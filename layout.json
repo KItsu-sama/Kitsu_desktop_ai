@@ -5,6 +5,120 @@
   "size": null,
   "children": [
     {
+      "name": ".claude",
+      "path": "D:\\Du lieu o C\\Kitsu_ai\\.claude",
+      "type": "directory",
+      "size": null,
+      "children": [
+        {
+          "name": "skills",
+          "path": "D:\\Du lieu o C\\Kitsu_ai\\.claude\\skills",
+          "type": "directory",
+          "size": null,
+          "children": [
+            {
+              "name": "gitnexus",
+              "path": "D:\\Du lieu o C\\Kitsu_ai\\.claude\\skills\\gitnexus",
+              "type": "directory",
+              "size": null,
+              "children": [
+                {
+                  "name": "gitnexus-cli",
+                  "path": "D:\\Du lieu o C\\Kitsu_ai\\.claude\\skills\\gitnexus\\gitnexus-cli",
+                  "type": "directory",
+                  "size": null,
+                  "children": [
+                    {
+                      "name": "SKILL.md",
+                      "path": "D:\\Du lieu o C\\Kitsu_ai\\.claude\\skills\\gitnexus\\gitnexus-cli\\SKILL.md",
+                      "type": "file",
+                      "size": 3445,
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "name": "gitnexus-debugging",
+                  "path": "D:\\Du lieu o C\\Kitsu_ai\\.claude\\skills\\gitnexus\\gitnexus-debugging",
+                  "type": "directory",
+                  "size": null,
+                  "children": [
+                    {
+                      "name": "SKILL.md",
+                      "path": "D:\\Du lieu o C\\Kitsu_ai\\.claude\\skills\\gitnexus\\gitnexus-debugging\\SKILL.md",
+                      "type": "file",
+                      "size": 3164,
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "name": "gitnexus-exploring",
+                  "path": "D:\\Du lieu o C\\Kitsu_ai\\.claude\\skills\\gitnexus\\gitnexus-exploring",
+                  "type": "directory",
+                  "size": null,
+                  "children": [
+                    {
+                      "name": "SKILL.md",
+                      "path": "D:\\Du lieu o C\\Kitsu_ai\\.claude\\skills\\gitnexus\\gitnexus-exploring\\SKILL.md",
+                      "type": "file",
+                      "size": 3037,
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "name": "gitnexus-guide",
+                  "path": "D:\\Du lieu o C\\Kitsu_ai\\.claude\\skills\\gitnexus\\gitnexus-guide",
+                  "type": "directory",
+                  "size": null,
+                  "children": [
+                    {
+                      "name": "SKILL.md",
+                      "path": "D:\\Du lieu o C\\Kitsu_ai\\.claude\\skills\\gitnexus\\gitnexus-guide\\SKILL.md",
+                      "type": "file",
+                      "size": 3480,
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "name": "gitnexus-impact-analysis",
+                  "path": "D:\\Du lieu o C\\Kitsu_ai\\.claude\\skills\\gitnexus\\gitnexus-impact-analysis",
+                  "type": "directory",
+                  "size": null,
+                  "children": [
+                    {
+                      "name": "SKILL.md",
+                      "path": "D:\\Du lieu o C\\Kitsu_ai\\.claude\\skills\\gitnexus\\gitnexus-impact-analysis\\SKILL.md",
+                      "type": "file",
+                      "size": 2919,
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "name": "gitnexus-refactoring",
+                  "path": "D:\\Du lieu o C\\Kitsu_ai\\.claude\\skills\\gitnexus\\gitnexus-refactoring",
+                  "type": "directory",
+                  "size": null,
+                  "children": [
+                    {
+                      "name": "SKILL.md",
+                      "path": "D:\\Du lieu o C\\Kitsu_ai\\.claude\\skills\\gitnexus\\gitnexus-refactoring\\SKILL.md",
+                      "type": "file",
+                      "size": 4107,
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
       "name": ".github",
       "path": "D:\\Du lieu o C\\Kitsu_ai\\.github",
       "type": "directory",
@@ -56,6 +170,34 @@
       "children": []
     },
     {
+      "name": "AGENTS.md",
+      "path": "D:\\Du lieu o C\\Kitsu_ai\\AGENTS.md",
+      "type": "file",
+      "size": 5475,
+      "children": []
+    },
+    {
+      "name": "CLAUDE.md",
+      "path": "D:\\Du lieu o C\\Kitsu_ai\\CLAUDE.md",
+      "type": "file",
+      "size": 5475,
+      "children": []
+    },
+    {
+      "name": "IMPLEMENTATION_TASKS.md",
+      "path": "D:\\Du lieu o C\\Kitsu_ai\\IMPLEMENTATION_TASKS.md",
+      "type": "file",
+      "size": 4307,
+      "children": []
+    },
+    {
+      "name": "PHASE_1_SUMMARY.md",
+      "path": "D:\\Du lieu o C\\Kitsu_ai\\PHASE_1_SUMMARY.md",
+      "type": "file",
+      "size": 9240,
+      "children": []
+    },
+    {
       "name": "README.md",
       "path": "D:\\Du lieu o C\\Kitsu_ai\\README.md",
       "type": "file",
@@ -99,7 +241,7 @@
               "name": "engine.py",
               "path": "D:\\Du lieu o C\\Kitsu_ai\\ai\\fast_brain\\engine.py",
               "type": "file",
-              "size": 9136,
+              "size": 12001,
               "children": []
             },
             {
@@ -113,7 +255,7 @@
               "name": "intent_classifier.py",
               "path": "D:\\Du lieu o C\\Kitsu_ai\\ai\\fast_brain\\intent_classifier.py",
               "type": "file",
-              "size": 6083,
+              "size": 9404,
               "children": []
             },
             {
@@ -141,7 +283,7 @@
               "name": "patterns.py",
               "path": "D:\\Du lieu o C\\Kitsu_ai\\ai\\fast_brain\\patterns.py",
               "type": "file",
-              "size": 5996,
+              "size": 13246,
               "children": []
             },
             {
@@ -337,7 +479,7 @@
           "name": "bootstrap.py",
           "path": "D:\\Du lieu o C\\Kitsu_ai\\app\\bootstrap.py",
           "type": "file",
-          "size": 3971,
+          "size": 5043,
           "children": []
         },
         {
@@ -381,21 +523,28 @@
           "name": "launcher.py",
           "path": "D:\\Du lieu o C\\Kitsu_ai\\app\\launcher.py",
           "type": "file",
-          "size": 9936,
+          "size": 11386,
           "children": []
         },
         {
           "name": "main.py",
           "path": "D:\\Du lieu o C\\Kitsu_ai\\app\\main.py",
           "type": "file",
-          "size": 5823,
+          "size": 6478,
           "children": []
         },
         {
           "name": "profiles.py",
           "path": "D:\\Du lieu o C\\Kitsu_ai\\app\\profiles.py",
           "type": "file",
-          "size": 3859,
+          "size": 7295,
+          "children": []
+        },
+        {
+          "name": "runtime_config.py",
+          "path": "D:\\Du lieu o C\\Kitsu_ai\\app\\runtime_config.py",
+          "type": "file",
+          "size": 3559,
           "children": []
         }
       ]
@@ -475,7 +624,7 @@
           "name": "capability_flags.py",
           "path": "D:\\Du lieu o C\\Kitsu_ai\\config\\capability_flags.py",
           "type": "file",
-          "size": 1867,
+          "size": 3806,
           "children": []
         },
         {
@@ -525,7 +674,7 @@
           "name": "schema.py",
           "path": "D:\\Du lieu o C\\Kitsu_ai\\config\\schema.py",
           "type": "file",
-          "size": 2951,
+          "size": 6940,
           "children": []
         }
       ]
@@ -547,7 +696,7 @@
           "name": "bus.py",
           "path": "D:\\Du lieu o C\\Kitsu_ai\\core\\bus.py",
           "type": "file",
-          "size": 1896,
+          "size": 7980,
           "children": []
         },
         {
@@ -561,14 +710,14 @@
           "name": "contracts.py",
           "path": "D:\\Du lieu o C\\Kitsu_ai\\core\\contracts.py",
           "type": "file",
-          "size": 1014,
+          "size": 10168,
           "children": []
         },
         {
           "name": "events.py",
           "path": "D:\\Du lieu o C\\Kitsu_ai\\core\\events.py",
           "type": "file",
-          "size": 3435,
+          "size": 7806,
           "children": []
         },
         {
@@ -579,10 +728,25 @@
           "children": []
         },
         {
+          "name": "learning",
+          "path": "D:\\Du lieu o C\\Kitsu_ai\\core\\learning",
+          "type": "directory",
+          "size": null,
+          "children": [
+            {
+              "name": "micro_trainer.py",
+              "path": "D:\\Du lieu o C\\Kitsu_ai\\core\\learning\\micro_trainer.py",
+              "type": "file",
+              "size": 3132,
+              "children": []
+            }
+          ]
+        },
+        {
           "name": "orchestrator.py",
           "path": "D:\\Du lieu o C\\Kitsu_ai\\core\\orchestrator.py",
           "type": "file",
-          "size": 3544,
+          "size": 11498,
           "children": []
         },
         {
@@ -710,7 +874,7 @@
               "name": "crash.log",
               "path": "D:\\Du lieu o C\\Kitsu_ai\\data\\runtime\\crash.log",
               "type": "file",
-              "size": 91,
+              "size": 182,
               "children": []
             },
             {
@@ -784,14 +948,14 @@
           "name": "metrics.py",
           "path": "D:\\Du lieu o C\\Kitsu_ai\\infra\\metrics.py",
           "type": "file",
-          "size": 0,
+          "size": 1997,
           "children": []
         },
         {
           "name": "tracing.py",
           "path": "D:\\Du lieu o C\\Kitsu_ai\\infra\\tracing.py",
           "type": "file",
-          "size": 0,
+          "size": 1110,
           "children": []
         }
       ]
@@ -800,14 +964,14 @@
       "name": "layout.json",
       "path": "D:\\Du lieu o C\\Kitsu_ai\\layout.json",
       "type": "file",
-      "size": 487724,
+      "size": 54296,
       "children": []
     },
     {
       "name": "layout.txt",
       "path": "D:\\Du lieu o C\\Kitsu_ai\\layout.txt",
       "type": "file",
-      "size": 73927,
+      "size": 8744,
       "children": []
     },
     {
@@ -1035,7 +1199,7 @@
           "name": "input_mux.py",
           "path": "D:\\Du lieu o C\\Kitsu_ai\\multimodal\\input_mux.py",
           "type": "file",
-          "size": 0,
+          "size": 8428,
           "children": []
         },
         {
@@ -1135,7 +1299,7 @@
           "name": "engine.py",
           "path": "D:\\Du lieu o C\\Kitsu_ai\\personality\\engine.py",
           "type": "file",
-          "size": 0,
+          "size": 2780,
           "children": []
         },
         {
@@ -1257,7 +1421,7 @@
       "name": "r.py",
       "path": "D:\\Du lieu o C\\Kitsu_ai\\r.py",
       "type": "file",
-      "size": 6636,
+      "size": 6578,
       "children": []
     },
     {
@@ -1298,14 +1462,14 @@
           "name": "policy_router.py",
           "path": "D:\\Du lieu o C\\Kitsu_ai\\router\\policy_router.py",
           "type": "file",
-          "size": 0,
+          "size": 10230,
           "children": []
         },
         {
           "name": "strip_controller.py",
           "path": "D:\\Du lieu o C\\Kitsu_ai\\router\\strip_controller.py",
           "type": "file",
-          "size": 0,
+          "size": 6428,
           "children": []
         }
       ]
@@ -1557,7 +1721,7 @@
           "name": "gateway.py",
           "path": "D:\\Du lieu o C\\Kitsu_ai\\system\\gateway.py",
           "type": "file",
-          "size": 0,
+          "size": 3445,
           "children": []
         },
         {
@@ -1788,7 +1952,7 @@
           "name": "logger.py",
           "path": "D:\\Du lieu o C\\Kitsu_ai\\utils\\logger.py",
           "type": "file",
-          "size": 5136,
+          "size": 5445,
           "children": []
         },
         {

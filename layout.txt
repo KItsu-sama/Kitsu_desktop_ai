@@ -1,5 +1,20 @@
 [Kitsu_ai]
 └── Kitsu_ai
+    ├── .claude
+    │   └── skills
+    │       └── gitnexus
+    │           ├── gitnexus-cli
+    │           │   └── SKILL.md
+    │           ├── gitnexus-debugging
+    │           │   └── SKILL.md
+    │           ├── gitnexus-exploring
+    │           │   └── SKILL.md
+    │           ├── gitnexus-guide
+    │           │   └── SKILL.md
+    │           ├── gitnexus-impact-analysis
+    │           │   └── SKILL.md
+    │           └── gitnexus-refactoring
+    │               └── SKILL.md
     ├── .github
     │   └── workflows
     │       ├── codeql.yml
@@ -7,6 +22,10 @@
     │       ├── docker-blacksmith.yml
     │       └── ruff.yml
     ├── .gitignore
+    ├── AGENTS.md
+    ├── CLAUDE.md
+    ├── IMPLEMENTATION_TASKS.md
+    ├── PHASE_1_SUMMARY.md
     ├── README.md
     ├── ai
     │   ├── __init__.py
@@ -54,7 +73,8 @@
     │   ├── kisu_launcher.py
     │   ├── launcher.py
     │   ├── main.py
-    │   └── profiles.py
+    │   ├── profiles.py
+    │   └── runtime_config.py
     ├── assets
     │   ├── banner.jpg
     │   ├── models
@@ -80,6 +100,8 @@
     │   ├── contracts.py
     │   ├── events.py
     │   ├── health.py
+    │   ├── learning
+    │   │   └── micro_trainer.py
     │   ├── orchestrator.py
     │   └── performance_manager.py
     ├── data
