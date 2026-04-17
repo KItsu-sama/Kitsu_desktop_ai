@@ -1,0 +1,99 @@
+# Kisu Core Configuration Defaults
+
+timing:
+  emotion_decay_tick_ms: 1000
+  idle_check_tick_ms: 5000
+  health_check_tick_ms: 30000
+  performance_tick_ms: 10000
+  idle_threshold_ms: 60000
+  sleep_threshold_ms: 300000
+  slm_unload_after_idle_ms: 300000
+  # New: Cooldowns for system actions to prevent loops
+  power_action_cooldown_ms: 60000
+  permission_prompt_timeout_ms: 15000
+
+fast_brain:
+  promote_threshold: 0.80      # Frequency * Recency score to move to Fast Brain
+  demote_threshold: 0.20       # Score below which entry is purged to save space
+  spam_window_ms: 30000        # Time window to detect repeating patterns
+  spam_repeat_count: 3         # Max repeats before Kisu gets "irritated"
+  spam_emotion_base: 0.30      # Initial intensity of annoyance
+  spam_emotion_per_repeat: 0.15
+  spam_emotion_max: 0.90
+  max_promoted_entries: 500    # Prevent Fast Brain from bloating RAM
+  fuzzy_match_threshold: 0.85  # Levenshtein distance for "near matches"
+
+hardware:
+  micro_ram_gb: 2.0
+  low_ram_gb: 4.0
+  mid_ram_gb: 8.0
+  micro_cpu_score: 20
+  low_cpu_score: 50
+  mid_cpu_score: 80
+  # New: Battery Awareness
+  eco_mode_battery_pct: 20     # Force Ultra-Low if battery hits this level
+  disable_3d_on_battery: true
+
+performance:
+  ram_low_watermark_pct: 15
+  cpu_sustained_pct: 90
+  cpu_sustained_window_s: 30
+  model_unload_confirm_timeout_ms: 500
+  # New: Threading controls
+  max_slm_threads: 2           # Limit CPU usage for student devices
+  gpu_acceleration: auto       # [auto, force, none]
+
+intent:
+  factual_min_word_count: 8
+  question_words: [what, who, when, why, how, where, define, explain]
+  system_verbs: [sleep, shutdown, "turn off", close, open, hide]
+  system_nouns: [monitor, screen, pc, computer, laptop, window]
+  # New: Browser Extension Intents
+  quiz_trigger_words: [quiz, test, exam, answer, solve]
+
+quiz_solver:
+  # Mode configs: [rush, normal, adapt]
+  default_mode: normal
+  rush_delay_range_ms: [500, 2000]
+  normal_delay_range_ms: [5000, 15000]
+  adapt_ability_priority: true
+  # Logic for disabling
+  disable_on_average_score_below: 0.50
+  reenable_perfect_score_count: 1
+  reenable_above_avg_count: 3
+  no_zone_apps: ["BankApp.exe", "Discord.exe"] # Add restricted zones
+
+emotion:
+  ram_pressure_emotion: stressed
+  ram_pressure_intensity: 0.6
+  module_failure_emotion: tired
+  module_failure_intensity: 0.5
+  # New: Social/Learning emotions
+  spam_emotion_type: irritated
+  correct_answer_emotion: happy
+  wrong_answer_emotion: embarrassed
+
+visuals:
+  default_render_mode: 2d      # [2d, 3d, chibi]
+  shimeji_enabled: true
+  cursor_fx_enabled: true
+  background_visualizer: true
+  transparency_allowed: true
+  # Strip system fallbacks
+  fallback_3d_to_2d: true
+  fallback_2d_to_text: false
+
+permissions:
+  # Security Scopes
+  allow_file_scan: false       # Must be toggled by user
+  allow_system_power: false
+  allow_browser_inject: false
+  # Safety
+  require_confirmation_for_destructive: true
+  max_files_per_scan: 100
+
+health:
+  consecutive_failures_restart: 2
+  consecutive_failures_degrade: 3
+  check_timeout_ms: 5000
+  auto_update_fast_brain: true # Run trainer.py on shutdown/sleep

@@ -1,0 +1,15 @@
+{
+  "platform": "windows",
+  "platform_version": "10.0.19045",
+  "python_version": "3.14.4 (tags/v3.14.4:23116f9, Apr  7 2026, 14:10:54) [MSC v.1944 64 bit (AMD64)]",
+  "capabilities": {
+    "gpu": false,
+    "cuda": false,
+    "audio_input": false,
+    "audio_output": false,
+    "display": true,
+    "network": true
+  },
+  "install_date": "2026-04-16T22:42:07.174163",
+  "version": "0.1.0"
+}

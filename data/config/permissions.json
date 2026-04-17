@@ -1,0 +1,8 @@
+{
+  "browser_hooks": true,
+  "system_control": true,
+  "file_access": false,
+  "safe_mode": true,
+  "can_train": false,
+  "can_modify_memory": true
+}

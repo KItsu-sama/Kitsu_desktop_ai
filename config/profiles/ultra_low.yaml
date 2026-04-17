@@ -1,0 +1,29 @@
+name: ultra_low
+tier: micro
+description: "CPU-only, minimal RAM. FastBrain + response templates only."
+
+flags:
+  use_fast_brain: true
+  use_slm: false
+  use_llm: false
+  use_2d: false
+  use_3d: false
+  use_voice: false
+  use_shimeji: false
+  use_emotion: true
+  use_system_control: false
+
+startup_modules:
+  required:
+    - core.events
+    - core.bus
+    - core.clocks
+    - core.orchestrator
+    - core.health
+    - config.capability_flags
+    - ai.fast_brain.engine
+    - personality.emotion_engine
+  optional: []
+
+ui_mode: text_only
+model_downloads: []
