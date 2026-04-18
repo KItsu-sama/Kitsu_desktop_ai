@@ -25,6 +25,8 @@
     ├── AGENTS.md
     ├── CLAUDE.md
     ├── IMPLEMENTATION_TASKS.md
+    ├── LEGACY_REFACTOR_SUMMARY.md
+    ├── LEGACY_RUNTIME_REFACTOR_SUMMARY.md
     ├── PHASE_1_SUMMARY.md
     ├── README.md
     ├── ai
@@ -39,6 +41,7 @@
     │   │   ├── markov.py
     │   │   ├── model_storage
     │   │   ├── patterns.py
+    │   │   ├── provider.py
     │   │   └── trainer.py
     │   ├── interfaces.py
     │   ├── llm
@@ -47,6 +50,7 @@
     │   │   ├── engine.py
     │   │   ├── llm_processor.py
     │   │   ├── llm_wrapper.py
+    │   │   ├── provider.py
     │   │   ├── providers
     │   │   │   ├── __init__.py
     │   │   │   ├── null_provider.py
@@ -57,11 +61,13 @@
     │   │   ├── conflict.py
     │   │   ├── ranker.py
     │   │   └── response_safety.py
+    │   ├── prompt_builder.py
     │   └── slm
     │       ├── __init__.py
     │       ├── engine.py
     │       ├── intent_style.py
     │       ├── micro_slm.py
+    │       ├── provider.py
     │       ├── style_processor.py
     │       └── templates.py
     ├── app
@@ -95,13 +101,16 @@
     │   └── schema.py
     ├── core
     │   ├── __init__.py
+    │   ├── background_tasks.py
     │   ├── bus.py
     │   ├── clocks.py
     │   ├── contracts.py
     │   ├── events.py
     │   ├── health.py
+    │   ├── idle_manager.py
     │   ├── learning
     │   │   └── micro_trainer.py
+    │   ├── lifecycle.py
     │   ├── orchestrator.py
     │   └── performance_manager.py
     ├── data
@@ -224,10 +233,1330 @@
     │   │       ├── shimeji
     │   │       └── shop
     │   ├── local_api.rs
-    │   └── src
-    │       ├── hw_detect.rs
-    │       ├── local_api.rs
-    │       └── main.rs
+    │   ├── src
+    │   │   ├── hw_detect.rs
+    │   │   ├── local_api.rs
+    │   │   └── main.rs
+    │   └── tauri
+    │       ├── .cargo
+    │       │   ├── audit.toml
+    │       │   └── config.toml
+    │       ├── .changes
+    │       │   ├── README.md
+    │       │   ├── add-bring-all-to-front-predefined-menu-item-type.md
+    │       │   ├── base64.md
+    │       │   ├── change-pr-15117.md
+    │       │   ├── change-pr-15175.md
+    │       │   ├── config.json
+    │       │   ├── data-tauri-drag-region-deep.md
+    │       │   ├── eval-with-callback.md
+    │       │   ├── feat-uninstaller-icon-image.md
+    │       │   ├── file-association.md
+    │       │   ├── fix-build-bundles-arg.md
+    │       │   ├── fix-ios-metal-toolchain.md
+    │       │   ├── linux-deploy-link.md
+    │       │   ├── liquid-glass-icon.md
+    │       │   ├── mobile-file-associations.md
+    │       │   ├── multi-window-mobile.md
+    │       │   ├── new-window-main-thread.md
+    │       │   ├── prompt-signing-key-password-context.md
+    │       │   ├── safepathbuf_into_pathbuf.md
+    │       │   ├── supersede-kuchikiki.md
+    │       │   ├── tauri-dbus.md
+    │       │   ├── toml-ver.md
+    │       │   ├── web-content-process-termination.md
+    │       │   └── wix-minimum-webview2-version.md
+    │       ├── .devcontainer
+    │       │   ├── Dockerfile
+    │       │   ├── README.md
+    │       │   └── devcontainer.json
+    │       ├── .docker
+    │       │   └── cross
+    │       │       ├── aarch64.Dockerfile
+    │       │       ├── cmake.sh
+    │       │       ├── common.sh
+    │       │       ├── deny-debian-packages.sh
+    │       │       ├── dropbear.sh
+    │       │       ├── lib.sh
+    │       │       ├── linux-image.sh
+    │       │       ├── linux-runner
+    │       │       ├── qemu.sh
+    │       │       └── xargo.sh
+    │       ├── .editorconfig
+    │       ├── .github
+    │       │   ├── CODEOWNERS
+    │       │   ├── CODE_OF_CONDUCT.md
+    │       │   ├── CONTRIBUTING.md
+    │       │   ├── FUNDING.yml
+    │       │   ├── ISSUE_TEMPLATE
+    │       │   │   ├── bug_report.yml
+    │       │   │   ├── config.yml
+    │       │   │   ├── docs_report.md
+    │       │   │   └── feature_request.yml
+    │       │   ├── PULL_REQUEST_TEMPLATE.md
+    │       │   ├── RELEASING.md
+    │       │   ├── icon.png
+    │       │   ├── splash.png
+    │       │   ├── sponsors
+    │       │   │   └── crabnebula.svg
+    │       │   └── workflows
+    │       │       ├── audit.yml
+    │       │       ├── bench.yml
+    │       │       ├── check-change-tags.yml
+    │       │       ├── check-generated-files.yml
+    │       │       ├── check-license-header.yml
+    │       │       ├── covector-comment-on-fork.yml
+    │       │       ├── covector-status.yml
+    │       │       ├── covector-version-or-publish.yml
+    │       │       ├── deploy-schema-worker.yml
+    │       │       ├── docker.yml
+    │       │       ├── fmt.yml
+    │       │       ├── lint-js.yml
+    │       │       ├── lint-rust.yml
+    │       │       ├── publish-cli-js.yml
+    │       │       ├── publish-cli-rs.yml
+    │       │       ├── supply-chain.yml
+    │       │       ├── test-android.yml
+    │       │       ├── test-cli-js.yml
+    │       │       ├── test-cli-rs.yml
+    │       │       ├── test-core.yml
+    │       │       └── udeps.yml
+    │       ├── .gitignore
+    │       ├── .prettierignore
+    │       ├── .prettierrc
+    │       ├── .scripts
+    │       │   └── ci
+    │       │       ├── check-change-tags.js
+    │       │       ├── check-license-header.js
+    │       │       ├── has-diff.sh
+    │       │       ├── pack-cli.sh
+    │       │       └── sync-cli-metadata.js
+    │       ├── ARCHITECTURE.md
+    │       ├── Cargo.lock
+    │       ├── Cargo.toml
+    │       ├── LICENSE.spdx
+    │       ├── LICENSE_APACHE-2.0
+    │       ├── LICENSE_MIT
+    │       ├── README.md
+    │       ├── SECURITY.md
+    │       ├── audits
+    │       │   ├── Radically_Open_Security-v1-report.pdf
+    │       │   └── Radically_Open_Security-v2-report.pdf
+    │       ├── bench
+    │       │   ├── Cargo.toml
+    │       │   ├── README.md
+    │       │   └── src
+    │       │       ├── build_benchmark_jsons.rs
+    │       │       ├── run_benchmark.rs
+    │       │       └── utils.rs
+    │       ├── crates
+    │       │   ├── tauri
+    │       │   │   ├── .scripts
+    │       │   │   │   └── loop_qc.sh
+    │       │   │   ├── CHANGELOG.md
+    │       │   │   ├── Cargo.toml
+    │       │   │   ├── LICENSE_APACHE-2.0
+    │       │   │   ├── LICENSE_MIT
+    │       │   │   ├── README.md
+    │       │   │   ├── build.rs
+    │       │   │   ├── mobile
+    │       │   │   │   ├── android
+    │       │   │   │   │   ├── .gitignore
+    │       │   │   │   │   ├── build.gradle.kts
+    │       │   │   │   │   ├── proguard-rules.pro
+    │       │   │   │   │   └── src
+    │       │   │   │   │       ├── androidTest
+    │       │   │   │   │       │   └── java
+    │       │   │   │   │       │       └── app
+    │       │   │   │   │       │           └── tauri
+    │       │   │   │   │       │               └── ExampleInstrumentedTest.kt
+    │       │   │   │   │       ├── main
+    │       │   │   │   │       │   ├── AndroidManifest.xml
+    │       │   │   │   │       │   └── java
+    │       │   │   │   │       │       └── app
+    │       │   │   │   │       │           └── tauri
+    │       │   │   │   │       │               ├── AppPlugin.kt
+    │       │   │   │   │       │               ├── FsUtils.kt
+    │       │   │   │   │       │               ├── JniMethod.kt
+    │       │   │   │   │       │               ├── Logger.kt
+    │       │   │   │   │       │               ├── PathPlugin.kt
+    │       │   │   │   │       │               ├── PermissionHelper.kt
+    │       │   │   │   │       │               ├── PermissionState.kt
+    │       │   │   │   │       │               ├── annotation
+    │       │   │   │   │       │               │   ├── ActivityCallback.kt
+    │       │   │   │   │       │               │   ├── InvokeArg.kt
+    │       │   │   │   │       │               │   ├── Permission.kt
+    │       │   │   │   │       │               │   ├── PermissionCallback.kt
+    │       │   │   │   │       │               │   ├── PluginMethod.kt
+    │       │   │   │   │       │               │   └── TauriPlugin.kt
+    │       │   │   │   │       │               └── plugin
+    │       │   │   │   │       │                   ├── Channel.kt
+    │       │   │   │   │       │                   ├── InvalidPluginMethodException.kt
+    │       │   │   │   │       │                   ├── Invoke.kt
+    │       │   │   │   │       │                   ├── JSArray.kt
+    │       │   │   │   │       │                   ├── JSObject.kt
+    │       │   │   │   │       │                   ├── Plugin.kt
+    │       │   │   │   │       │                   ├── PluginHandle.kt
+    │       │   │   │   │       │                   ├── PluginManager.kt
+    │       │   │   │   │       │                   ├── PluginMethodData.kt
+    │       │   │   │   │       │                   └── PluginResult.kt
+    │       │   │   │   │       └── test
+    │       │   │   │   │           └── java
+    │       │   │   │   │               └── app
+    │       │   │   │   │                   └── tauri
+    │       │   │   │   │                       └── ExampleUnitTest.kt
+    │       │   │   │   ├── android-codegen
+    │       │   │   │   │   └── TauriActivity.kt
+    │       │   │   │   ├── ios-api
+    │       │   │   │   │   ├── .gitignore
+    │       │   │   │   │   ├── Package.swift
+    │       │   │   │   │   ├── README.md
+    │       │   │   │   │   └── Sources
+    │       │   │   │   │       └── Tauri
+    │       │   │   │   │           ├── Channel.swift
+    │       │   │   │   │           ├── Invoke.swift
+    │       │   │   │   │           ├── JSTypes.swift
+    │       │   │   │   │           ├── JsonValue.swift
+    │       │   │   │   │           ├── Logger.swift
+    │       │   │   │   │           ├── Plugin
+    │       │   │   │   │           │   └── Plugin.swift
+    │       │   │   │   │           ├── Tauri.swift
+    │       │   │   │   │           └── UiUtils.swift
+    │       │   │   │   └── proguard-tauri.pro
+    │       │   │   ├── permissions
+    │       │   │   │   ├── app
+    │       │   │   │   │   └── autogenerated
+    │       │   │   │   │       └── reference.md
+    │       │   │   │   ├── event
+    │       │   │   │   │   └── autogenerated
+    │       │   │   │   │       └── reference.md
+    │       │   │   │   ├── image
+    │       │   │   │   │   └── autogenerated
+    │       │   │   │   │       └── reference.md
+    │       │   │   │   ├── menu
+    │       │   │   │   │   └── autogenerated
+    │       │   │   │   │       └── reference.md
+    │       │   │   │   ├── path
+    │       │   │   │   │   └── autogenerated
+    │       │   │   │   │       └── reference.md
+    │       │   │   │   ├── resources
+    │       │   │   │   │   └── autogenerated
+    │       │   │   │   │       └── reference.md
+    │       │   │   │   ├── tray
+    │       │   │   │   │   └── autogenerated
+    │       │   │   │   │       └── reference.md
+    │       │   │   │   ├── webview
+    │       │   │   │   │   └── autogenerated
+    │       │   │   │   │       └── reference.md
+    │       │   │   │   └── window
+    │       │   │   │       └── autogenerated
+    │       │   │   │           └── reference.md
+    │       │   │   ├── scripts
+    │       │   │   │   ├── bundle.global.js
+    │       │   │   │   ├── core.js
+    │       │   │   │   ├── freeze_prototype.js
+    │       │   │   │   ├── init.js
+    │       │   │   │   ├── ipc-protocol.js
+    │       │   │   │   ├── ipc.js
+    │       │   │   │   ├── isolation.js
+    │       │   │   │   ├── pattern.js
+    │       │   │   │   └── process-ipc-message-fn.js
+    │       │   │   ├── src
+    │       │   │   │   ├── app
+    │       │   │   │   │   └── plugin.rs
+    │       │   │   │   ├── app.rs
+    │       │   │   │   ├── async_runtime.rs
+    │       │   │   │   ├── error.rs
+    │       │   │   │   ├── event
+    │       │   │   │   │   ├── event-system-spec.md
+    │       │   │   │   │   ├── event_name.rs
+    │       │   │   │   │   ├── init.js
+    │       │   │   │   │   ├── listener.rs
+    │       │   │   │   │   ├── mod.rs
+    │       │   │   │   │   └── plugin.rs
+    │       │   │   │   ├── image
+    │       │   │   │   │   ├── mod.rs
+    │       │   │   │   │   └── plugin.rs
+    │       │   │   │   ├── ios.rs
+    │       │   │   │   ├── ipc
+    │       │   │   │   │   ├── authority.rs
+    │       │   │   │   │   ├── capability_builder.rs
+    │       │   │   │   │   ├── channel.rs
+    │       │   │   │   │   ├── command.rs
+    │       │   │   │   │   ├── format_callback.rs
+    │       │   │   │   │   ├── mod.rs
+    │       │   │   │   │   └── protocol.rs
+    │       │   │   │   ├── lib.rs
+    │       │   │   │   ├── manager
+    │       │   │   │   │   ├── menu.rs
+    │       │   │   │   │   ├── mod.rs
+    │       │   │   │   │   ├── tray.rs
+    │       │   │   │   │   ├── webview.rs
+    │       │   │   │   │   └── window.rs
+    │       │   │   │   ├── menu
+    │       │   │   │   │   ├── builders
+    │       │   │   │   │   │   ├── check.rs
+    │       │   │   │   │   │   ├── icon.rs
+    │       │   │   │   │   │   ├── menu.rs
+    │       │   │   │   │   │   ├── mod.rs
+    │       │   │   │   │   │   └── normal.rs
+    │       │   │   │   │   ├── check.rs
+    │       │   │   │   │   ├── icon.rs
+    │       │   │   │   │   ├── menu.rs
+    │       │   │   │   │   ├── mod.rs
+    │       │   │   │   │   ├── normal.rs
+    │       │   │   │   │   ├── plugin.rs
+    │       │   │   │   │   ├── predefined.rs
+    │       │   │   │   │   └── submenu.rs
+    │       │   │   │   ├── path
+    │       │   │   │   │   ├── android.rs
+    │       │   │   │   │   ├── desktop.rs
+    │       │   │   │   │   ├── init.js
+    │       │   │   │   │   ├── mod.rs
+    │       │   │   │   │   └── plugin.rs
+    │       │   │   │   ├── pattern.rs
+    │       │   │   │   ├── plugin
+    │       │   │   │   │   └── mobile.rs
+    │       │   │   │   ├── plugin.rs
+    │       │   │   │   ├── process.rs
+    │       │   │   │   ├── protocol
+    │       │   │   │   │   ├── asset.rs
+    │       │   │   │   │   ├── isolation.rs
+    │       │   │   │   │   ├── mod.rs
+    │       │   │   │   │   └── tauri.rs
+    │       │   │   │   ├── resources
+    │       │   │   │   │   ├── mod.rs
+    │       │   │   │   │   └── plugin.rs
+    │       │   │   │   ├── scope
+    │       │   │   │   │   ├── fs.rs
+    │       │   │   │   │   └── mod.rs
+    │       │   │   │   ├── state.rs
+    │       │   │   │   ├── test
+    │       │   │   │   │   ├── mock_runtime.rs
+    │       │   │   │   │   └── mod.rs
+    │       │   │   │   ├── tray
+    │       │   │   │   │   ├── mod.rs
+    │       │   │   │   │   └── plugin.rs
+    │       │   │   │   ├── vibrancy
+    │       │   │   │   │   ├── macos.rs
+    │       │   │   │   │   ├── mod.rs
+    │       │   │   │   │   └── windows.rs
+    │       │   │   │   ├── webview
+    │       │   │   │   │   ├── mod.rs
+    │       │   │   │   │   ├── plugin.rs
+    │       │   │   │   │   ├── scripts
+    │       │   │   │   │   │   ├── print.js
+    │       │   │   │   │   │   ├── toggle-devtools.js
+    │       │   │   │   │   │   └── zoom-hotkey.js
+    │       │   │   │   │   └── webview_window.rs
+    │       │   │   │   └── window
+    │       │   │   │       ├── mod.rs
+    │       │   │   │       ├── plugin.rs
+    │       │   │   │       └── scripts
+    │       │   │   │           └── drag.js
+    │       │   │   └── test
+    │       │   │       ├── api
+    │       │   │       │   ├── test.txt
+    │       │   │       │   └── test_binary
+    │       │   │       ├── fixture
+    │       │   │       │   ├── config.json
+    │       │   │       │   ├── dist
+    │       │   │       │   │   └── index.html
+    │       │   │       │   ├── isolation
+    │       │   │       │   │   ├── dist
+    │       │   │       │   │   │   └── index.html
+    │       │   │       │   │   ├── isolation-dist
+    │       │   │       │   │   │   ├── index.html
+    │       │   │       │   │   │   └── index.js
+    │       │   │       │   │   └── src-tauri
+    │       │   │       │   │       ├── icons
+    │       │   │       │   │       │   ├── icon.ico
+    │       │   │       │   │       │   ├── icon.ico~dev
+    │       │   │       │   │       │   └── icon.png
+    │       │   │       │   │       └── tauri.conf.json
+    │       │   │       │   ├── src-tauri
+    │       │   │       │   │   ├── icons
+    │       │   │       │   │   │   ├── icon.ico
+    │       │   │       │   │   │   ├── icon.ico~dev
+    │       │   │       │   │   │   └── icon.png
+    │       │   │       │   │   └── tauri.conf.json
+    │       │   │       │   └── test.txt
+    │       │   │       └── updater
+    │       │   │           └── fixture
+    │       │   │               ├── archives
+    │       │   │               │   ├── archive.linux.tar.gz
+    │       │   │               │   ├── archive.linux.tar.gz.sig
+    │       │   │               │   ├── archive.macos.tar.gz
+    │       │   │               │   ├── archive.macos.tar.gz.sig
+    │       │   │               │   ├── archive.windows.zip
+    │       │   │               │   └── archive.windows.zip.sig
+    │       │   │               ├── bad_signature
+    │       │   │               │   ├── update.key
+    │       │   │               │   └── update.key.pub
+    │       │   │               └── good_signature
+    │       │   │                   ├── update.key
+    │       │   │                   └── update.key.pub
+    │       │   ├── tauri-build
+    │       │   │   ├── CHANGELOG.md
+    │       │   │   ├── Cargo.toml
+    │       │   │   ├── LICENSE_APACHE-2.0
+    │       │   │   ├── LICENSE_MIT
+    │       │   │   ├── README.md
+    │       │   │   └── src
+    │       │   │       ├── acl.rs
+    │       │   │       ├── codegen
+    │       │   │       │   ├── context.rs
+    │       │   │       │   └── mod.rs
+    │       │   │       ├── lib.rs
+    │       │   │       ├── manifest.rs
+    │       │   │       ├── mobile.rs
+    │       │   │       ├── static_vcruntime.rs
+    │       │   │       └── windows-app-manifest.xml
+    │       │   ├── tauri-bundler
+    │       │   │   ├── CHANGELOG.md
+    │       │   │   ├── Cargo.toml
+    │       │   │   ├── License_Apache.md
+    │       │   │   ├── License_MIT.md
+    │       │   │   ├── README.md
+    │       │   │   └── src
+    │       │   │       ├── bundle
+    │       │   │       │   ├── category.rs
+    │       │   │       │   ├── kmp
+    │       │   │       │   │   └── mod.rs
+    │       │   │       │   ├── linux
+    │       │   │       │   │   ├── appimage
+    │       │   │       │   │   │   ├── linuxdeploy-plugin-gstreamer.sh
+    │       │   │       │   │   │   ├── linuxdeploy-plugin-gtk.sh
+    │       │   │       │   │   │   ├── linuxdeploy.rs
+    │       │   │       │   │   │   └── mod.rs
+    │       │   │       │   │   ├── debian.rs
+    │       │   │       │   │   ├── freedesktop
+    │       │   │       │   │   │   ├── main.desktop
+    │       │   │       │   │   │   └── mod.rs
+    │       │   │       │   │   ├── mod.rs
+    │       │   │       │   │   └── rpm.rs
+    │       │   │       │   ├── macos
+    │       │   │       │   │   ├── app.rs
+    │       │   │       │   │   ├── dmg
+    │       │   │       │   │   │   ├── bundle_dmg
+    │       │   │       │   │   │   ├── eula-resources-template.xml
+    │       │   │       │   │   │   ├── mod.rs
+    │       │   │       │   │   │   └── template.applescript
+    │       │   │       │   │   ├── icon.rs
+    │       │   │       │   │   ├── ios.rs
+    │       │   │       │   │   ├── mod.rs
+    │       │   │       │   │   └── sign.rs
+    │       │   │       │   ├── platform.rs
+    │       │   │       │   ├── settings.rs
+    │       │   │       │   ├── updater_bundle.rs
+    │       │   │       │   └── windows
+    │       │   │       │       ├── mod.rs
+    │       │   │       │       ├── msi
+    │       │   │       │       │   ├── default-locale-strings.xml
+    │       │   │       │       │   ├── install-task.ps1
+    │       │   │       │       │   ├── languages.json
+    │       │   │       │       │   ├── main.wxs
+    │       │   │       │       │   ├── mod.rs
+    │       │   │       │       │   ├── uninstall-task.ps1
+    │       │   │       │       │   └── update-task.xml
+    │       │   │       │       ├── nsis
+    │       │   │       │       │   ├── FileAssociation.nsh
+    │       │   │       │       │   ├── installer.nsi
+    │       │   │       │       │   ├── languages
+    │       │   │       │       │   │   ├── Arabic.nsh
+    │       │   │       │       │   │   ├── Bulgarian.nsh
+    │       │   │       │       │   │   ├── Dutch.nsh
+    │       │   │       │       │   │   ├── English.nsh
+    │       │   │       │       │   │   ├── French.nsh
+    │       │   │       │       │   │   ├── German.nsh
+    │       │   │       │       │   │   ├── Hebrew.nsh
+    │       │   │       │       │   │   ├── Italian.nsh
+    │       │   │       │       │   │   ├── Japanese.nsh
+    │       │   │       │       │   │   ├── Korean.nsh
+    │       │   │       │       │   │   ├── Norwegian.nsh
+    │       │   │       │       │   │   ├── Persian.nsh
+    │       │   │       │       │   │   ├── Portuguese.nsh
+    │       │   │       │       │   │   ├── PortugueseBR.nsh
+    │       │   │       │       │   │   ├── Russian.nsh
+    │       │   │       │       │   │   ├── SimpChinese.nsh
+    │       │   │       │       │   │   ├── Spanish.nsh
+    │       │   │       │       │   │   ├── SpanishInternational.nsh
+    │       │   │       │       │   │   ├── Swedish.nsh
+    │       │   │       │       │   │   ├── TradChinese.nsh
+    │       │   │       │       │   │   ├── Turkish.nsh
+    │       │   │       │       │   │   └── Ukrainian.nsh
+    │       │   │       │       │   ├── mod.rs
+    │       │   │       │       │   └── utils.nsh
+    │       │   │       │       ├── sign.rs
+    │       │   │       │       └── util.rs
+    │       │   │       ├── bundle.rs
+    │       │   │       ├── error.rs
+    │       │   │       ├── lib.rs
+    │       │   │       └── utils
+    │       │   │           ├── fs_utils.rs
+    │       │   │           ├── http_utils.rs
+    │       │   │           └── mod.rs
+    │       │   ├── tauri-cli
+    │       │   │   ├── CHANGELOG.md
+    │       │   │   ├── Cargo.toml
+    │       │   │   ├── ENVIRONMENT_VARIABLES.md
+    │       │   │   ├── LICENSE_APACHE-2.0
+    │       │   │   ├── LICENSE_MIT
+    │       │   │   ├── README.md
+    │       │   │   ├── build.rs
+    │       │   │   ├── config.schema.json
+    │       │   │   ├── metadata-v2.json
+    │       │   │   ├── metadata.json
+    │       │   │   ├── schema.json
+    │       │   │   ├── scripts
+    │       │   │   │   └── kill-children.sh
+    │       │   │   ├── src
+    │       │   │   │   ├── acl
+    │       │   │   │   │   ├── capability
+    │       │   │   │   │   │   ├── mod.rs
+    │       │   │   │   │   │   └── new.rs
+    │       │   │   │   │   ├── mod.rs
+    │       │   │   │   │   └── permission
+    │       │   │   │   │       ├── add.rs
+    │       │   │   │   │       ├── ls.rs
+    │       │   │   │   │       ├── mod.rs
+    │       │   │   │   │       ├── new.rs
+    │       │   │   │   │       └── rm.rs
+    │       │   │   │   ├── add.rs
+    │       │   │   │   ├── build.rs
+    │       │   │   │   ├── bundle.rs
+    │       │   │   │   ├── completions.rs
+    │       │   │   │   ├── dev
+    │       │   │   │   │   ├── auto-reload.js
+    │       │   │   │   │   └── builtin_dev_server.rs
+    │       │   │   │   ├── dev.rs
+    │       │   │   │   ├── error.rs
+    │       │   │   │   ├── helpers
+    │       │   │   │   │   ├── app_paths.rs
+    │       │   │   │   │   ├── cargo.rs
+    │       │   │   │   │   ├── cargo_manifest.rs
+    │       │   │   │   │   ├── config.rs
+    │       │   │   │   │   ├── flock.rs
+    │       │   │   │   │   ├── framework.rs
+    │       │   │   │   │   ├── fs.rs
+    │       │   │   │   │   ├── http.rs
+    │       │   │   │   │   ├── icns.json
+    │       │   │   │   │   ├── mod.rs
+    │       │   │   │   │   ├── npm.rs
+    │       │   │   │   │   ├── pbxproj.rs
+    │       │   │   │   │   ├── plist.rs
+    │       │   │   │   │   ├── plugins.rs
+    │       │   │   │   │   ├── prompts.rs
+    │       │   │   │   │   ├── template.rs
+    │       │   │   │   │   └── updater_signature.rs
+    │       │   │   │   ├── icon.rs
+    │       │   │   │   ├── info
+    │       │   │   │   │   ├── app.rs
+    │       │   │   │   │   ├── env_nodejs.rs
+    │       │   │   │   │   ├── env_rust.rs
+    │       │   │   │   │   ├── env_system.rs
+    │       │   │   │   │   ├── ios.rs
+    │       │   │   │   │   ├── mod.rs
+    │       │   │   │   │   ├── packages_nodejs.rs
+    │       │   │   │   │   ├── packages_rust.rs
+    │       │   │   │   │   └── plugins.rs
+    │       │   │   │   ├── init.rs
+    │       │   │   │   ├── inspect.rs
+    │       │   │   │   ├── interface
+    │       │   │   │   │   ├── mod.rs
+    │       │   │   │   │   ├── rust
+    │       │   │   │   │   │   ├── cargo_config.rs
+    │       │   │   │   │   │   ├── desktop.rs
+    │       │   │   │   │   │   ├── installation.rs
+    │       │   │   │   │   │   └── manifest.rs
+    │       │   │   │   │   └── rust.rs
+    │       │   │   │   ├── lib.rs
+    │       │   │   │   ├── main.rs
+    │       │   │   │   ├── migrate
+    │       │   │   │   │   ├── migrations
+    │       │   │   │   │   │   ├── mod.rs
+    │       │   │   │   │   │   ├── v1
+    │       │   │   │   │   │   │   ├── config.rs
+    │       │   │   │   │   │   │   ├── fixtures
+    │       │   │   │   │   │   │   │   ├── api-example.tauri.conf.json
+    │       │   │   │   │   │   │   │   └── cli-template.tauri.conf.json
+    │       │   │   │   │   │   │   ├── frontend
+    │       │   │   │   │   │   │   │   └── partial_loader
+    │       │   │   │   │   │   │   │       ├── mod.rs
+    │       │   │   │   │   │   │   │       ├── svelte.rs
+    │       │   │   │   │   │   │   │       └── vue.rs
+    │       │   │   │   │   │   │   ├── frontend.rs
+    │       │   │   │   │   │   │   ├── manifest.rs
+    │       │   │   │   │   │   │   └── mod.rs
+    │       │   │   │   │   │   └── v2_beta.rs
+    │       │   │   │   │   └── mod.rs
+    │       │   │   │   ├── mobile
+    │       │   │   │   │   ├── android
+    │       │   │   │   │   │   ├── android_studio_script.rs
+    │       │   │   │   │   │   ├── build.rs
+    │       │   │   │   │   │   ├── dev.rs
+    │       │   │   │   │   │   ├── mod.rs
+    │       │   │   │   │   │   ├── project.rs
+    │       │   │   │   │   │   └── run.rs
+    │       │   │   │   │   ├── init.rs
+    │       │   │   │   │   ├── ios
+    │       │   │   │   │   │   ├── build.rs
+    │       │   │   │   │   │   ├── dev.rs
+    │       │   │   │   │   │   ├── mod.rs
+    │       │   │   │   │   │   ├── project.rs
+    │       │   │   │   │   │   ├── run.rs
+    │       │   │   │   │   │   └── xcode_script.rs
+    │       │   │   │   │   └── mod.rs
+    │       │   │   │   ├── plugin
+    │       │   │   │   │   ├── android.rs
+    │       │   │   │   │   ├── init.rs
+    │       │   │   │   │   ├── ios.rs
+    │       │   │   │   │   ├── mod.rs
+    │       │   │   │   │   └── new.rs
+    │       │   │   │   ├── remove.rs
+    │       │   │   │   └── signer
+    │       │   │   │       ├── generate.rs
+    │       │   │   │       ├── mod.rs
+    │       │   │   │       └── sign.rs
+    │       │   │   ├── tauri-dev-watcher.gitignore
+    │       │   │   ├── tauri.config.schema.json
+    │       │   │   ├── tauri.gitignore
+    │       │   │   └── templates
+    │       │   │       ├── app
+    │       │   │       │   └── src-tauri
+    │       │   │       │       ├── .gitignore
+    │       │   │       │       ├── Cargo.crate-manifest
+    │       │   │       │       ├── build.rs
+    │       │   │       │       ├── capabilities
+    │       │   │       │       │   └── default.json
+    │       │   │       │       ├── icons
+    │       │   │       │       │   ├── 128x128.png
+    │       │   │       │       │   ├── 128x128@2x.png
+    │       │   │       │       │   ├── 32x32.png
+    │       │   │       │       │   ├── Square107x107Logo.png
+    │       │   │       │       │   ├── Square142x142Logo.png
+    │       │   │       │       │   ├── Square150x150Logo.png
+    │       │   │       │       │   ├── Square284x284Logo.png
+    │       │   │       │       │   ├── Square30x30Logo.png
+    │       │   │       │       │   ├── Square310x310Logo.png
+    │       │   │       │       │   ├── Square44x44Logo.png
+    │       │   │       │       │   ├── Square71x71Logo.png
+    │       │   │       │       │   ├── Square89x89Logo.png
+    │       │   │       │       │   ├── StoreLogo.png
+    │       │   │       │       │   ├── icon.icns
+    │       │   │       │       │   ├── icon.ico
+    │       │   │       │       │   └── icon.png
+    │       │   │       │       ├── src
+    │       │   │       │       │   ├── lib.rs
+    │       │   │       │       │   └── main.rs
+    │       │   │       │       └── tauri.conf.json
+    │       │   │       ├── mobile
+    │       │   │       │   ├── android
+    │       │   │       │   │   ├── .editorconfig
+    │       │   │       │   │   ├── .gitignore
+    │       │   │       │   │   ├── app
+    │       │   │       │   │   │   ├── .gitignore
+    │       │   │       │   │   │   ├── build.gradle.kts
+    │       │   │       │   │   │   ├── proguard-rules.pro
+    │       │   │       │   │   │   └── src
+    │       │   │       │   │   │       └── main
+    │       │   │       │   │   │           ├── AndroidManifest.xml
+    │       │   │       │   │   │           ├── MainActivity.kt
+    │       │   │       │   │   │           └── res
+    │       │   │       │   │   │               ├── drawable
+    │       │   │       │   │   │               │   └── ic_launcher_background.xml
+    │       │   │       │   │   │               ├── drawable-v24
+    │       │   │       │   │   │               │   └── ic_launcher_foreground.xml
+    │       │   │       │   │   │               ├── layout
+    │       │   │       │   │   │               │   └── activity_main.xml
+    │       │   │       │   │   │               ├── mipmap-hdpi
+    │       │   │       │   │   │               │   ├── ic_launcher.png
+    │       │   │       │   │   │               │   ├── ic_launcher_foreground.png
+    │       │   │       │   │   │               │   └── ic_launcher_round.png
+    │       │   │       │   │   │               ├── mipmap-mdpi
+    │       │   │       │   │   │               │   ├── ic_launcher.png
+    │       │   │       │   │   │               │   ├── ic_launcher_foreground.png
+    │       │   │       │   │   │               │   └── ic_launcher_round.png
+    │       │   │       │   │   │               ├── mipmap-xhdpi
+    │       │   │       │   │   │               │   ├── ic_launcher.png
+    │       │   │       │   │   │               │   ├── ic_launcher_foreground.png
+    │       │   │       │   │   │               │   └── ic_launcher_round.png
+    │       │   │       │   │   │               ├── mipmap-xxhdpi
+    │       │   │       │   │   │               │   ├── ic_launcher.png
+    │       │   │       │   │   │               │   ├── ic_launcher_foreground.png
+    │       │   │       │   │   │               │   └── ic_launcher_round.png
+    │       │   │       │   │   │               ├── mipmap-xxxhdpi
+    │       │   │       │   │   │               │   ├── ic_launcher.png
+    │       │   │       │   │   │               │   ├── ic_launcher_foreground.png
+    │       │   │       │   │   │               │   └── ic_launcher_round.png
+    │       │   │       │   │   │               ├── values
+    │       │   │       │   │   │               │   ├── colors.xml
+    │       │   │       │   │   │               │   ├── strings.xml
+    │       │   │       │   │   │               │   └── themes.xml
+    │       │   │       │   │   │               ├── values-night
+    │       │   │       │   │   │               │   └── themes.xml
+    │       │   │       │   │   │               └── xml
+    │       │   │       │   │   │                   └── file_paths.xml
+    │       │   │       │   │   ├── build.gradle.kts
+    │       │   │       │   │   ├── buildSrc
+    │       │   │       │   │   │   ├── build.gradle.kts
+    │       │   │       │   │   │   └── src
+    │       │   │       │   │   │       └── main
+    │       │   │       │   │   │           └── kotlin
+    │       │   │       │   │   │               ├── BuildTask.kt
+    │       │   │       │   │   │               └── RustPlugin.kt
+    │       │   │       │   │   ├── gradle
+    │       │   │       │   │   │   └── wrapper
+    │       │   │       │   │   │       ├── gradle-wrapper.jar
+    │       │   │       │   │   │       └── gradle-wrapper.properties
+    │       │   │       │   │   ├── gradle.properties
+    │       │   │       │   │   ├── gradlew
+    │       │   │       │   │   ├── gradlew.bat
+    │       │   │       │   │   └── settings.gradle
+    │       │   │       │   └── ios
+    │       │   │       │       ├── .gitignore
+    │       │   │       │       ├── Assets.xcassets
+    │       │   │       │       │   ├── AppIcon.appiconset
+    │       │   │       │       │   │   ├── AppIcon-20x20@1x.png
+    │       │   │       │       │   │   ├── AppIcon-20x20@2x-1.png
+    │       │   │       │       │   │   ├── AppIcon-20x20@2x.png
+    │       │   │       │       │   │   ├── AppIcon-20x20@3x.png
+    │       │   │       │       │   │   ├── AppIcon-29x29@1x.png
+    │       │   │       │       │   │   ├── AppIcon-29x29@2x-1.png
+    │       │   │       │       │   │   ├── AppIcon-29x29@2x.png
+    │       │   │       │       │   │   ├── AppIcon-29x29@3x.png
+    │       │   │       │       │   │   ├── AppIcon-40x40@1x.png
+    │       │   │       │       │   │   ├── AppIcon-40x40@2x-1.png
+    │       │   │       │       │   │   ├── AppIcon-40x40@2x.png
+    │       │   │       │       │   │   ├── AppIcon-40x40@3x.png
+    │       │   │       │       │   │   ├── AppIcon-512@2x.png
+    │       │   │       │       │   │   ├── AppIcon-60x60@2x.png
+    │       │   │       │       │   │   ├── AppIcon-60x60@3x.png
+    │       │   │       │       │   │   ├── AppIcon-76x76@1x.png
+    │       │   │       │       │   │   ├── AppIcon-76x76@2x.png
+    │       │   │       │       │   │   ├── AppIcon-83.5x83.5@2x.png
+    │       │   │       │       │   │   └── Contents.json
+    │       │   │       │       │   └── Contents.json
+    │       │   │       │       ├── ExportOptions.plist
+    │       │   │       │       ├── LaunchScreen.storyboard
+    │       │   │       │       ├── Podfile
+    │       │   │       │       ├── Sources
+    │       │   │       │       │   └── {{app.name}}
+    │       │   │       │       │       ├── bindings
+    │       │   │       │       │       │   └── bindings.h
+    │       │   │       │       │       └── main.mm
+    │       │   │       │       ├── project.yml
+    │       │   │       │       └── {{app.name}}.xcodeproj
+    │       │   │       │           └── project.xcworkspace
+    │       │   │       │               └── xcshareddata
+    │       │   │       │                   └── WorkspaceSettings.xcsettings
+    │       │   │       ├── plugin
+    │       │   │       │   ├── .github
+    │       │   │       │   │   └── workflows
+    │       │   │       │   │       ├── audit.yml
+    │       │   │       │   │       ├── clippy.yml
+    │       │   │       │   │       └── test.yml
+    │       │   │       │   ├── .gitignore
+    │       │   │       │   ├── Cargo.crate-manifest
+    │       │   │       │   ├── README.md
+    │       │   │       │   ├── __example-api
+    │       │   │       │   │   └── tauri-app
+    │       │   │       │   │       ├── .gitignore
+    │       │   │       │   │       ├── README.md
+    │       │   │       │   │       ├── index.html
+    │       │   │       │   │       ├── jsconfig.json
+    │       │   │       │   │       ├── package.json
+    │       │   │       │   │       ├── public
+    │       │   │       │   │       │   ├── svelte.svg
+    │       │   │       │   │       │   ├── tauri.svg
+    │       │   │       │   │       │   └── vite.svg
+    │       │   │       │   │       ├── src
+    │       │   │       │   │       │   ├── App.svelte
+    │       │   │       │   │       │   ├── lib
+    │       │   │       │   │       │   │   └── Greet.svelte
+    │       │   │       │   │       │   ├── main.js
+    │       │   │       │   │       │   ├── style.css
+    │       │   │       │   │       │   └── vite-env.d.ts
+    │       │   │       │   │       ├── src-tauri
+    │       │   │       │   │       │   ├── .gitignore
+    │       │   │       │   │       │   ├── Cargo.crate-manifest
+    │       │   │       │   │       │   ├── build.rs
+    │       │   │       │   │       │   ├── capabilities
+    │       │   │       │   │       │   │   └── default.json
+    │       │   │       │   │       │   ├── icons
+    │       │   │       │   │       │   │   ├── 128x128.png
+    │       │   │       │   │       │   │   ├── 128x128@2x.png
+    │       │   │       │   │       │   │   ├── 32x32.png
+    │       │   │       │   │       │   │   ├── icon.icns
+    │       │   │       │   │       │   │   ├── icon.ico
+    │       │   │       │   │       │   │   └── icon.png
+    │       │   │       │   │       │   ├── src
+    │       │   │       │   │       │   │   ├── lib.rs
+    │       │   │       │   │       │   │   └── main.rs
+    │       │   │       │   │       │   └── tauri.conf.json
+    │       │   │       │   │       └── vite.config.js
+    │       │   │       │   ├── __example-basic
+    │       │   │       │   │   └── vanilla
+    │       │   │       │   │       ├── .gitignore
+    │       │   │       │   │       ├── package.json
+    │       │   │       │   │       ├── public
+    │       │   │       │   │       │   └── index.html
+    │       │   │       │   │       └── src-tauri
+    │       │   │       │   │           ├── .gitignore
+    │       │   │       │   │           ├── Cargo.crate-manifest
+    │       │   │       │   │           ├── build.rs
+    │       │   │       │   │           ├── capabilities
+    │       │   │       │   │           │   └── default.json
+    │       │   │       │   │           ├── icons
+    │       │   │       │   │           │   ├── 128x128.png
+    │       │   │       │   │           │   ├── 128x128@2x.png
+    │       │   │       │   │           │   ├── 32x32.png
+    │       │   │       │   │           │   ├── icon.icns
+    │       │   │       │   │           │   ├── icon.ico
+    │       │   │       │   │           │   └── icon.png
+    │       │   │       │   │           ├── rustfmt.toml
+    │       │   │       │   │           ├── src
+    │       │   │       │   │           │   ├── lib.rs
+    │       │   │       │   │           │   └── main.rs
+    │       │   │       │   │           └── tauri.conf.json
+    │       │   │       │   ├── android
+    │       │   │       │   │   ├── .gitignore
+    │       │   │       │   │   ├── build.gradle.kts
+    │       │   │       │   │   ├── proguard-rules.pro
+    │       │   │       │   │   ├── settings.gradle
+    │       │   │       │   │   └── src
+    │       │   │       │   │       ├── androidTest
+    │       │   │       │   │       │   └── java
+    │       │   │       │   │       │       └── ExampleInstrumentedTest.kt
+    │       │   │       │   │       ├── main
+    │       │   │       │   │       │   ├── AndroidManifest.xml
+    │       │   │       │   │       │   └── java
+    │       │   │       │   │       │       ├── Example.kt
+    │       │   │       │   │       │       └── ExamplePlugin.kt
+    │       │   │       │   │       └── test
+    │       │   │       │   │           └── java
+    │       │   │       │   │               └── ExampleUnitTest.kt
+    │       │   │       │   ├── build.rs
+    │       │   │       │   ├── guest-js
+    │       │   │       │   │   └── index.ts
+    │       │   │       │   ├── ios-spm
+    │       │   │       │   │   ├── .gitignore
+    │       │   │       │   │   ├── Package.swift
+    │       │   │       │   │   ├── README.md
+    │       │   │       │   │   └── Sources
+    │       │   │       │   │       └── ExamplePlugin.swift
+    │       │   │       │   ├── ios-xcode
+    │       │   │       │   │   ├── tauri-plugin-{{ plugin_name }}
+    │       │   │       │   │   │   └── ExamplePlugin.swift
+    │       │   │       │   │   └── tauri-plugin-{{ plugin_name }}.xcodeproj
+    │       │   │       │   │       ├── project.pbxproj
+    │       │   │       │   │       └── project.xcworkspace
+    │       │   │       │   │           ├── contents.xcworkspacedata
+    │       │   │       │   │           └── xcshareddata
+    │       │   │       │   │               └── IDEWorkspaceChecks.plist
+    │       │   │       │   ├── package.json
+    │       │   │       │   ├── rollup.config.js
+    │       │   │       │   ├── src
+    │       │   │       │   │   ├── commands.rs
+    │       │   │       │   │   ├── desktop.rs
+    │       │   │       │   │   ├── error.rs
+    │       │   │       │   │   ├── lib.rs
+    │       │   │       │   │   ├── mobile.rs
+    │       │   │       │   │   └── models.rs
+    │       │   │       │   └── tsconfig.json
+    │       │   │       └── tauri.conf.json
+    │       │   ├── tauri-codegen
+    │       │   │   ├── CHANGELOG.md
+    │       │   │   ├── Cargo.toml
+    │       │   │   ├── LICENSE_APACHE-2.0
+    │       │   │   ├── LICENSE_MIT
+    │       │   │   ├── README.md
+    │       │   │   └── src
+    │       │   │       ├── context.rs
+    │       │   │       ├── embedded_assets.rs
+    │       │   │       ├── image.rs
+    │       │   │       ├── lib.rs
+    │       │   │       └── vendor
+    │       │   │           ├── blake3_reference.rs
+    │       │   │           └── mod.rs
+    │       │   ├── tauri-driver
+    │       │   │   ├── CHANGELOG.md
+    │       │   │   ├── Cargo.toml
+    │       │   │   ├── LICENSE.spdx
+    │       │   │   ├── LICENSE_APACHE-2.0
+    │       │   │   ├── LICENSE_MIT
+    │       │   │   ├── README.md
+    │       │   │   └── src
+    │       │   │       ├── cli.rs
+    │       │   │       ├── main.rs
+    │       │   │       ├── server.rs
+    │       │   │       └── webdriver.rs
+    │       │   ├── tauri-macos-sign
+    │       │   │   ├── CHANGELOG.md
+    │       │   │   ├── Cargo.toml
+    │       │   │   ├── README.md
+    │       │   │   └── src
+    │       │   │       ├── certificate.rs
+    │       │   │       ├── keychain
+    │       │   │       │   └── identity.rs
+    │       │   │       ├── keychain.rs
+    │       │   │       ├── lib.rs
+    │       │   │       └── provisioning_profile.rs
+    │       │   ├── tauri-macros
+    │       │   │   ├── CHANGELOG.md
+    │       │   │   ├── Cargo.toml
+    │       │   │   ├── LICENSE_APACHE-2.0
+    │       │   │   ├── LICENSE_MIT
+    │       │   │   ├── README.md
+    │       │   │   └── src
+    │       │   │       ├── command
+    │       │   │       │   ├── handler.rs
+    │       │   │       │   ├── mod.rs
+    │       │   │       │   └── wrapper.rs
+    │       │   │       ├── context.rs
+    │       │   │       ├── lib.rs
+    │       │   │       ├── menu.rs
+    │       │   │       ├── mobile.rs
+    │       │   │       └── runtime.rs
+    │       │   ├── tauri-plugin
+    │       │   │   ├── CHANGELOG.md
+    │       │   │   ├── Cargo.toml
+    │       │   │   └── src
+    │       │   │       ├── build
+    │       │   │       │   ├── mobile.rs
+    │       │   │       │   └── mod.rs
+    │       │   │       ├── lib.rs
+    │       │   │       └── runtime.rs
+    │       │   ├── tauri-runtime
+    │       │   │   ├── CHANGELOG.md
+    │       │   │   ├── Cargo.toml
+    │       │   │   ├── LICENSE_APACHE-2.0
+    │       │   │   ├── LICENSE_MIT
+    │       │   │   ├── README.md
+    │       │   │   ├── build.rs
+    │       │   │   └── src
+    │       │   │       ├── dpi.rs
+    │       │   │       ├── lib.rs
+    │       │   │       ├── monitor.rs
+    │       │   │       ├── webview.rs
+    │       │   │       └── window.rs
+    │       │   ├── tauri-runtime-wry
+    │       │   │   ├── CHANGELOG.md
+    │       │   │   ├── Cargo.toml
+    │       │   │   ├── LICENSE_APACHE-2.0
+    │       │   │   ├── LICENSE_MIT
+    │       │   │   ├── README.md
+    │       │   │   ├── build.rs
+    │       │   │   └── src
+    │       │   │       ├── dialog
+    │       │   │       │   ├── mod.rs
+    │       │   │       │   └── windows.rs
+    │       │   │       ├── lib.rs
+    │       │   │       ├── monitor
+    │       │   │       │   ├── linux.rs
+    │       │   │       │   ├── macos.rs
+    │       │   │       │   ├── mod.rs
+    │       │   │       │   └── windows.rs
+    │       │   │       ├── undecorated_resizing.rs
+    │       │   │       ├── util.rs
+    │       │   │       ├── webview.rs
+    │       │   │       └── window
+    │       │   │           ├── linux.rs
+    │       │   │           ├── macos.rs
+    │       │   │           ├── mod.rs
+    │       │   │           └── windows.rs
+    │       │   ├── tauri-schema-generator
+    │       │   │   ├── Cargo.toml
+    │       │   │   ├── README.md
+    │       │   │   ├── build.rs
+    │       │   │   ├── schemas
+    │       │   │   │   ├── capability.schema.json
+    │       │   │   │   ├── config.schema.json
+    │       │   │   │   ├── permission.schema.json
+    │       │   │   │   └── scope.schema.json
+    │       │   │   └── src
+    │       │   │       └── main.rs
+    │       │   ├── tauri-schema-worker
+    │       │   │   ├── .gitignore
+    │       │   │   ├── Cargo.toml
+    │       │   │   ├── README.md
+    │       │   │   ├── package.json
+    │       │   │   ├── src
+    │       │   │   │   ├── config.rs
+    │       │   │   │   └── lib.rs
+    │       │   │   └── wrangler.toml
+    │       │   └── tauri-utils
+    │       │       ├── CHANGELOG.md
+    │       │       ├── Cargo.toml
+    │       │       ├── LICENSE_APACHE-2.0
+    │       │       ├── LICENSE_MIT
+    │       │       ├── README.md
+    │       │       └── src
+    │       │           ├── acl
+    │       │           │   ├── build.rs
+    │       │           │   ├── capability.rs
+    │       │           │   ├── identifier.rs
+    │       │           │   ├── manifest.rs
+    │       │           │   ├── mod.rs
+    │       │           │   ├── resolved.rs
+    │       │           │   ├── schema.rs
+    │       │           │   └── value.rs
+    │       │           ├── assets.rs
+    │       │           ├── build.rs
+    │       │           ├── config
+    │       │           │   └── parse.rs
+    │       │           ├── config.rs
+    │       │           ├── config_v1
+    │       │           │   ├── mod.rs
+    │       │           │   └── parse.rs
+    │       │           ├── html.rs
+    │       │           ├── html2.rs
+    │       │           ├── io.rs
+    │       │           ├── lib.rs
+    │       │           ├── mime_type.rs
+    │       │           ├── pattern
+    │       │           │   ├── isolation.js
+    │       │           │   ├── isolation.rs
+    │       │           │   └── mod.rs
+    │       │           ├── platform
+    │       │           │   └── starting_binary.rs
+    │       │           ├── platform.rs
+    │       │           ├── plugin.rs
+    │       │           ├── resources.rs
+    │       │           └── tokens.rs
+    │       ├── dependabot.yml
+    │       ├── examples
+    │       │   ├── .icons
+    │       │   │   ├── 128x128.png
+    │       │   │   ├── 128x128@2x.png
+    │       │   │   ├── 32x32.png
+    │       │   │   ├── AppIcon.icon
+    │       │   │   │   ├── Assets
+    │       │   │   │   │   └── icon.png
+    │       │   │   │   └── icon.json
+    │       │   │   ├── Square107x107Logo.png
+    │       │   │   ├── Square142x142Logo.png
+    │       │   │   ├── Square150x150Logo.png
+    │       │   │   ├── Square284x284Logo.png
+    │       │   │   ├── Square30x30Logo.png
+    │       │   │   ├── Square310x310Logo.png
+    │       │   │   ├── Square44x44Logo.png
+    │       │   │   ├── Square71x71Logo.png
+    │       │   │   ├── Square89x89Logo.png
+    │       │   │   ├── StoreLogo.png
+    │       │   │   ├── icon.icns
+    │       │   │   ├── icon.ico
+    │       │   │   ├── icon.png
+    │       │   │   ├── tray_icon.png
+    │       │   │   ├── tray_icon_with_transparency.ico
+    │       │   │   └── tray_icon_with_transparency.png
+    │       │   ├── README.md
+    │       │   ├── api
+    │       │   │   ├── .gitignore
+    │       │   │   ├── .setup-cross.sh
+    │       │   │   ├── .taurignore
+    │       │   │   ├── README.md
+    │       │   │   ├── dist
+    │       │   │   │   └── .gitkeep
+    │       │   │   ├── index.html
+    │       │   │   ├── isolation-dist
+    │       │   │   │   ├── index.html
+    │       │   │   │   └── index.js
+    │       │   │   ├── jsconfig.json
+    │       │   │   ├── package.json
+    │       │   │   ├── public
+    │       │   │   │   └── tauri_logo.png
+    │       │   │   ├── screenshot.png
+    │       │   │   ├── src
+    │       │   │   │   ├── App.svelte
+    │       │   │   │   ├── app.css
+    │       │   │   │   ├── components
+    │       │   │   │   │   ├── MenuBuilder.svelte
+    │       │   │   │   │   └── MenuItemBuilder.svelte
+    │       │   │   │   ├── main.js
+    │       │   │   │   ├── views
+    │       │   │   │   │   ├── App.svelte
+    │       │   │   │   │   ├── Communication.svelte
+    │       │   │   │   │   ├── Menu.svelte
+    │       │   │   │   │   ├── Tray.svelte
+    │       │   │   │   │   ├── WebRTC.svelte
+    │       │   │   │   │   ├── Welcome.svelte
+    │       │   │   │   │   └── Window.svelte
+    │       │   │   │   └── vite-env.d.ts
+    │       │   │   ├── src-tauri
+    │       │   │   │   ├── .gitignore
+    │       │   │   │   ├── .taurignore
+    │       │   │   │   ├── Cargo.toml
+    │       │   │   │   ├── Cross.toml
+    │       │   │   │   ├── Info.plist
+    │       │   │   │   ├── build.rs
+    │       │   │   │   ├── capabilities
+    │       │   │   │   │   ├── .gitignore
+    │       │   │   │   │   ├── main.json
+    │       │   │   │   │   └── run-app.json
+    │       │   │   │   ├── locales
+    │       │   │   │   │   └── pt-BR.wxl
+    │       │   │   │   ├── permissions
+    │       │   │   │   │   ├── app-menu
+    │       │   │   │   │   │   └── default.toml
+    │       │   │   │   │   └── autogenerated
+    │       │   │   │   │       ├── echo.toml
+    │       │   │   │   │       ├── log_operation.toml
+    │       │   │   │   │       ├── perform_request.toml
+    │       │   │   │   │       └── spam.toml
+    │       │   │   │   ├── src
+    │       │   │   │   │   ├── cmd.rs
+    │       │   │   │   │   ├── lib.rs
+    │       │   │   │   │   ├── main.rs
+    │       │   │   │   │   ├── menu_plugin.rs
+    │       │   │   │   │   └── tray.rs
+    │       │   │   │   ├── tauri-plugin-sample
+    │       │   │   │   │   ├── .gitignore
+    │       │   │   │   │   ├── Cargo.toml
+    │       │   │   │   │   ├── android
+    │       │   │   │   │   │   ├── .gitignore
+    │       │   │   │   │   │   ├── build.gradle.kts
+    │       │   │   │   │   │   ├── proguard-rules.pro
+    │       │   │   │   │   │   ├── settings.gradle
+    │       │   │   │   │   │   └── src
+    │       │   │   │   │   │       ├── androidTest
+    │       │   │   │   │   │       │   └── java
+    │       │   │   │   │   │       │       └── com
+    │       │   │   │   │   │       │           └── plugin
+    │       │   │   │   │   │       │               └── sample
+    │       │   │   │   │   │       │                   └── ExampleInstrumentedTest.kt
+    │       │   │   │   │   │       ├── main
+    │       │   │   │   │   │       │   ├── AndroidManifest.xml
+    │       │   │   │   │   │       │   └── java
+    │       │   │   │   │   │       │       └── com
+    │       │   │   │   │   │       │           └── plugin
+    │       │   │   │   │   │       │               └── sample
+    │       │   │   │   │   │       │                   ├── Example.kt
+    │       │   │   │   │   │       │                   └── ExamplePlugin.kt
+    │       │   │   │   │   │       └── test
+    │       │   │   │   │   │           └── java
+    │       │   │   │   │   │               └── com
+    │       │   │   │   │   │                   └── plugin
+    │       │   │   │   │   │                       └── sample
+    │       │   │   │   │   │                           └── ExampleUnitTest.kt
+    │       │   │   │   │   ├── api-iife.js
+    │       │   │   │   │   ├── build.rs
+    │       │   │   │   │   ├── ios
+    │       │   │   │   │   │   ├── .gitignore
+    │       │   │   │   │   │   ├── Package.swift
+    │       │   │   │   │   │   ├── README.md
+    │       │   │   │   │   │   └── Sources
+    │       │   │   │   │   │       └── ExamplePlugin.swift
+    │       │   │   │   │   ├── permissions
+    │       │   │   │   │   │   ├── .gitignore
+    │       │   │   │   │   │   ├── autogenerated
+    │       │   │   │   │   │   │   ├── commands
+    │       │   │   │   │   │   │   │   └── ping.toml
+    │       │   │   │   │   │   │   └── reference.md
+    │       │   │   │   │   │   ├── global-scope.toml
+    │       │   │   │   │   │   ├── ping-scoped.toml
+    │       │   │   │   │   │   └── schemas
+    │       │   │   │   │   │       └── schema.json
+    │       │   │   │   │   └── src
+    │       │   │   │   │       ├── desktop.rs
+    │       │   │   │   │       ├── error.rs
+    │       │   │   │   │       ├── lib.rs
+    │       │   │   │   │       ├── mobile.rs
+    │       │   │   │   │       └── models.rs
+    │       │   │   │   └── tauri.conf.json
+    │       │   │   ├── svelte.config.js
+    │       │   │   ├── unocss.config.js
+    │       │   │   └── vite.config.js
+    │       │   ├── commands
+    │       │   │   ├── README.md
+    │       │   │   ├── commands.rs
+    │       │   │   ├── index.html
+    │       │   │   ├── main.rs
+    │       │   │   └── tauri.conf.json
+    │       │   ├── drag
+    │       │   │   ├── README.md
+    │       │   │   ├── index.html
+    │       │   │   ├── main.rs
+    │       │   │   └── tauri.conf.json
+    │       │   ├── file-associations
+    │       │   │   ├── README.md
+    │       │   │   ├── index.html
+    │       │   │   ├── package.json
+    │       │   │   └── src-tauri
+    │       │   │       ├── .license_template
+    │       │   │       ├── Cargo.toml
+    │       │   │       ├── Info.plist
+    │       │   │       ├── build.rs
+    │       │   │       ├── src
+    │       │   │       │   └── main.rs
+    │       │   │       └── tauri.conf.json
+    │       │   ├── helloworld
+    │       │   │   ├── README.md
+    │       │   │   ├── index.html
+    │       │   │   ├── main.rs
+    │       │   │   └── tauri.conf.json
+    │       │   ├── isolation
+    │       │   │   ├── README.md
+    │       │   │   ├── dist
+    │       │   │   │   ├── index.html
+    │       │   │   │   └── linked.js
+    │       │   │   ├── isolation-dist
+    │       │   │   │   ├── index.html
+    │       │   │   │   └── index.js
+    │       │   │   ├── main.rs
+    │       │   │   └── tauri.conf.json
+    │       │   ├── multiwebview
+    │       │   │   ├── README.md
+    │       │   │   ├── index.html
+    │       │   │   ├── main.rs
+    │       │   │   └── tauri.conf.json
+    │       │   ├── multiwindow
+    │       │   │   ├── README.md
+    │       │   │   ├── index.html
+    │       │   │   ├── main.rs
+    │       │   │   └── tauri.conf.json
+    │       │   ├── resources
+    │       │   │   ├── README.md
+    │       │   │   ├── index.html
+    │       │   │   ├── package.json
+    │       │   │   └── src-tauri
+    │       │   │       ├── Cargo.toml
+    │       │   │       ├── assets
+    │       │   │       │   └── index.js
+    │       │   │       ├── build.rs
+    │       │   │       ├── capabilities
+    │       │   │       │   └── app.json
+    │       │   │       ├── src
+    │       │   │       │   └── main.rs
+    │       │   │       └── tauri.conf.json
+    │       │   ├── run-return
+    │       │   │   ├── README.md
+    │       │   │   ├── index.html
+    │       │   │   ├── main.rs
+    │       │   │   └── tauri.conf.json
+    │       │   ├── splashscreen
+    │       │   │   ├── README.md
+    │       │   │   ├── dist
+    │       │   │   │   ├── icon.png
+    │       │   │   │   ├── index.html
+    │       │   │   │   └── splashscreen.html
+    │       │   │   ├── main.rs
+    │       │   │   └── tauri.conf.json
+    │       │   ├── state
+    │       │   │   ├── README.md
+    │       │   │   ├── index.html
+    │       │   │   ├── main.rs
+    │       │   │   └── tauri.conf.json
+    │       │   └── streaming
+    │       │       ├── README.md
+    │       │       ├── index.html
+    │       │       ├── main.rs
+    │       │       └── tauri.conf.json
+    │       ├── package.json
+    │       ├── packages
+    │       │   ├── api
+    │       │   │   ├── .gitignore
+    │       │   │   ├── CHANGELOG.md
+    │       │   │   ├── LICENSE_APACHE-2.0
+    │       │   │   ├── LICENSE_MIT
+    │       │   │   ├── README.md
+    │       │   │   ├── eslint.config.js
+    │       │   │   ├── package.json
+    │       │   │   ├── rollup.config.ts
+    │       │   │   ├── src
+    │       │   │   │   ├── app.ts
+    │       │   │   │   ├── core.ts
+    │       │   │   │   ├── dpi.ts
+    │       │   │   │   ├── event.ts
+    │       │   │   │   ├── global.d.ts
+    │       │   │   │   ├── image.ts
+    │       │   │   │   ├── index.ts
+    │       │   │   │   ├── menu
+    │       │   │   │   │   ├── base.ts
+    │       │   │   │   │   ├── checkMenuItem.ts
+    │       │   │   │   │   ├── iconMenuItem.ts
+    │       │   │   │   │   ├── menu.ts
+    │       │   │   │   │   ├── menuItem.ts
+    │       │   │   │   │   ├── predefinedMenuItem.ts
+    │       │   │   │   │   └── submenu.ts
+    │       │   │   │   ├── menu.ts
+    │       │   │   │   ├── mocks.ts
+    │       │   │   │   ├── path.ts
+    │       │   │   │   ├── tray.ts
+    │       │   │   │   ├── webview.ts
+    │       │   │   │   ├── webviewWindow.ts
+    │       │   │   │   └── window.ts
+    │       │   │   └── tsconfig.json
+    │       │   └── cli
+    │       │       ├── .cargo
+    │       │       │   └── config.toml
+    │       │       ├── .gitignore
+    │       │       ├── .npmignore
+    │       │       ├── CHANGELOG.md
+    │       │       ├── Cargo.toml
+    │       │       ├── LICENSE_APACHE-2.0
+    │       │       ├── LICENSE_MIT
+    │       │       ├── README.md
+    │       │       ├── __tests__
+    │       │       │   ├── fixtures
+    │       │       │   │   └── empty
+    │       │       │   │       ├── .gitignore
+    │       │       │   │       ├── dist
+    │       │       │   │       │   └── index.html
+    │       │       │   │       └── package.json
+    │       │       │   └── template.spec.ts
+    │       │       ├── append-headers.js
+    │       │       ├── build.rs
+    │       │       ├── index.d.ts
+    │       │       ├── index.js
+    │       │       ├── main.d.ts
+    │       │       ├── main.js
+    │       │       ├── npm
+    │       │       │   ├── darwin-arm64
+    │       │       │   │   ├── README.md
+    │       │       │   │   └── package.json
+    │       │       │   ├── darwin-x64
+    │       │       │   │   ├── README.md
+    │       │       │   │   └── package.json
+    │       │       │   ├── linux-arm-gnueabihf
+    │       │       │   │   ├── README.md
+    │       │       │   │   └── package.json
+    │       │       │   ├── linux-arm64-gnu
+    │       │       │   │   ├── README.md
+    │       │       │   │   └── package.json
+    │       │       │   ├── linux-arm64-musl
+    │       │       │   │   ├── README.md
+    │       │       │   │   └── package.json
+    │       │       │   ├── linux-riscv64-gnu
+    │       │       │   │   ├── README.md
+    │       │       │   │   └── package.json
+    │       │       │   ├── linux-x64-gnu
+    │       │       │   │   ├── README.md
+    │       │       │   │   └── package.json
+    │       │       │   ├── linux-x64-musl
+    │       │       │   │   ├── README.md
+    │       │       │   │   └── package.json
+    │       │       │   ├── win32-arm64-msvc
+    │       │       │   │   ├── README.md
+    │       │       │   │   └── package.json
+    │       │       │   ├── win32-ia32-msvc
+    │       │       │   │   ├── README.md
+    │       │       │   │   └── package.json
+    │       │       │   └── win32-x64-msvc
+    │       │       │       ├── README.md
+    │       │       │       └── package.json
+    │       │       ├── package.json
+    │       │       ├── src
+    │       │       │   └── lib.rs
+    │       │       └── tauri.js
+    │       ├── pnpm-lock.yaml
+    │       ├── pnpm-workspace.yaml
+    │       ├── renovate.json
+    │       ├── rustfmt.toml
+    │       └── supply-chain
+    │           ├── audits.toml
+    │           ├── config.toml
+    │           └── imports.lock
     ├── system
     │   ├── __init__.py
     │   ├── adapters
@@ -265,10 +1594,312 @@
     │       ├── behavior.py
     │       ├── interactions.py
     │       └── physics.py
-    └── utils
-        ├── __init__.py
-        ├── layout_maper.py
-        ├── llm_fallback_generator.py
-        ├── loader.py
-        ├── logger.py
-        └── session_logger.py
+    ├── utils
+    │   ├── __init__.py
+    │   ├── config_loader.py
+    │   ├── layout_maper.py
+    │   ├── layout_mapper.py
+    │   ├── llm_fallback_generator.py
+    │   ├── loader.py
+    │   ├── logger.py
+    │   └── session_logger.py
+    └── vendor
+        └── Open-LLM-VTuber
+            ├── .cursor
+            │   └── rules
+            │       └── olv-core-rules.mdc
+            ├── .dockerignore
+            ├── .gemini
+            │   ├── GEMINI.md
+            │   └── styleguide.md
+            ├── .gitattributes
+            ├── .github
+            │   ├── FUNDING.yml
+            │   ├── ISSUE_TEMPLATE
+            │   │   ├── bug---question---get-help---bug---提问---求助.md
+            │   │   └── feature-request---功能建议.md
+            │   ├── copilot-instructions.md
+            │   └── workflows
+            │       ├── codeql.yml
+            │       ├── create_release.yml
+            │       ├── docker-blacksmith.yml
+            │       ├── fossa_scan.yml
+            │       ├── ruff.yml
+            │       └── update-requirements.yml
+            ├── .gitignore
+            ├── .gitmodules
+            ├── .pre-commit-config.yaml
+            ├── .python-version
+            ├── CLAUDE.md
+            ├── CONTRIBUTING.md
+            ├── LICENSE
+            ├── LICENSE-Live2D.md
+            ├── README.CN.md
+            ├── README.JP.md
+            ├── README.KR.md
+            ├── README.md
+            ├── assets
+            │   ├── banner.cn.jpg
+            │   ├── banner.jpg
+            │   ├── banner.kr.jpg
+            │   ├── i1.jpg
+            │   ├── i1_app_mode.jpg
+            │   ├── i2.jpg
+            │   ├── i2_pet_vscode.jpg
+            │   ├── i3.jpg
+            │   ├── i3_browser_world_fun.jpg
+            │   ├── i4.jpg
+            │   └── i4_pet_desktop.jpg
+            ├── avatars
+            │   ├── mao.png
+            │   └── shizuku.png
+            ├── backgrounds
+            │   ├── README.md
+            │   ├── cartoon-night-landscape-moon.jpeg
+            │   ├── ceiling-window-room-night.jpeg
+            │   ├── cityscape.jpeg
+            │   ├── computer-room-illustration.jpeg
+            │   ├── congress.jpg
+            │   ├── field-night-painting-moon.jpeg
+            │   ├── lernado-diff-classroom-center.jpeg
+            │   ├── moon-over-mountain.jpeg
+            │   ├── mountain-range-illustration.jpeg
+            │   ├── night-landscape-grass-moon.jpeg
+            │   ├── night-scene-cartoon-moon.jpeg
+            │   ├── painting-valley-night-sky. 2.jpeg
+            │   ├── room-interior-illustration.jpeg
+            │   └── sdxl-classroom-door-view.jpeg
+            ├── characters
+            │   ├── README.md
+            │   ├── en_nuke_debate.yaml
+            │   ├── en_unhelpful_ai.yaml
+            │   ├── zh_米粒.yaml
+            │   └── zh_翻译腔.yaml
+            ├── config_templates
+            │   ├── README.md
+            │   ├── conf.ZH.default.yaml
+            │   └── conf.default.yaml
+            ├── doc
+            │   ├── README.md
+            │   └── sample_conf
+            │       ├── sherpaASRTTS_sense_voice_melo.yaml
+            │       ├── sherpaASRTTS_sense_voice_piper_en.yaml
+            │       ├── sherpaASRTTS_sense_voice_vits_zh.yaml
+            │       ├── sherpaASR_paraformer.yaml
+            │       └── sherpaASR_sense_voice.yaml
+            ├── dockerfile
+            ├── frontend
+            ├── live2d-models
+            │   ├── mao_pro
+            │   │   ├── ReadMe.txt
+            │   │   └── runtime
+            │   │       ├── expressions
+            │   │       │   ├── exp_01.exp3.json
+            │   │       │   ├── exp_02.exp3.json
+            │   │       │   ├── exp_03.exp3.json
+            │   │       │   ├── exp_04.exp3.json
+            │   │       │   ├── exp_05.exp3.json
+            │   │       │   ├── exp_06.exp3.json
+            │   │       │   ├── exp_07.exp3.json
+            │   │       │   └── exp_08.exp3.json
+            │   │       ├── mao_pro.4096
+            │   │       │   └── texture_00.png
+            │   │       ├── mao_pro.cdi3.json
+            │   │       ├── mao_pro.moc3
+            │   │       ├── mao_pro.model3.json
+            │   │       ├── mao_pro.physics3.json
+            │   │       ├── mao_pro.pose3.json
+            │   │       └── motions
+            │   │           ├── mtn_01.motion3.json
+            │   │           ├── mtn_02.motion3.json
+            │   │           ├── mtn_03.motion3.json
+            │   │           ├── mtn_04.motion3.json
+            │   │           ├── special_01.motion3.json
+            │   │           ├── special_02.motion3.json
+            │   │           └── special_03.motion3.json
+            │   └── shizuku
+            │       ├── ReadMe.txt
+            │       └── runtime
+            │           ├── motion
+            │           │   ├── 01.motion3.json
+            │           │   ├── 02.motion3.json
+            │           │   ├── 03.motion3.json
+            │           │   └── 04.motion3.json
+            │           ├── shizuku.1024
+            │           │   ├── texture_00.png
+            │           │   ├── texture_01.png
+            │           │   ├── texture_02.png
+            │           │   ├── texture_03.png
+            │           │   └── texture_04.png
+            │           ├── shizuku.cdi3.json
+            │           ├── shizuku.moc3
+            │           ├── shizuku.model3.json
+            │           ├── shizuku.physics3.json
+            │           └── shizuku.pose3.json
+            ├── model_dict.json
+            ├── pixi.lock
+            ├── prompts
+            │   ├── README.md
+            │   ├── __init__.py
+            │   ├── prompt_loader.py
+            │   └── utils
+            │       ├── concise_style_prompt.txt
+            │       ├── group_conversation_prompt.txt
+            │       ├── live2d_expression_prompt.txt
+            │       ├── live_prompt.txt
+            │       ├── mcp_prompt.txt
+            │       ├── proactive_speak_prompt.txt
+            │       ├── speakable_prompt.txt
+            │       ├── think_tag_prompt.txt
+            │       └── tool_guidance_prompt.txt
+            ├── pyproject.toml
+            ├── requirements-bilibili.txt
+            ├── requirements.txt
+            ├── run_server.py
+            ├── scripts
+            │   └── run_bilibili_live.py
+            ├── src
+            │   └── open_llm_vtuber
+            │       ├── __init__.py
+            │       ├── agent
+            │       │   ├── __init__.py
+            │       │   ├── agent_factory.py
+            │       │   ├── agents
+            │       │   │   ├── __init__.py
+            │       │   │   ├── agent_interface.py
+            │       │   │   ├── basic_memory_agent.py
+            │       │   │   ├── hume_ai.py
+            │       │   │   ├── letta_agent.py
+            │       │   │   └── mem0_llm.py
+            │       │   ├── input_types.py
+            │       │   ├── output_types.py
+            │       │   ├── stateless_llm
+            │       │   │   ├── __init__.py
+            │       │   │   ├── claude_llm.py
+            │       │   │   ├── llama_cpp_llm.py
+            │       │   │   ├── ollama_llm.py
+            │       │   │   ├── openai_compatible_llm.py
+            │       │   │   ├── stateless_llm_interface.py
+            │       │   │   └── stateless_llm_with_template.py
+            │       │   ├── stateless_llm_factory.py
+            │       │   └── transformers.py
+            │       ├── asr
+            │       │   ├── __init__.py
+            │       │   ├── asr_factory.py
+            │       │   ├── asr_interface.py
+            │       │   ├── azure_asr.py
+            │       │   ├── faster_whisper_asr.py
+            │       │   ├── fun_asr.py
+            │       │   ├── groq_whisper_asr.py
+            │       │   ├── openai_whisper_asr.py
+            │       │   ├── sherpa_onnx_asr.py
+            │       │   ├── utils.py
+            │       │   └── whisper_cpp_asr.py
+            │       ├── chat_group.py
+            │       ├── chat_history_manager.py
+            │       ├── config_manager
+            │       │   ├── __init__.py
+            │       │   ├── agent.py
+            │       │   ├── asr.py
+            │       │   ├── character.py
+            │       │   ├── i18n.py
+            │       │   ├── live.py
+            │       │   ├── main.py
+            │       │   ├── stateless_llm.py
+            │       │   ├── system.py
+            │       │   ├── tts.py
+            │       │   ├── tts_preprocessor.py
+            │       │   ├── utils.py
+            │       │   └── vad.py
+            │       ├── conversations
+            │       │   ├── __init__.py
+            │       │   ├── conversation_handler.py
+            │       │   ├── conversation_utils.py
+            │       │   ├── group_conversation.py
+            │       │   ├── single_conversation.py
+            │       │   ├── tts_manager.py
+            │       │   └── types.py
+            │       ├── live
+            │       │   ├── bilibili_live.py
+            │       │   └── live_interface.py
+            │       ├── live2d_model.py
+            │       ├── mcpp
+            │       │   ├── json_detector.py
+            │       │   ├── mcp_client.py
+            │       │   ├── server_registry.py
+            │       │   ├── tool_adapter.py
+            │       │   ├── tool_executor.py
+            │       │   ├── tool_manager.py
+            │       │   ├── types.py
+            │       │   └── utils
+            │       │       └── path.py
+            │       ├── message_handler.py
+            │       ├── proxy_handler.py
+            │       ├── proxy_message_queue.py
+            │       ├── routes.py
+            │       ├── server.py
+            │       ├── service_context.py
+            │       ├── translate
+            │       │   ├── __init__.py
+            │       │   ├── deeplx.py
+            │       │   ├── tencent.py
+            │       │   ├── translate_factory.py
+            │       │   └── translate_interface.py
+            │       ├── tts
+            │       │   ├── __init__.py
+            │       │   ├── azure_tts.py
+            │       │   ├── bark_tts.py
+            │       │   ├── cartesia_tts.py
+            │       │   ├── coqui_tts.py
+            │       │   ├── cosyvoice2_tts.py
+            │       │   ├── cosyvoice_tts.py
+            │       │   ├── edge_tts.py
+            │       │   ├── elevenlabs_tts.py
+            │       │   ├── fish_api_tts.py
+            │       │   ├── gpt_sovits_tts.py
+            │       │   ├── melo_tts.py
+            │       │   ├── minimax_tts.py
+            │       │   ├── openai_tts.py
+            │       │   ├── piper_tts.py
+            │       │   ├── pyttsx3_tts.py
+            │       │   ├── sherpa_onnx_tts.py
+            │       │   ├── siliconflow_tts.py
+            │       │   ├── spark_tts.py
+            │       │   ├── tts_factory.py
+            │       │   ├── tts_interface.py
+            │       │   └── x_tts.py
+            │       ├── utils
+            │       │   ├── __init__.py
+            │       │   ├── install_utils.py
+            │       │   ├── sentence_divider.py
+            │       │   ├── stream_audio.py
+            │       │   └── tts_preprocessor.py
+            │       ├── vad
+            │       │   ├── __init__.py
+            │       │   ├── silero.py
+            │       │   ├── vad_factory.py
+            │       │   └── vad_interface.py
+            │       └── websocket_handler.py
+            ├── upgrade.py
+            ├── upgrade_codes
+            │   ├── __init__.py
+            │   ├── compare_yaml.py
+            │   ├── config_sync.py
+            │   ├── from_version
+            │   │   ├── __init__.py
+            │   │   └── v_1_1_1.py
+            │   ├── upgrade_core
+            │   │   ├── __init__.py
+            │   │   ├── comment_diff_fn.py
+            │   │   ├── comment_sync.py
+            │   │   ├── constants.py
+            │   │   ├── language.py
+            │   │   └── upgrade_utils.py
+            │   ├── upgrade_manager.py
+            │   └── version_manager.py
+            ├── uv.lock
+            └── web_tool
+                ├── README.md
+                ├── index.html
+                ├── main.js
+                └── recorder.js

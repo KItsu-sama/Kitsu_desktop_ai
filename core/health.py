@@ -51,19 +51,32 @@ class HealthMonitor(ModuleContract):
         return HealthStatus(module_id=self.module_id, ok=True, latency_ms=0.0)
 
     async def _run_health_cycle(self) -> None:
-        summary = await self.orchestrator.health_check_all()
+        # Get health status from all registered modules
+        summary = {}
+        for module_id in self.orchestrator._modules:
+            module = self.orchestrator.get_module(module_id)
+            if module:
+                try:
+                    status = await module.health_check()
+                    summary[module_id] = status
+                except Exception as exc:
+                    logger.exception('Health check failed for %s', module_id)
+                    summary[module_id] = HealthStatus(module_id=module_id, ok=False, detail=str(exc))
+        
         for module_id, status in summary.items():
             history = self._history.setdefault(module_id, [])
             history.append(status)
             if len(history) > 5:
                 history.pop(0)
-            failures = sum(1 for entry in history[-3:] if not entry.ok)
+            failures = sum(1 for entry in history[-3:] if not (getattr(entry, 'ok', entry.get('ok', True) if isinstance(entry, dict) else True)))
             if failures >= 3:
                 logger.warning('Health degradation detected for %s', module_id)
-                await self.orchestrator.degrade(f'health failure: {module_id}')
-                self.event_bus.emit(
-                    EventType.HEALTH_CHECK_FAILED,
-                    EventPayload(source='core.health', data={'module_id': module_id, 'detail': status.detail}),
+                self.event_bus.publish(
+                    EventPayload(
+                        event_type=EventType.HEALTH_CHECK_FAILED,
+                        source='core.health',
+                        data={'module_id': module_id, 'detail': getattr(status, 'detail', None)}
+                    )
                 )
 
     def get_summary(self) -> Dict[str, HealthStatus]:

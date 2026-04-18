@@ -1,5 +1,6 @@
 # r.py - lazy launcher
 import argparse
+import asyncio
 import sys
 from pathlib import Path
 
@@ -66,6 +67,24 @@ def parse_args():
     )
 
     parser.add_argument(
+        "--safe",
+        action="store_true",
+        help="Force ultra low safe-mode profile"
+    )
+
+    parser.add_argument(
+        "--first-run",
+        action="store_true", 
+        help="Run first-run setup and exit"
+    )
+
+    parser.add_argument(
+        "--profile",
+        type=str,
+        help="Force a specific hardware profile"
+    )
+
+    parser.add_argument(
         "--training-dataset",
         type=str,
         metavar="DATASET_PATH",
@@ -82,6 +101,18 @@ def parse_args():
     # Store debug flag in overrides for launcher
     if args.debug:
         overrides["debug"] = True
+    
+    # Store safe flag in overrides for launcher
+    if args.safe:
+        overrides["safe"] = True
+    
+    # Store first-run flag in overrides for launcher
+    if args.first_run:
+        overrides["first_run"] = True
+    
+    # Store profile flag in overrides for launcher
+    if args.profile:
+        overrides["profile"] = args.profile
     
     # Store training dataset in overrides
     if args.training_dataset:
@@ -177,4 +208,4 @@ if __name__ == "__main__":
 
         sys.exit(0)
 
-    sys.exit(main())
+    sys.exit(asyncio.run(main()))

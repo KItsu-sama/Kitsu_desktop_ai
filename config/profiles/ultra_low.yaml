@@ -15,14 +15,11 @@ flags:
 
 startup_modules:
   required:
-    - core.events
-    - core.bus
     - core.clocks
     - core.orchestrator
     - core.health
-    - config.capability_flags
-    - ai.fast_brain.engine
-    - personality.emotion_engine
+    - core.performance_manager
+    - ai.model_manager
   optional: []
 
 ui_mode: text_only

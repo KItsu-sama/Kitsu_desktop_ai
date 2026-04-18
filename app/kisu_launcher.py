@@ -17,9 +17,12 @@ class KisuLauncher(Launcher):
             return False
 
         character = self._load_default_character()
-        self.event_bus.emit(
-            EventType.CHARACTER_LOADED,
-            EventPayload(source='kisu_launcher', data={'character': character.name}),
+        self.event_bus.publish(
+            EventPayload(
+                event_type=EventType.CHARACTER_LOADED,
+                source='kisu_launcher',
+                data={'character': character.name}
+            )
         )
         logger.info('Kisu character loaded: %s', character.name)
         return True

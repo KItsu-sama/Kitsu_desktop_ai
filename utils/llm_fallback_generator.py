@@ -17,14 +17,14 @@ Fallback respects:
 - word limits from emotion_config
 """
 
-import random
 import json
 import logging
+import random
 from pathlib import Path
 from typing import Optional
 
-from core.memory.user_manager import UserManager
-from core.personality.emotion_config import get_style_rules
+from memory.stores.preferences import PreferenceStore
+from personality.emotion_config import get_style_rules
 
 log = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ class LLMFallback:
     # Init
     # =========================================================
 
-    def __init__(self, memory: Optional[UserManager] = None):
+    def __init__(self, memory: Optional[PreferenceStore] = None):
         self.memory = memory
 
     # =========================================================

@@ -52,9 +52,12 @@ class PerformanceManager(ModuleContract):
             return
 
         if ram_pct < 15 or cpu_pct > 90:
-            self.event_bus.emit(
-                EventType.PERFORMANCE_PRESSURE,
-                EventPayload(source='core.performance_manager', data={'ram_pct': ram_pct, 'cpu_pct': cpu_pct}),
+            self.event_bus.publish(
+                EventPayload(
+                    event_type=EventType.PERFORMANCE_PRESSURE,
+                    source='core.performance_manager',
+                    data={'ram_pct': ram_pct, 'cpu_pct': cpu_pct}
+                )
             )
             try:
                 await self.message_bus.request('model_manager.unload', {'reason': 'pressure'})

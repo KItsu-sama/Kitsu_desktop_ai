@@ -17,8 +17,9 @@ capability profile to the hardware she runs on.
 
 ---
 
-## Architecture overview
+## AI ARCHITECTURE
 
+## Architecture overview
 ```
 User input
     │
@@ -55,9 +56,242 @@ User input
          User + Avatar
 ```
 
-The FastBrain learning loop is the core mechanism: every response generated anywhere
-in the pipeline is fed back in, making the Markov chain more confident on that path
-so the next identical or similar input never needs to escalate.
+### Brain Stack (Inference Pipeline)
+
+**FastBrain → SLM → LLM**
+
+#### FastBrain (Base Layer)
+- **Binary + Markov Chain + Huffman Tree**
+- **Handles:**
+  - Common inputs (greetings, repeated phrases)
+  - Spam detection
+  - Instant responses (0ms)
+- **Self-learning:**
+  - Promotes frequent inputs via: `score = frequency × recency`
+  - Feeds confirmed outputs back into itself
+
+#### SLM (Style + Reasoning Lite)
+- Shapes personality (fox-like tone)
+- Handles normal conversation
+- Lightweight, offline
+
+#### LLM (Deep Reasoning)
+- Used only when needed:
+  - Complex queries
+  - Web search
+  - Analysis
+
+### Reasoning Optimization
+Pretrained models may hallucinate due to custom prompts/LoRA
+**Long-term goal:**
+- Custom LLM with:
+  - Universal Transformers
+  - Tokenizer + embeddings
+  - Multi-head attention
+  - Value cache
+  - Looped reasoning
+
+## 🎭 EMOTION SYSTEM
+
+### Layers
+
+**Mood (Primary)**
+- behave, mean, flirty, protective
+
+**Style (Expression)**
+- chaotic, sweet, cold, direct, sarcastic, playful, eerie
+
+**State (Micro-behavior)**
+- normal, fox, glitch, analyst, submissive, detached
+
+### Behavior Model
+- Emotions stored in decaying stack
+- Dominant emotion determines: `emotion → mood + style + state`
+- **Supports:**
+  - Triggers
+  - Reactions
+  - Personality overlays
+
+### Special Rules
+- Spam detection → adds irritation
+- Unsafe combinations → auto-adjust
+- Style rules control:
+  - Tone
+  - Length
+  - Emoji usage
+
+## ⚙️ STRIP / TIER SYSTEM
+
+### Concept
+- **Tier system** = user-facing
+- **Strip system** = internal flags
+
+### Flags (Read-only after startup)
+```
+USE_FAST_BRAIN
+USE_SLM
+USE_LLM
+USE_2D / USE_3D
+USE_EMOTION
+USE_VOICE
+USE_SYSTEM_CONTROL
+USE_SHIMEJI
+```
+
+### Modes
+
+**Ultra Low**
+- FastBrain + templates only
+- No LLM/SLM
+
+**Balanced**
+- SLM + prompt shaping
+
+**Full**
+- LoRA + LLM + full emotion system
+
+### Fallback Chain
+3D → 2D → SLM → FastBrain → Basic chatbot
+
+## 🖥️ PLATFORM ARCHITECTURE
+
+### Core App (Tauri)
+**Handles:**
+- AI pipeline
+- Emotion system
+- VTuber rendering (2D/3D)
+- Shimeji behavior
+- System control
+- Background / cursor
+
+### Browser Extension (Optional)
+**Handles:**
+- Web interaction
+- Quiz solving
+- Tab manipulation
+
+**Communication:**
+- Extension ⇄ Core App (WebSocket/API)
+
+## 🔐 PERMISSION SYSTEM
+
+### Category-based permissions with scope + risk levels:
+```
+filesystem
+display
+system
+browser
+network
+audio
+automation
+```
+
+### Rules
+- Category ON ≠ full access
+- **Dangerous actions ALWAYS require confirmation:**
+  - Shutdown
+  - File deletion
+  - Automation
+
+### Safety Features
+- Cooldowns
+- Rate limits
+- Kill switch (automation)
+- Session-based permissions
+
+## 💤 IDLE SYSTEM
+
+### States
+- **Active**
+- **Idle** (~60s)
+- **Sleep** (~5min)
+
+### Behavior
+- Idle → light animation (bored)
+- Sleep → unload models
+
+### Memory Strategy
+**Keep:**
+- FastBrain
+- Minimal emotion state
+
+**Unload:**
+- SLM after idle
+- LLM always
+
+## 🎮 FEATURES
+
+### Desktop Interaction
+- Wallpaper control
+- Cursor (fox bite effect)
+- Hide/crop tabs
+- Shimeji companion
+- Power control (sleep/shutdown)
+
+### AI Features
+- Web search
+- File interaction (permission-based)
+- Real-time adaptation to user habits
+
+### Creative Tools (Future)
+- Drawing app
+- Video editing with live comments
+
+## 🧪 QUIZ SYSTEM
+
+### Modes
+- **Rush** → fastest answers
+- **Normal** → human-like delay
+- **Adapt** → uses tools for best score
+
+### Learning Loop
+- Stores solved questions
+- Re-tests user later
+
+**Auto-solver disabled if:**
+- User score below average
+
+**Re-enabled after:**
+- 3 above-average or perfect scores
+
+## 🛍️ COMMUNITY SYSTEM
+
+### Supports
+- Personality configs
+- Visual assets (2D/3D, cursor, UI)
+- Desktop behaviors
+- Plugins (quiz, tools)
+- Voice packs
+
+### Restrictions
+- No core AI routing modification
+
+## ⚡ PERFORMANCE STRATEGY
+
+### Hardware Adaptation
+- **Low-end** → FastBrain only
+- **Mid** → SLM
+- **High** → LLM + 3D
+
+### Model Management
+- Load/unload dynamically
+- Never keep heavy models idle
+
+### Install Size Target
+- Core: 10–20MB
+- FastBrain: ~5MB
+- Micro-SLM: 5–20MB
+
+## 🔑 KEY DESIGN PRINCIPLES
+
+1. **FastBrain is ALWAYS active**
+2. **Heavy models are OPTIONAL and unloadable**
+3. **System must work offline at install**
+4. **Every feature is permission-gated**
+5. **Graceful degradation is mandatory**
+6. **Emotion drives personality, not logic**
+7. **Extensions are untrusted (must validate)**
+8. **No lag on wake (instant FastBrain response)**
 
 ---
 
@@ -146,6 +380,18 @@ main.py
 
 Steps 1–7 failing causes an immediate clean exit with a clear error message.
 Steps 8–9 failing triggers degraded mode — Kisu still runs at a lower tier.
+
+---
+
+## 🚀 COMBO ARCHITECTURE
+
+**Kitsu = Open_LLM_VTuber + Tauri + Shimeji + Desktop Local**
+
+This is a hybrid system combining:
+- **Open_LLM_VTuber**: AI personality and emotion system
+- **Tauri**: Desktop app framework with Rust backend
+- **Shimeji**: Desktop overlay companion physics
+- **Desktop Local**: Offline-first, permission-gated system
 
 ---
 

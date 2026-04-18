@@ -32,6 +32,6 @@ startup_modules:
 
 ui_mode: avatar_2d
 model_downloads:
-  - id: micro_slm
-    size_mb: 20
+  - id: tinyllama:1.1b
+    size_mb: 1100
     required: true

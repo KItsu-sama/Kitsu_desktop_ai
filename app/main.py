@@ -2,11 +2,11 @@
 app/main.py - CANONICAL KITU ENTRY POINT
 
 Desktop launcher entry point for Kitsu.
-ALWAYS run this file directly:
+DO NOT run this file directly - use r.py instead:
+  python r.py
   python -m app.main
-  python app/main.py
 
-🚫 launcher.py is DEPRECATED - all logic merged here.
+
 
 Startup Flow:
 1. CLI parsing + logging
@@ -200,10 +200,9 @@ def main(argv: Optional[list[str]] = None) -> int:
         'debug': args.debug,
         'first_run': args.first_run,
     }
-    return launcher_main(overrides)
+    return asyncio.run(launcher_main(overrides))
 
 
 if __name__ == "__main__":
-    """Official entry point."""
-    exit_code = main()
-    sys.exit(exit_code)
+    """ main must not be run directly"""   
+    raise SystemExit(main())

@@ -38,6 +38,7 @@ import yaml
 
 from app.profiles import HardwareProfile, detect_hardware_profile, get_profile_path, select_profile
 from app.runtime_config import RuntimeConfig, load_system_config, save_system_config
+from app.bootstrap import build_app_container, BootstrapError
 
 PROJECT_ROOT = Path(__file__).parent.parent
 LOG_PATH = Path('data/runtime/crash.log')
@@ -173,7 +174,7 @@ def _build_runtime_config(profile_name: str, overrides: dict[str, Any], safe_mod
     )
 
 
-def main(overrides: Optional[dict[str, Any]] = None) -> int:
+async def main(overrides: Optional[dict[str, Any]] = None) -> int:
     overrides = overrides or {}
     debug = bool(overrides.get('debug', False))
     _setup_logging(logging.DEBUG if debug else logging.INFO)
@@ -182,7 +183,7 @@ def main(overrides: Optional[dict[str, Any]] = None) -> int:
         print(overrides.get('logo_text', ''))
         return 0
 
-    if overrides.get('first_run'):
+    if overrides.get('first-run'):
         success = _maybe_run_first_run()
         return 0 if success else 1
 
@@ -199,7 +200,7 @@ def main(overrides: Optional[dict[str, Any]] = None) -> int:
             _fatal('First-run setup failed')
 
     try:
-        container = build_app_container(
+        container = await build_app_container(
             profile_override=profile_name,
             safe_mode=safe_mode,
             runtime_config=runtime_config,
@@ -214,7 +215,7 @@ def main(overrides: Optional[dict[str, Any]] = None) -> int:
         return 1
 
     from app.main import start_engine
-    return asyncio.run(start_engine(container))
+    return await start_engine(container)
 
 
 def write_crash_log(exception: Exception) -> None:
@@ -225,7 +226,7 @@ def write_crash_log(exception: Exception) -> None:
             handle.write(json.dumps({
                 'error': str(exception),
                 'type': type(exception).__name__,
-                'timestamp': asyncio.get_event_loop().time(),
+                'timestamp': 0.0,
             }) + '\n')
     except Exception:
         logger.exception('Failed to write crash log')
@@ -263,21 +264,29 @@ class Launcher:
             self._emit_progress(completed, total_steps, module_id)
             await self._start_module(module_id, required=False)
 
-        self.event_bus.emit(
-            'app:ready',
-            {'source': 'launcher', 'data': {'status': 'ready'}},
+        from core.events import EventType, EventPayload
+        self.event_bus.publish(
+            EventPayload(
+                event_type=EventType.APP_READY,
+                source='launcher',
+                data={}
+            )
         )
         logger.info('Startup sequence complete')
         return True
 
     def _emit_progress(self, completed: int, total: int, current_module: str) -> None:
-        self.event_bus.emit(
-            'loading:progress',
-            {'source': 'launcher', 'data': {
-                'completed': completed, 
-                'total': total, 
-                'module': current_module
-            }},
+        from core.events import EventType, EventPayload
+        self.event_bus.publish(
+            EventPayload(
+                event_type=EventType.LOADING_PROGRESS,
+                source='launcher',
+                data={
+                    'completed': completed, 
+                    'total': total, 
+                    'module': current_module
+                }
+            )
         )
 
     async def _start_module(self, module_id: str, required: bool) -> bool:
@@ -289,7 +298,7 @@ class Launcher:
             logger.warning('Optional module %s not registered', module_id)
             return True
 
-        started = await self.orchestrator.start(module_id)
+        started = await self.orchestrator.start_module(module_id)
         if not started:
             logger.warning('Failed to start module %s', module_id)
             return not required
@@ -309,10 +318,13 @@ class Launcher:
 
     async def _enter_safe_mode(self) -> bool:
         logger.warning('Entering safe mode due to startup failure')
-        await self.orchestrator.degrade('startup_failure')
-        self.event_bus.emit(
-            'app:shutdown',
-            {'source': 'launcher', 'data': {'reason': 'startup_failure'}},
+        from core.events import EventType, EventPayload
+        self.event_bus.publish(
+            EventPayload(
+                event_type=EventType.APP_SHUTDOWN,
+                source='launcher',
+                data={'reason': 'startup_failure'}
+            )
         )
         return False
 

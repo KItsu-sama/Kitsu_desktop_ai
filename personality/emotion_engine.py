@@ -18,6 +18,7 @@ Non-responsibilities:
 """
 
 import asyncio
+import json
 import random
 import time
 import logging
@@ -68,6 +69,33 @@ class EmotionEngine:
             triggers_path: Path to triggers.json
             continuous_decay: If True, run background decay loop. If False, decay only on tick()
         """
+        # Initialize EmotionEnhancements attributes
+        self.energy_level = 0.7
+        self.trust_level = 0.5
+        self.personality_traits = {
+            "sass_level": 0.3,
+            "curiosity": 0.8,
+            "playfulness": 0.6,
+            "loyalty": 0.9
+        }
+        self.mood_transitions = {
+            "behave": {
+                "happy": 0.2, "curious": 0.3, "content": 0.4, "neutral": 0.1
+            },
+            "mean": {
+                "neutral": 0.4, "concerned": 0.2, "grumpy": 0.3, "content": 0.1
+            },
+            "flirty": {
+                "happy": 0.4, "playful": 0.3, "excited": 0.2, "neutral": 0.1
+            },
+            "protective": {
+                "neutral": 0.4, "sad": 0.2, "concerned": 0.3, "content": 0.1
+            }
+        }
+        self.last_activity = time.time()
+        self.sleeping = False
+        self.sleep_threshold = 300  # 5 minutes
+        
         self.kitsu_self = kitsu_self
         self.trigger_manager = None
         self.shared_state: Optional['KitsuState'] = None
@@ -75,7 +103,7 @@ class EmotionEngine:
         # Initialize trigger manager if path provided
         if triggers_path:
             try:
-                from core.personality.trigger_manager import TriggerManager
+                from personality.trigger_manager import TriggerManager
                 self.trigger_manager = TriggerManager(triggers_path)
                 log.info("TriggerManager loaded")
             except Exception as e:
@@ -903,3 +931,328 @@ class EmotionEngine:
                 return "watchful_gaze"
 
         return "idle"
+
+    # =========================================================================
+    # Emotion Enhancements
+    # =========================================================================
+
+    def adjust_energy(self, delta: float) -> None:
+        """Adjust energy level by delta amount."""
+        self.energy_level = max(0.0, min(1.0, self.energy_level + delta))
+        log.debug(f"Energy level: {self.energy_level:.2f}")
+    
+    def adjust_trust(self, delta: float) -> None:
+        """Adjust trust level by delta amount.""" 
+        self.trust_level = max(0.0, min(1.0, self.trust_level + delta))
+        log.debug(f"Trust level: {self.trust_level:.2f}")
+    
+    def update_activity(self) -> None:
+        """Update last activity timestamp."""
+        self.last_activity = time.time()
+        if self.sleeping:
+            self.wake_up()
+    
+    def should_sleep(self) -> bool:
+        """Check if Kitsu should enter sleep mode based on inactivity."""
+        inactive_time = time.time() - self.last_activity
+        return inactive_time > self.sleep_threshold and not self.sleeping
+    
+    def enter_sleep_mode(self) -> None:
+        """Enter sleep mode."""
+        self.sleeping = True
+        log.info("Kitsu entered sleep mode")
+    
+    def wake_up(self) -> None:
+        """Wake up from sleep mode."""
+        if self.sleeping:
+            self.sleeping = False
+            self.last_activity = time.time()
+            log.info("Kitsu woke up")
+    
+    def get_wake_message(self) -> str:
+        """Get a wake-up message based on current personality state."""
+        messages = [
+            "*yawns* Oh! You're back! I was wondering when you'd return~",
+            "*stretches* Good morning~ Did you miss me?", 
+            "*ears perk up* Oh! You startled me! Hehe~",
+            "*nuzzles* I missed you! Welcome back!"
+        ]
+        return random.choice(messages)
+    
+    def get_llm_response_modifiers(self) -> Dict[str, Any]:
+        """
+        Get modifiers for LLM response generation.
+        
+        Returns a dictionary that can be used to shape LLM prompts
+        based on current emotional and personality state.
+        """
+        # Get base emotional state from the engine
+        base_state = {
+            "mood": getattr(self, 'mood', 'behave'),
+            "style": getattr(self, 'style', 'sweet'), 
+            "state": getattr(self, 'state', 'normal'),
+            "sleeping": self.sleeping
+        }
+        
+        # Add enhancement layers
+        enhanced_state = {
+            **base_state,
+            "energy_level": self.energy_level,
+            "trust_level": self.trust_level,
+            "personality": self.personality_traits,
+            "sleeping": self.sleeping
+        }
+        
+        return enhanced_state
+    
+    def apply_mood_transition(self, target_mood: str, strength: float = 0.5) -> bool:
+        """
+        Apply probabilistic mood transition.
+        
+        Args:
+            target_mood: Desired mood to transition to
+            strength: Transition strength (0.0 - 1.0)
+            
+        Returns:
+            True if transition occurred, False otherwise
+        """
+        current_mood = getattr(self, 'mood', 'behave')
+        
+        # Use transition probabilities
+        if current_mood in self.mood_transitions:
+            transitions = self.mood_transitions[current_mood]
+            if target_mood in transitions:
+                probability = transitions[target_mood] * strength
+                if random.random() < probability:
+                    setattr(self, 'mood', target_mood)
+                    log.debug(f"Mood transitioned to: {target_mood}")
+                    return True
+        
+        return False
+    
+    def process_interaction_context(self, user_input: str, kitsu_response: str) -> None:
+        """
+        Process interaction for emotional changes and personality updates.
+        
+        This method analyzes user input and response patterns to adjust
+        personality traits and emotional state.
+        """
+        self.update_activity()
+        
+        # Analyze user input for emotional triggers
+        input_lower = user_input.lower()
+        
+        # Simple emotional triggers
+        if any(word in input_lower for word in ["love", "like", "awesome", "great"]):
+            self.adjust_trust(0.1)
+            self.adjust_energy(0.2)
+            
+        elif any(word in input_lower for word in ["sad", "bad", "terrible", "awful"]):
+            self.adjust_trust(-0.05)
+            self.adjust_energy(-0.1)
+            
+        elif any(word in input_lower for word in ["play", "game", "fun"]):
+            self.adjust_energy(0.3)
+            self.personality_traits["playfulness"] = min(1.0, self.personality_traits["playfulness"] + 0.1)
+        
+        # Personality-based adjustments
+        if self.personality_traits["sass_level"] > 0.5:
+            if "?" in user_input and "why" in input_lower:
+                # Increase chance of sarcastic responses
+                if hasattr(self, 'style'):
+                    self.style = "sarcastic"
+        
+        # Energy-based mood influence
+        if self.energy_level > 0.8:
+            self.apply_mood_transition("flirty", strength=0.2)
+        elif self.energy_level < 0.3:
+            self.apply_mood_transition("behave", strength=0.3)
+    
+    def get_personality_summary(self) -> Dict[str, Any]:
+        """Get a summary of current personality state for debugging/monitoring."""
+        return {
+            "mood": getattr(self, 'mood', 'behave'),
+            "style": getattr(self, 'style', 'sweet'),
+            "state": getattr(self, 'state', 'normal'),
+            "energy_level": self.energy_level,
+            "trust_level": self.trust_level,
+            "sleeping": self.sleeping,
+            "personality_traits": self.personality_traits.copy(),
+            "last_activity": self.last_activity
+        }
+
+    # =========================================================================
+    # Legacy Bridge Compatibility
+    # =========================================================================
+
+    def from_legacy_state(self, legacy_data: Dict[str, Any]) -> None:
+        """
+        Convert legacy emotion state to modern EmotionEngine state.
+
+        Args:
+            legacy_data: Legacy emotion state dictionary
+        """
+        try:
+            # Map legacy mood to modern mood
+            legacy_mood = legacy_data.get("mood", "neutral")
+            modern_mood = self._map_legacy_mood(legacy_mood)
+
+            # Map legacy style to modern style  
+            legacy_style = legacy_data.get("style", "casual")
+            modern_style = self._map_legacy_style(legacy_style)
+
+            # Set modern engine state
+            self.mood = modern_mood
+            self.style = modern_style
+
+            # Apply legacy emotions to stack
+            legacy_emotions = legacy_data.get("emotions", [])
+            for emotion_data in legacy_emotions:
+                self.add_emotion(
+                    name=emotion_data.get("name", "neutral"),
+                    intensity=emotion_data.get("intensity", 0.5),
+                    duration=emotion_data.get("duration", 5.0)
+                )
+
+            # Apply personality traits if available
+            personality = legacy_data.get("personality_traits", {})
+            if personality:
+                self._apply_legacy_traits(personality)
+
+            log.info(f"Migrated legacy state: {legacy_mood}/{legacy_style} -> {modern_mood}/{modern_style}")
+
+        except Exception as e:
+            log.error(f"Failed to migrate legacy state: {e}")
+
+    def to_legacy_state(self) -> Dict[str, Any]:
+        """
+        Convert modern EmotionEngine state to legacy format.
+
+        Returns:
+            Legacy-compatible state dictionary
+        """
+        try:
+            # Get current modern state
+            modern_state = self.get_state_dict()
+
+            # Map to legacy format
+            legacy_state = {
+                "mood": self._map_modern_to_legacy_mood(modern_state["mood"]),
+                "style": self._map_modern_to_legacy_style(modern_state["style"]),
+                "emotion": modern_state.get("dominant_emotion", "content"),
+                "last_activity": time.time(),
+                "sleeping": modern_state.get("is_hidden", False),
+                "energy_level": getattr(self, 'energy_level', 0.7),
+                "trust_level": getattr(self, 'trust_level', 0.5),
+                "personality_traits": getattr(self, 'personality_traits', {
+                    "sass_level": 0.3,
+                    "curiosity": 0.8, 
+                    "playfulness": 0.6,
+                    "loyalty": 0.9
+                })
+            }
+
+            return legacy_state
+
+        except Exception as e:
+            log.error(f"Failed to convert to legacy state: {e}")
+            return {}
+
+    def load_legacy_state(self) -> bool:
+        """
+        Load legacy emotion state file and migrate to modern engine.
+
+        Returns:
+            True if migration successful, False otherwise
+        """
+        try:
+            legacy_state_file = Path("data/emotion_state.json")
+            if not legacy_state_file.exists():
+                log.debug("No legacy state file found")
+                return False
+
+            with open(legacy_state_file, 'r', encoding='utf-8') as f:
+                legacy_data = json.load(f)
+
+            self.from_legacy_state(legacy_data)
+            log.info("Successfully loaded and migrated legacy state")
+            return True
+
+        except Exception as e:
+            log.error(f"Failed to load legacy state: {e}")
+            return False
+
+    def save_legacy_format(self) -> None:
+        """Save current modern state in legacy format for compatibility."""
+        try:
+            legacy_state = self.to_legacy_state()
+
+            # Ensure directory exists
+            legacy_state_file = Path("data/emotion_state.json")
+            legacy_state_file.parent.mkdir(parents=True, exist_ok=True)
+
+            with open(legacy_state_file, 'w', encoding='utf-8') as f:
+                json.dump(legacy_state, f, indent=2)
+
+            log.debug("Saved state in legacy format")
+
+        except Exception as e:
+            log.error(f"Failed to save legacy format: {e}")
+
+    def _map_legacy_mood(self, legacy_mood: str) -> str:
+        """Map legacy mood names to modern mood names."""
+        mood_mapping = {
+            "happy": "behave",
+            "neutral": "behave", 
+            "sad": "behave",
+            "excited": "flirty",
+            "playful": "flirty",
+            "concerned": "protective",
+            "grumpy": "mean",
+            "tired": "behave"
+        }
+        return mood_mapping.get(legacy_mood, "behave")
+
+    def _map_modern_to_legacy_mood(self, modern_mood: str) -> str:
+        """Map modern mood names to legacy mood names."""
+        reverse_mapping = {
+            "behave": "neutral",
+            "mean": "grumpy",
+            "flirty": "playful", 
+            "protective": "concerned"
+        }
+        return reverse_mapping.get(modern_mood, "neutral")
+
+    def _map_legacy_style(self, legacy_style: str) -> str:
+        """Map legacy style names to modern style names."""
+        style_mapping = {
+            "casual": "sweet",
+            "formal": "direct",
+            "energetic": "chaotic",
+            "gentle": "sweet",
+            "sarcastic": "sarcastic",
+            "shy": "sweet",
+            "confident": "chaotic"
+        }
+        return style_mapping.get(legacy_style, "sweet")
+
+    def _map_modern_to_legacy_style(self, modern_style: str) -> str:
+        """Map modern style names to legacy style names."""
+        reverse_mapping = {
+            "sweet": "casual",
+            "cold": "formal",
+            "direct": "formal",
+            "chaotic": "energetic",
+            "sarcastic": "sarcastic",
+            "playful": "casual",
+            "eerie": "gentle"
+        }
+        return reverse_mapping.get(modern_style, "casual")
+
+    def _apply_legacy_traits(self, traits: Dict[str, float]) -> None:
+        """Apply legacy personality traits to modern engine."""
+        # Store traits for modern engine to use
+        if hasattr(self, 'personality_traits'):
+            self.personality_traits.update(traits)
+        else:
+            self.personality_traits = traits

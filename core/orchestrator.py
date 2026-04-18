@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import sys
 from dataclasses import dataclass
 from typing import Dict, List, Optional, Type
 
@@ -69,6 +70,7 @@ class Orchestrator(ModuleContract):
         # Runtime state
         self._running: bool = False
         self._shutdown_event: asyncio.Event = asyncio.Event()
+        self._chat_enabled: bool = True
 
     # --- ModuleContract Implementation ---
 
@@ -170,6 +172,9 @@ class Orchestrator(ModuleContract):
             return False
         try:
             result = await module.stop()
+            # Handle modules that return None instead of boolean
+            if result is None:
+                result = True
             self._statuses[module_id].started = not result
             return result
         except Exception:
@@ -186,8 +191,10 @@ class Orchestrator(ModuleContract):
 
     async def shutdown(self) -> None:
         """Graceful shutdown of all modules (reverse start order)."""
+        # Don't try to stop ourselves - that would cause infinite recursion
         for module_id in reversed(list(self._modules.keys())):
-            await self.stop_module(module_id)
+            if module_id != self.module_id:  # Skip self
+                await self.stop_module(module_id)
         self._shutdown_event.set()
         bus.publish(EventPayload(
             event_type=EventType.APP_SHUTDOWN,
@@ -198,6 +205,27 @@ class Orchestrator(ModuleContract):
     def get_status(self) -> Dict[str, ModuleStatus]:
         """Get status of all registered modules."""
         return dict(self._statuses)
+    
+    async def _check_module_health(self) -> None:
+        """Periodic health check for all modules."""
+        try:
+            for module_id, status in self._statuses.items():
+                if status.started:
+                    module = self._modules.get(module_id)
+                    if module and hasattr(module, 'health_check'):
+                        try:
+                            health_result = await module.health_check()
+                            # Update health status based on health_check result
+                            if isinstance(health_result, dict):
+                                status.healthy = health_result.get('ok', True)
+                            else:
+                                status.healthy = bool(health_result)
+                        except Exception as e:
+                            logger.debug("Health check failed for %s: %s", module_id, e)
+                            status.healthy = False
+                            status.last_error = str(e)
+        except Exception as e:
+            logger.debug("Error during module health check: %s", e)
 
     # --- Legacy Event Handlers (unchanged) ---
 
@@ -260,9 +288,15 @@ class Orchestrator(ModuleContract):
         logger.warning("No AI provider could handle input: %r", event.text)
 
     def _on_response_ready(self, event: ResponseReady) -> None:
-        """Feed the final response back into FastBrain learning loop."""
+        """Feed the final response back into FastBrain learning loop and display to user."""
         if self.fast_brain:
             self.fast_brain.train(event.input_text, event.response_text)
+        
+        # Display response to user in chat
+        print(f"\n{event.source.upper()}: {event.response_text}")
+        if event.confidence < 1.0:
+            print(f"(confidence: {event.confidence:.2f})")
+        print()  # Add spacing after response
 
     def _on_emotion_changed(self, event: EmotionChanged) -> None:
         """Forward emotion state to avatar."""
@@ -276,15 +310,119 @@ class Orchestrator(ModuleContract):
         logger.info("Shutdown requested: %s", event.reason)
         asyncio.create_task(self.shutdown())
 
-    # --- Main Loop (unchanged) ---
+    # --- Main Loop ---
 
     async def run(self) -> None:
         """Run the main orchestrator event loop."""
         logger.info("Orchestrator main loop started.")
-        await self._shutdown_event.wait()
-        logger.info("Orchestrator main loop stopped.")
+        
+        # Start chat loop task
+        chat_task = asyncio.create_task(self._chat_loop()) if self._chat_enabled else None
+        
+        try:
+            # Run active monitoring loop instead of just waiting
+            while not self._shutdown_event.is_set():
+                try:
+                    # Check module health periodically
+                    await self._check_module_health()
+                    
+                    # Wait a short time before next check
+                    # Use wait_for with timeout to allow shutdown interruption
+                    try:
+                        await asyncio.wait_for(self._shutdown_event.wait(), timeout=1.0)
+                        break  # If wait_for completes without timeout, shutdown was requested
+                    except asyncio.TimeoutError:
+                        # Timeout is expected - continue loop
+                        continue
+                except asyncio.CancelledError:
+                    # Handle cancellation gracefully
+                    logger.info("Orchestrator run cancelled")
+                    break
+                except Exception as e:
+                    logger.error("Error in orchestrator main loop: %s", e)
+                    await asyncio.sleep(1.0)  # Prevent rapid error loops
+                    
+        except KeyboardInterrupt:
+            logger.info("Keyboard interrupt received")
+        except asyncio.CancelledError:
+            logger.info("Orchestrator run cancelled")
+        finally:
+            # Cancel chat task if running
+            if chat_task and not chat_task.done():
+                chat_task.cancel()
+                try:
+                    await chat_task
+                except asyncio.CancelledError:
+                    pass
+            logger.info("Orchestrator main loop stopped.")
 
-    def stop(self) -> None:
+    async def _chat_loop(self) -> None:
+        """Interactive chat loop for user input."""
+        logger.info("Chat loop started. Type 'help' for commands or 'quit' to exit.")
+        
+        try:
+            while not self._shutdown_event.is_set():
+                try:
+                    # Get user input
+                    user_input = await asyncio.get_event_loop().run_in_executor(
+                        None, 
+                        lambda: input("\n> ")
+                    )
+                    
+                    # Handle commands
+                    if user_input.lower().strip() in ['quit', 'exit', 'q']:
+                        logger.info("Quit command received")
+                        self.request_stop()
+                        break
+                    elif user_input.lower().strip() == 'help':
+                        self._show_help()
+                    elif user_input.lower().strip() == 'status':
+                        self._show_status()
+                    elif user_input.strip():
+                        # Process regular input through AI pipeline
+                        bus.publish(InputReceived(text=user_input))
+                    
+                except EOFError:
+                    logger.info("EOF received - shutting down")
+                    self.request_stop()
+                    break
+                except KeyboardInterrupt:
+                    logger.info("Keyboard interrupt in chat loop")
+                    self.request_stop()
+                    break
+                    
+        except asyncio.CancelledError:
+            logger.info("Chat loop cancelled")
+        except Exception as e:
+            logger.error("Error in chat loop: %s", e)
+    
+    def _show_help(self) -> None:
+        """Show available commands."""
+        help_text = """
+Available commands:
+  help    - Show this help message
+  status  - Show system status
+  quit    - Exit the application
+  exit    - Exit the application
+  q       - Exit the application
+
+Any other text will be processed as chat input.
+        """
+        print(help_text)
+    
+    def _show_status(self) -> None:
+        """Show current system status."""
+        try:
+            status = asyncio.get_event_loop().run_until_complete(self.health_check())
+            print(f"\n=== System Status ===")
+            print(f"Modules: {status.get('module_count', 0)} registered")
+            print(f"Legacy OK: {status.get('legacy_subsystems', {}).get('fast_brain', False)}")
+            print(f"Overall OK: {status.get('ok', False)}")
+            print("========================\n")
+        except Exception as e:
+            print(f"Error getting status: {e}")
+    
+    def request_stop(self) -> None:
         """Request orchestrator shutdown."""
         self._shutdown_event.set()
 

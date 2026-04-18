@@ -13,10 +13,10 @@ timing:
   permission_prompt_timeout_ms: 15000
 
 fast_brain:
-  promote_threshold: 0.80      # Frequency * Recency score to move to Fast Brain
+  confidence_promote_threshold: 0.80      # Frequency * Recency score to move to Fast Brain
   demote_threshold: 0.20       # Score below which entry is purged to save space
-  spam_window_ms: 30000        # Time window to detect repeating patterns
-  spam_repeat_count: 3         # Max repeats before Kisu gets "irritated"
+  spam_window_seconds: 30        # Time window to detect repeating patterns
+  spam_threshold_count: 3         # Max repeats before Kisu gets "irritated"
   spam_emotion_base: 0.30      # Initial intensity of annoyance
   spam_emotion_per_repeat: 0.15
   spam_emotion_max: 0.90
@@ -97,3 +97,55 @@ health:
   consecutive_failures_degrade: 3
   check_timeout_ms: 5000
   auto_update_fast_brain: true # Run trainer.py on shutdown/sleep
+
+flags:
+  use_fast_brain: true
+  use_slm: false
+  use_llm: false
+  use_2d: true
+  use_3d: false
+  use_emotion: true
+  use_voice: false
+  use_system_control: false
+  use_shimeji: true
+
+idle:
+  idle_threshold_seconds: 60
+  sleep_threshold_seconds: 300
+  check_interval_ms: 5000
+
+logging:
+  level: INFO
+  format: "%(asctime)s [%(levelname)s] %(name)s: %(message)s"
+  file_path: data/runtime/kitsu.log
+  max_size_mb: 50
+  backup_count: 5
+
+paths:
+  data_dir: data
+  runtime_dir: data/runtime
+  logs_dir: data/runtime/logs
+  cache_dir: data/cache
+  models_dir: models
+  characters_dir: characters
+  mods_dir: data/mods
+
+profile:
+  tier: ultra_low
+  auto_detect: true
+  override: null
+
+slm:
+  model_id: "tinyllama:1.1b"
+  context_size: 2048
+  temperature: 0.7
+  max_tokens: 512
+  offload_layers: 0
+  gpu_layers: 0
+
+router:
+  complexity_threshold: 0.7
+  fallback_enabled: true
+  intent_classifier: simple
+  confidence_slm_threshold: 0.6
+  confidence_llm_threshold: 0.8
