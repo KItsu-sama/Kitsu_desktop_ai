@@ -28,7 +28,7 @@ from dataclasses import dataclass, asdict, fields
 from enum import Enum
 import hashlib
 
-from core.memory.scoring import compute_score
+from memory.scoring import compute_score
 
 log = logging.getLogger(__name__)
 

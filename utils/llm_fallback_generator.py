@@ -17,6 +17,7 @@ Fallback respects:
 - word limits from emotion_config
 """
 
+import re
 import json
 import logging
 import random
@@ -179,8 +180,7 @@ class LLMFallback:
         noises = [
             " *nyah*",
             " *mrrp*",
-            " *fox-chirp*",
-            " 🦊",
+            " *sniff*",
         ]
 
         if random.random() < 0.30:
@@ -245,6 +245,7 @@ class LLMFallback:
             return "… " + text
 
         return text
+        
 
     # =========================================================
     # Build Base Phrase
@@ -263,6 +264,43 @@ class LLMFallback:
             base = f"{extra}{core}{cause_suffix}"
 
         return base.strip()
+    
+    # =========================================================
+    # New Vocabulary & Language Guard
+    # =========================================================
+
+    def _apply_japanese_replacements(self, text: str, mood: str):
+        """Replaces English words with Kitsu-specific Japanese flavor."""
+        
+        # Vocabulary Map
+        replacements = {
+            "please": "dozo",
+            "i'm fine": "Genki",
+            "i am fine": "Genki"
+        }
+        
+        # Handle Sorry based on Mood
+        if "sorry" in text.lower() or "my bad" in text.lower():
+            sorry_word = "sumimasen" if mood == "behave" else "Gomen Nasai"
+            # Simple replacement for common failure phrases
+            text = text.replace("I am sorry", sorry_word).replace("sorry", sorry_word)
+
+        for eng, jap in replacements.items():
+            # Case insensitive replacement
+            compiled = re.compile(re.escape(eng), re.IGNORECASE)
+            text = compiled.sub(jap, text)
+            
+        return text
+
+    def _check_japanese_input(self, user_input: str):
+        """
+        If the system detects Japanese input but the LLM is down, 
+        provide the specific refusal.
+        """
+        # Simple regex to detect Kana/Kanji
+        if re.search(r'[\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FFF]', user_input):
+            return "Sumimasen. Nihongo wakarimasen."
+        return None
 
     # =========================================================
     # Word Limit Enforcement
@@ -276,13 +314,18 @@ class LLMFallback:
 
         words = text.split()
 
-        return " ".join(words[:max_words])
+        return " ".join(words[:max_words+5])
 
     # =========================================================
     # Public API
     # =========================================================
 
-    def generate(self, mood: str = "", style: str = "", cause: Optional[str] = None):
+    def generate(self, mood: str = "behave", style: str = "sweet", cause: Optional[str] = None, raw_input: str = ""):
+        # 1. Check for Japanese Input First
+        jap_refusal = self._check_japanese_input(raw_input)
+        if jap_refusal:
+            return jap_refusal
+        
 
         cause = cause or "unknown"
 
@@ -357,6 +400,9 @@ class LLMFallback:
 
         if tail:
             base += tail
+
+        # 2. Apply Japanese flavor BEFORE word limit enforcement
+        base = self._apply_japanese_replacements(base, mood)
 
         base = self._enforce_word_limit(base, style)
 

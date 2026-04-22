@@ -5,7 +5,6 @@ Main orchestrator for Kitsu. Manages subsystem lifecycle + event routing.
 
 Rules:
 - Only imports from core/contracts.py and core/bus.py.
-- Never imports from ai/, personality/, ui/, system/, etc.
 - Receives subsystem instances injected by app/bootstrap.py.
 - Wires event routing between subsystems via the bus.
 - Runs the main event loop + module lifecycle management.
@@ -33,6 +32,25 @@ from core.events import (
     # Modern events
     EventType, EventPayload,
 )
+from personality.emotion_engine import EmotionEngine
+from personality.kitsu_self import KitsuSelf
+try:
+    from core.brain.state import KitsuState
+    from core.brain.router import IntentRouter
+    from core.brain.binary_reasoner import BinaryReasoner
+except ImportError:
+    KitsuState = None
+    IntentRouter = None
+    BinaryReasoner = None
+from memory.memory_manager import MemoryManager, MemoryType, MemoryConfig
+from personality.reaction_mapper import ReactionMapper
+from personality.emotion_controller import EmotionController
+from utils.llm_fallback_generator import LLMFallback
+try:
+    from core.compression.hybrid_generator import HybridGenerator, GenerationConfig, GenerationMode
+    HYBRID_AVAILABLE = True
+except ImportError:
+    HYBRID_AVAILABLE = False
 
 logger = logging.getLogger(__name__)
 
@@ -52,7 +70,20 @@ class Orchestrator(ModuleContract):
     module_id = 'core.orchestrator'
     required_flags: List[str] = []
 
-    def __init__(self) -> None:
+    def __init__(self, runtime_config: Optional[Any] = None):
+        self.runtime_config = runtime_config
+        if runtime_config and hasattr(runtime_config, 'merged'):
+            config_dict = runtime_config.merged
+        else:
+            config_dict = runtime_config or {}
+        self.core_config = config_dict.get("core", {})
+        self.emotion_config = config_dict.get("emotion", {})
+        self.memory_config = config_dict.get("memory", {})
+        if HYBRID_AVAILABLE:
+            self.hybrid_config = config_dict.get("hybrid", {})
+        else:
+            self.hybrid_config = {}
+
         # Legacy subsystems (injected by bootstrap.py)
         self.fast_brain: Optional[AIProvider] = None
         self.slm: Optional[AIProvider] = None
@@ -72,17 +103,45 @@ class Orchestrator(ModuleContract):
         self._shutdown_event: asyncio.Event = asyncio.Event()
         self._chat_enabled: bool = True
 
+        # Merged from kitsu_engine
+        self.kitsu_self: Optional[KitsuSelf] = None
+        self.emotion_engine: Optional[EmotionEngine] = None
+        self.emotion_controller: Optional[EmotionController] = None
+        self.reaction_mapper: Optional[ReactionMapper] = None
+        self.core_memory: Optional[MemoryManager] = None
+        self.router = IntentRouter() if IntentRouter else None
+        self.reasoner = BinaryReasoner() if BinaryReasoner else None
+        self.state = KitsuState() if KitsuState else type('MockState', (), {
+            'reset': lambda self: None, 
+            'user_input': '', 
+            'mood': 'neutral', 
+            'style': 'normal', 
+            'dominant_emotion': 'neutral', 
+            'final_response': '', 
+            'processing_stage': 'idle',
+            'update_emotional_state': lambda self, *args, **kwargs: None,
+            'update_from_emotion_engine': lambda self, *args, **kwargs: None,
+            'to_dict': lambda self: {},
+            'llm_prompt': '',
+        })()
+        self.compression = None
+        self.hybrid_generator: Optional[HybridGenerator] = None
+        self._compression_ready = False
+        self.llm_fallback = LLMFallback(memory=None)
+
     # --- ModuleContract Implementation ---
 
     async def start(self) -> bool:
         """Start orchestrator + wire all event handlers."""
         self.wire()
+        await self._initialize_engine()
         self._running = True
         logger.info("Orchestrator started and wired")
         return True
 
     async def stop(self) -> bool:
         """Stop orchestrator + shutdown all modules."""
+        await self._shutdown_engine()
         await self.shutdown()
         self._running = False
         logger.info("Orchestrator stopped")
@@ -98,7 +157,7 @@ class Orchestrator(ModuleContract):
             'slm': getattr(self.slm, 'is_available', lambda: False)() if self.slm else False,
             'llm': getattr(self.llm, 'is_available', lambda: False)() if self.llm else False,
             'emotion': True if self.emotion else False,
-            'avatar': self.avatar.is_visible() if self.avatar else False,
+            'avatar': (self.avatar.is_visible() if hasattr(self.avatar, 'is_visible') else False) if self.avatar else False,
         }
         results['legacy'] = legacy_status
         
@@ -133,6 +192,22 @@ class Orchestrator(ModuleContract):
         self._statuses[module.module_id] = ModuleStatus(module_id=module.module_id)
         logger.debug('Registered module %s', module.module_id)
 
+    async def unregister(self, module_id: str) -> bool:
+        """Unregister a module and clean up its resources."""
+        if module_id not in self._modules:
+            logger.warning('Module not registered: %s', module_id)
+            return False
+        
+        # Stop module if it's running
+        if self._statuses[module_id].started:
+            await self.stop_module(module_id)
+        
+        # Clean up
+        del self._modules[module_id]
+        del self._statuses[module_id]
+        logger.debug('Unregistered module %s', module_id)
+        return True
+
     def get_module(self, module_id: str) -> Optional[ModuleContract]:
         """Get registered module by ID."""
         return self._modules.get(module_id)
@@ -166,20 +241,28 @@ class Orchestrator(ModuleContract):
             return False
 
     async def stop_module(self, module_id: str) -> bool:
-        """Stop a specific module."""
+        """Stop a specific module with timeout and proper exception handling."""
         module = self.get_module(module_id)
         if not module:
             return False
         try:
-            result = await module.stop()
+            # Add timeout to prevent hanging modules from blocking shutdown
+            result = await asyncio.wait_for(module.stop(), timeout=10.0)
             # Handle modules that return None instead of boolean
             if result is None:
                 result = True
             self._statuses[module_id].started = not result
             return result
-        except Exception:
-            logger.exception('Failed to stop %s', module_id)
-            return False
+        except asyncio.TimeoutError:
+            logger.error('Module %s stop timed out after 10 seconds', module_id)
+            self._statuses[module_id].last_error = 'Stop timed out'
+            self._statuses[module_id].started = False
+            return False  # Continue shutdown despite timeout
+        except Exception as e:
+            logger.exception('Failed to stop %s: %s', module_id, e)
+            self._statuses[module_id].last_error = str(e)
+            self._statuses[module_id].started = False
+            return False  # Continue shutdown despite error
 
     async def start_all(self) -> bool:
         """Start all registered modules."""
@@ -229,11 +312,17 @@ class Orchestrator(ModuleContract):
 
     # --- Legacy Event Handlers (unchanged) ---
 
-    def _on_input(self, event: InputReceived) -> None:
-        """Route input through the legacy AI pipeline."""
-        # FastBrain first
+    async def _on_input(self, event: InputReceived) -> None:
+        """Route input through the legacy AI pipeline (async)."""
+        # FastBrain first - run in executor to prevent blocking
         if self.fast_brain and self.fast_brain.is_available():
-            response = self.fast_brain.query(event.text)
+            try:
+                response = await asyncio.get_event_loop().run_in_executor(
+                    None, self.fast_brain.query, event.text
+                )
+            except Exception as exc:
+                logger.warning('FastBrain query failed: %s', exc)
+                response = None
             if response is not None:
                 if self.personality and isinstance(response, str):
                     try:
@@ -249,9 +338,15 @@ class Orchestrator(ModuleContract):
                 ))
                 return
 
-        # SLM fallback
+        # SLM fallback - run in executor
         if self.slm and self.slm.is_available():
-            response = self.slm.query(event.text)
+            try:
+                response = await asyncio.get_event_loop().run_in_executor(
+                    None, self.slm.query, event.text
+                )
+            except Exception as exc:
+                logger.warning('SLM query failed: %s', exc)
+                response = None
             if response is not None:
                 if self.personality and isinstance(response, str):
                     try:
@@ -267,9 +362,15 @@ class Orchestrator(ModuleContract):
                 ))
                 return
 
-        # LLM fallback
+        # LLM fallback - run in executor
         if self.llm and self.llm.is_available():
-            response = self.llm.query(event.text)
+            try:
+                response = await asyncio.get_event_loop().run_in_executor(
+                    None, self.llm.query, event.text
+                )
+            except Exception as exc:
+                logger.warning('LLM query failed: %s', exc)
+                response = None
             if response is not None:
                 if self.personality and isinstance(response, str):
                     try:
@@ -329,7 +430,7 @@ class Orchestrator(ModuleContract):
                     # Wait a short time before next check
                     # Use wait_for with timeout to allow shutdown interruption
                     try:
-                        await asyncio.wait_for(self._shutdown_event.wait(), timeout=1.0)
+                        await asyncio.wait_for(self._shutdown_event.wait(), timeout=10.0)
                         break  # If wait_for completes without timeout, shutdown was requested
                     except asyncio.TimeoutError:
                         # Timeout is expected - continue loop
@@ -363,11 +464,21 @@ class Orchestrator(ModuleContract):
         try:
             while not self._shutdown_event.is_set():
                 try:
-                    # Get user input
-                    user_input = await asyncio.get_event_loop().run_in_executor(
-                        None, 
-                        lambda: input("\n> ")
-                    )
+                    # Get user input with better error handling
+                    try:
+                        user_input = await asyncio.get_event_loop().run_in_executor(
+                            None, 
+                            lambda: input("\n> ")
+                        )
+                    except (EOFError, KeyboardInterrupt):
+                        # Handle closed stdin or interrupt gracefully
+                        logger.info("Input stream closed or interrupted")
+                        self.request_stop()
+                        break
+                    except Exception as e:
+                        logger.error("Input error: %s", e)
+                        self.request_stop()
+                        break
                     
                     # Handle commands
                     if user_input.lower().strip() in ['quit', 'exit', 'q']:
@@ -379,9 +490,14 @@ class Orchestrator(ModuleContract):
                     elif user_input.lower().strip() == 'status':
                         self._show_status()
                     elif user_input.strip():
-                        # Process regular input through AI pipeline
-                        bus.publish(InputReceived(text=user_input))
-                    
+                        # Process regular input through Kitsu engine
+                        result = await self.process_input(user_input)
+                        bus.publish(ResponseReady(
+                            input_text=user_input,
+                            response_text=result['response'],
+                            source="kitsu_engine",
+                            confidence=result.get('confidence', 0.8),
+                        ))
                 except EOFError:
                     logger.info("EOF received - shutting down")
                     self.request_stop()
@@ -417,6 +533,7 @@ Any other text will be processed as chat input.
             print(f"\n=== System Status ===")
             print(f"Modules: {status.get('module_count', 0)} registered")
             print(f"Legacy OK: {status.get('legacy_subsystems', {}).get('fast_brain', False)}")
+            print(f"Engine OK: {self.emotion_engine is not None}")
             print(f"Overall OK: {status.get('ok', False)}")
             print("========================\n")
         except Exception as e:
@@ -427,8 +544,293 @@ Any other text will be processed as chat input.
         self._shutdown_event.set()
 
 
-# Global singleton
-orchestrator: Orchestrator = Orchestrator()
+    # =========================================================================
+    # Merged Kitsu Engine Methods
+    # =========================================================================
+
+    async def _initialize_engine(self):
+        try:
+            await self._initialize_personality()
+            await self._initialize_emotion_engine()
+            await self._initialize_memory()
+            await self._initialize_emotion_controller()
+            await self._initialize_compression()
+        except Exception as e:
+            logger.error(f"Failed to initialize engine: {e}")
+            # Continue without engine
+
+    async def _initialize_personality(self):
+        self.kitsu_self = KitsuSelf(
+            initial_state=self.core_config.get("personality", {})
+        )
+        logger.info("Core personality initialized")
+
+    async def _initialize_emotion_engine(self):
+        self.emotion_engine = EmotionEngine(
+            kitsu_self=self.kitsu_self,
+            continuous_decay=self.emotion_config.get("continuous_decay", True),
+        )
+        logger.info("Emotion engine initialized")
+
+    async def _initialize_memory(self):
+        config = MemoryConfig(
+            max_short_term=self.memory_config.get("max_short_term_memories", 100),
+            max_episodic=self.memory_config.get("max_episodic_memories", 50),
+        )
+        self.core_memory = MemoryManager(kitsu_self=self.kitsu_self, config=config)
+        await self.core_memory.start_episodic_session("Core Session")
+        logger.info("Core memory initialized")
+
+    async def _initialize_emotion_controller(self):
+        self.emotion_controller = EmotionController(
+            emotion_engine=self.emotion_engine,
+            kitsu_self=self.kitsu_self,
+            reaction_mapper=self.reaction_mapper,
+            memory_manager=self.core_memory,
+        )
+        await self.emotion_controller.start()
+        logger.info("Emotion controller initialized")
+
+    async def _initialize_compression(self):
+        try:
+            # Try to import compression pipeline
+            try:
+                from core.compression.pipeline import CompressionPipeline
+                self.compression = CompressionPipeline()
+                if hasattr(self.compression, 'load_encoder'):
+                    self.compression.load_encoder()
+                self._compression_ready = self.compression.encoder._is_built if hasattr(self.compression, 'encoder') else False
+                logger.info("Compression pipeline initialized")
+            except ImportError:
+                logger.debug("Compression pipeline not available")
+                self.compression = None
+                self._compression_ready = False
+        except Exception as e:
+            logger.error(f"Failed to initialize compression: {e}")
+            self.compression = None
+            self._compression_ready = False
+
+        if HYBRID_AVAILABLE and self._compression_ready:
+            try:
+                self.hybrid_generator = HybridGenerator(
+                    compression=self.compression,
+                    config=GenerationConfig(**self.hybrid_config)
+                )
+                logger.info("Hybrid generator initialized")
+            except Exception as e:
+                logger.error(f"Failed to initialize hybrid generator: {e}")
+                self.hybrid_generator = None
+        else:
+            self.hybrid_generator = None
+
+    async def _shutdown_engine(self):
+        if self.emotion_controller:
+            await self.emotion_controller.stop()
+        if self.core_memory:
+            await self.core_memory.stop()
+        logger.info("Engine shutdown complete")
+
+    async def process_input(
+        self,
+        user_input: str,
+        context: Optional[Dict[str, Any]] = None,
+        force_generation_mode: Optional[str] = None
+    ) -> Dict[str, Any]:
+        #NOTE: legacy/core/kitsu_engine still need to be refactored to use the new module system 
+        """
+        Main processing loop.
+
+        Path A — compression ready:
+            1. IntentRouter  (pure Python)
+            2. EmotionEngine (pure Python)
+            3. BinaryReasoner (pure Python)
+            4. CompressionPipeline.process(input + state) → binary vector
+            5. BinaryTranslator.build_prompt(vector + state) → prompt string
+            6. LLMController.executor.execute(prompt) → response text  [1 call]
+
+        Path B — compression not ready (fallback):
+        """
+
+        # --- Start timing for LLM generation ---
+        import time
+        start_time = time.time()
+
+        # --- Step 1: Reset state, populate input ---
+        self.state.reset()
+        self.state.user_input = user_input
+
+
+        # --- Step 2: Emotional state (pure Python) ---
+        # process_user_input fires keyword triggers and updates the emotion stack,
+        # then update_from_emotion_engine() pulls resistance, stack_size, is_hidden
+        # and all other EmotionEngine fields into KitsuState in one canonical call.
+        if self.emotion_engine:
+            self.emotion_engine.process_user_input(user_input, self.state)
+            self.state.update_from_emotion_engine(self.emotion_engine)
+
+        # Convenience locals (read from state so everything is in sync)
+        emotional_state = self.emotion_engine.get_emotional_state() if self.emotion_engine else {}
+        mood = self.state.mood
+        style = self.state.style
+        emotion = self.state.dominant_emotion
+
+        # --- Step 3: Intent routing (pure Python) ---
+        routing = await self.router.route(user_input, {"state": self.state}) if self.router else {"intent": "unknown"}
+
+        # --- Step 4: Binary reasoning (pure Python) ---
+        reasoning = self.reasoner.reason(self.state) if self.reasoner else {"binary_features": {}}
+        binary_features: Dict[str, int] = reasoning.get("binary_features", {})
+
+        # --- Step 5: Memory retrieval if flagged ---
+        memory_context = None
+        if binary_features.get("memory_relevant") or binary_features.get("use_memory"):
+            memory_context = await self._retrieve_memory_context(user_input)
+
+        # --- Step 6: Generate response ---
+        response_text = ""
+        binary_vector = None
+        debug_log = None
+        generation_metadata = {}
+
+        if self._compression_ready and self.compression and self.hybrid_generator:
+            response_text = self.generate_fast_response(routing.get("intent"), {"mood": mood, "style": style, "state": "normal"}, binary_features)
+        elif self._compression_ready and self.compression:
+            result = await self._generate_compressed(user_input, emotional_state, binary_features, memory_context)
+            response_text, binary_vector, debug_log = result
+        else:
+            response_text = await self._generate_fallback(user_input, mood, style)
+
+        if self.core_memory:
+            await self.core_memory.store_memory(
+                content=f"{user_input} -> {response_text}",
+                memory_type=MemoryType.SHORT_TERM,
+                emotional_tags=[emotion],
+                context_tags=["chat"],
+            )
+
+        self.state.final_response = response_text
+        self.state.processing_stage = "complete"
+
+        end_time = time.time()
+        generation_time = end_time - start_time
+
+        result = {
+            "response": response_text,
+            "text": response_text,
+            "emotional_state": emotional_state,
+            "mood": mood,
+            "style": style,
+            "emotion": emotion,
+            "avatar_hint": self.emotion_engine.get_avatar_hint() if self.emotion_engine else None,
+            "voice_params": self._get_voice_params(emotional_state),
+            "memory_references": [],
+            "confidence": generation_metadata.get("confidence", 0.8),
+            "binary_vector": binary_vector.tolist() if hasattr(binary_vector, 'tolist') else binary_vector,
+            "debug_log": debug_log,
+            "binary_features": binary_features,
+            "routing": routing,
+            "generation_metadata": generation_metadata,
+            "generation_time": generation_time,
+        }
+
+        # Publish events
+        bus.publish(EmotionChanged(mood=mood, style=style, state=emotion, dominant_emotion=emotion, intensity=emotional_state.get("confidence", 0.5)))
+        if result.get('avatar_hint'):
+            bus.publish(AvatarExpressionRequest(mood=mood, style=style, state=emotion))
+
+        return result
+
+    def generate_fast_response(self, intent, personality, features):
+        mood = personality.get("mood", "behave")
+        style = personality.get("style", "sweet")
+        state = personality.get("state", "normal")
+        
+        if intent == "greeting":
+            responses = {
+                "fox": "Kon! *wags tail*",
+                "glitch": "H3LLO HUM4N",
+                "behave": "Hello! How are you today?",
+            }
+            return responses.get(state, "Hello!")
+        elif intent == "question":
+            return "That's an interesting question. Let me think about it."
+        elif intent == "short":
+            return "Okay!"
+        
+        if state == "fox":
+            return "*tilts head* What do you mean?"
+        elif state == "glitch":
+            return "ERR0R: INPUT_UNRECOGNIZED"
+        elif mood == "flirty":
+            return "Oh, you're so sweet! 😘"
+        elif style == "sweet":
+            return "I understand. Let's talk more!"
+        else:
+            return "I see."
+
+    async def _generate_fallback(self, user_input: str, mood: str, style: str) -> str:
+        if self.llm and self.llm.is_available():
+            try:
+                return self.llm.query(user_input)
+            except Exception as e:
+                logger.warning("LLM query failed, using personality fallback: %s", e)
+                # Use personality-aware fallback when LLM fails
+                return self.llm_fallback.generate(
+                    mood=mood or "behave",
+                    style=style or "sweet",
+                    cause="timeout" if "timeout" in str(e).lower() else "crash",
+                    raw_input=user_input
+                )
+        # LLM not available, use personality fallback
+        return self.llm_fallback.generate(
+            mood=mood or "behave",
+            style=style or "sweet",
+            cause="unavailable",
+            raw_input=user_input
+        )
+
+    async def _retrieve_memory_context(self, user_input: str) -> Optional[str]:
+        if not self.core_memory:
+            return None
+        try:
+            memories = await self.core_memory.retrieve_relevant_memories(user_input, limit=3)
+            if memories:
+                # Limit total memory context size to prevent prompt overflow
+                memory_texts = []
+                total_size = 0
+                max_size = 2000  # Maximum characters for memory context
+                
+                for memory in memories:
+                    memory_text = memory.content
+                    if total_size + len(memory_text) <= max_size:
+                        memory_texts.append(memory_text)
+                        total_size += len(memory_text)
+                    else:
+                        # Truncate last memory if needed
+                        remaining = max_size - total_size
+                        if remaining > 50:  # Only add if meaningful content remains
+                            memory_texts.append(memory_text[:remaining] + "...")
+                        break
+                
+                return " ".join(memory_texts)
+        except Exception:
+            pass
+        return None
+
+    def _get_voice_params(self, emotional_state: Dict[str, Any]) -> Dict[str, float]:
+        return {"pitch": 1.0, "speed": 1.0}
+
+    async def _generate_compressed(self, user_input: str, emotional_state: Dict[str, Any], binary_features: Dict[str, int], memory_context: Optional[str]):
+        prompt = f"User: {user_input}\nMemory: {memory_context or ''}\nRespond as Kitsu."
+        if self.llm:
+            response_text = self.llm.query(prompt)
+        else:
+            response_text = "No LLM available."
+        return response_text, None, None
+        self._shutdown_event.set()
+
+
+
 
 # ---------------------------------------------------------------------------
 # Usage:

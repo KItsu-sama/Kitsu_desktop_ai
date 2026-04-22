@@ -125,7 +125,7 @@ async def build_app_container(
         event_bus = MessageBus()
         message_bus = MessageBus()
         clock_service = ClockService()
-        orchestrator = Orchestrator()
+        orchestrator = Orchestrator(runtime_config)
         
         # Clear orchestrator state if rebuilding
         if force_rebuild:
@@ -166,6 +166,9 @@ async def build_app_container(
                 kitsu_self=kitsu_self,
                 reaction_mapper=reaction_mapper
             )
+            # Set mock shared state to prevent errors
+            mock_state = type('MockState', (), {'update_emotional_state': lambda self, *args, **kwargs: None})()
+            emotion_engine.set_shared_state(mock_state)
             orchestrator.emotion = emotion_controller
             
         if flags.use_2d or flags.use_3d:

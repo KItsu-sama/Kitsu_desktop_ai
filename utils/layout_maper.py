@@ -1,4 +1,4 @@
-"""
+""" # utils/layout_maper.py
 Filesystem Snapshot Tool
 
 - Scans a directory recursively
@@ -11,6 +11,7 @@ Filesystem Snapshot Tool
 import os
 import json
 import fnmatch
+import argparse
 from pathlib import Path
 from typing import List, Optional
 
@@ -196,15 +197,51 @@ def ask_yes_no(prompt: str) -> bool:
 # =========================
 
 if __name__ == "__main__":
-    show_console = ask_yes_no("Display layout in console? (y/n): ")
-    export_text = ask_yes_no("Export layout to text file? (y/n): ")
-    export_json = ask_yes_no("Export layout to JSON file? (y/n): ")
+    parser = argparse.ArgumentParser(description="Filesystem Snapshot Tool")
+    parser.add_argument(
+        "--ignore",
+        type=str,
+        nargs="*",
+        default=[],
+        help="Additional patterns to ignore (space-separated)"
+    )
+    parser.add_argument(
+        "--console",
+        action="store_true",
+        help="Display layout in console"
+    )
+    parser.add_argument(
+        "--text",
+        action="store_true",
+        help="Export layout to text file (layout.txt)"
+    )
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help="Export layout to JSON file (layout.json)"
+    )
+    
+    args = parser.parse_args()
+
+    # Determine output modes
+    if args.console or args.text or args.json:
+        show_console = args.console
+        export_text = args.text
+        export_json = args.json
+    else:
+        show_console = ask_yes_no("Display layout in console? (y/n): ")
+        export_text = ask_yes_no("Export layout to text file? (y/n): ")
+        export_json = ask_yes_no("Export layout to JSON file? (y/n): ")
 
     if not any([show_console, export_text, export_json]):
         raise SystemExit("No output selected. Exiting.")
 
     root_path = os.path.abspath(".")
     ignore_patterns = load_gitignore(root_path)
+    
+    # Add CLI-provided patterns
+    if args.ignore:
+        ignore_patterns.extend(args.ignore)
 
     root_node = build_tree(root_path, root_path, ignore_patterns)
 
