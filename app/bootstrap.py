@@ -108,7 +108,6 @@ async def build_app_container(
     if _container is not None and not force_rebuild:
         if _container_params == params:
             return _container
-        logger.warning('Rebuilding app container for new bootstrap configuration')
     
     if force_rebuild or _container_params != params:
         logger.warning('Rebuilding app container for new bootstrap configuration')

@@ -45,13 +45,13 @@ class PerformanceManager(ModuleContract):
         try:
             import psutil
             memory = psutil.virtual_memory()
-            ram_pct = memory.available * 100.0 / memory.total
+            ram_pct = memory.percent  # This is the used memory percentage
             cpu_pct = psutil.cpu_percent(interval=None)
         except ImportError:
             logger.debug('psutil is unavailable for performance polling')
             return
 
-        if ram_pct < 15 or cpu_pct > 90:
+        if ram_pct > 85 or cpu_pct > 90:
             self.event_bus.publish(
                 EventPayload(
                     event_type=EventType.PERFORMANCE_PRESSURE,

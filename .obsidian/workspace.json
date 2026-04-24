@@ -4,21 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "c0ab52b9e2b848c3",
+        "id": "a0fb863e60ae684c",
         "type": "tabs",
         "children": [
           {
-            "id": "4d21d746c1ad4ce3",
+            "id": "e24bbdf3b0059c2d",
             "type": "leaf",
             "state": {
-              "type": "markdown",
-              "state": {
-                "file": "docs/kitsu/99_meta/Kitsu_Phase1_Summary.md",
-                "mode": "source",
-                "source": false
-              },
-              "icon": "lucide-file",
-              "title": "Kitsu_Phase1_Summary"
+              "type": "graph",
+              "state": {},
+              "icon": "lucide-git-fork",
+              "title": "Graph view"
             }
           }
         ]
@@ -156,13 +152,12 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "docs/kitsu/99_meta/Kitsu_Phase1_Summary.md",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Kitsu_Phase1_Summary"
+              "title": "Outline"
             }
           }
         ],
@@ -183,23 +178,25 @@
       "bases:Create new base": false
     }
   },
-  "active": "4d21d746c1ad4ce3",
+  "active": "e24bbdf3b0059c2d",
   "lastOpenFiles": [
-    "layout.json",
-    "layout.txt",
-    "personality/__pycache__/kitsu_self_interface.cpython-314.pyc",
-    "personality/__pycache__/emotional_triggers.cpython-314.pyc",
-    "personality/__pycache__/personality_mapper.cpython-314.pyc",
-    "personality/__pycache__/emotion_stack_manager.cpython-314.pyc",
+    "docs/kitsu/01_system/Kitsu.md",
     "personality/README_REFACTORING.md",
-    "personality/emotion_engine.py",
-    "personality/emotion_engine_fixed.py",
-    "personality/kitsu_self_interface.py",
-    "personality/emotional_triggers.py",
-    "personality/personality_mapper.py",
+    "personality/MODULE_SUMMARY.md",
+    "personality/VECTOR_SYSTEM_README.md",
+    "personality/__pycache__/energy.cpython-314.pyc",
+    "personality/__pycache__/adapters.cpython-314.pyc",
+    "personality/__pycache__/signals.cpython-314.pyc",
+    "personality/__pycache__/signals.cpython-314.pyc.2397435337648",
+    "personality/__pycache__/rules.cpython-314.pyc",
+    "personality/__pycache__/inertia.cpython-314.pyc",
+    "personality/__pycache__/inertia.cpython-314.pyc.2397435032112",
+    "personality/__pycache__/builder.cpython-314.pyc",
+    "personality/__pycache__/presets.cpython-314.pyc",
+    "personality/__pycache__/presets.cpython-314.pyc.1969896775472",
+    "docs/kitsu/99_meta/Kitsu_Phase1_Summary.md",
     "legacy/llama.cpp/README.md",
     "docs/kitsu/02_core/ORCHESTRATOR.md",
-    "docs/kitsu/01_system/Kitsu.md",
     "core/ORCHESTRATOR.md",
     "docs/SECURITY.md",
     "docs/kitsu/99_meta/Kitsu_AGENTS.md",
@@ -219,8 +216,6 @@
     "docs/kitsu/90_references/legacy_kitsu/QUICK_START.md",
     "docs/kitsu/90_references/legacy_kitsu/PROJECT_STRUCTURE.md",
     "docs/kitsu/90_references/legacy_kitsu/PROJECT_RATING.md",
-    "docs/kitsu/90_references/legacy_kitsu/PERFORMANCE.md",
-    "docs/kitsu/90_references/legacy_kitsu/ML_System.md",
     "legacy/llama.cpp/tools/server/themes/buttons-top/buttons_top.png",
     "Untitled 1.canvas",
     "Untitled.canvas"

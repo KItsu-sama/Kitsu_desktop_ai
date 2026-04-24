@@ -10,7 +10,7 @@ Three-Layer Architecture:
 - state: Micro-behavior layer (quirks/persona)
 - role: Behavioral overlay (contextual purpose)
 
-Total combinations: 4 moods × 7 styles × 6 states × 5 roles = 8,400 personality states
+Total combinations: 4 moods × 7 styles × 6 states × 5 roles = 1260 personality states
 
 Responsibilities:
 - Define valid moods, styles, states, and roles
@@ -252,8 +252,6 @@ UNSAFE_COMBINATIONS = {
     ("mean", "cold"): "convert_to_sarcastic",
     ("flirty", "cold"): "convert_to_sweet",
 }
-
-# ============================================================================
 # Emotion → Mood Mapping - COMPREHENSIVE MERGE
 # ============================================================================
 
@@ -261,7 +259,6 @@ EMOTION_TO_MOOD = {
     # Legacy mappings
     "happy": "behave",
     "sad": "protective",
-    "angry": "mean",
     "tired": "protective",
     "stressed": "protective",
     
@@ -298,15 +295,11 @@ EMOTION_TO_MOOD = {
     "calm": "behave",
     "content": "behave",
     "relaxed": "behave",
-    "bored": "behave",  # Added
+    "bored": "behave",
     "indifferent": "behave",
-    "surprised": "behave",  # Added
+    "surprised": "behave",
     "confused": "behave"
 }
-
-# ============================================================================
-# Emotion → Style Mapping - COMPREHENSIVE MERGE
-# ============================================================================
 
 EMOTION_TO_STYLE = {
     # Legacy mappings
@@ -332,7 +325,6 @@ EMOTION_TO_STYLE = {
     "indifferent": "direct",
     
     # Chaotic emotions → chaotic
-    "playful": "chaotic",
     "excited": "chaotic",
     "teasing": "chaotic",
     "mischief": "chaotic",

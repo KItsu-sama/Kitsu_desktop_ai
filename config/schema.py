@@ -56,6 +56,11 @@ class CharacterConfig:
     name: str
     identity: Dict[str, Any]
     voice: Dict[str, Any]
+    description: str
+    version: str
+    personality: Dict[str, Any]
+    appearance: Dict[str, Any]
+    behavior: Dict[str, Any]
 
 
 def _load_yaml(path: Path) -> Any:
@@ -152,7 +157,7 @@ def _validate_character_config(document: Any) -> CharacterConfig:
     if not isinstance(document, dict):
         raise ConfigValidationError('Character YAML must be a mapping')
     
-    unknown = set(document.keys()) - {'name', 'identity', 'voice'}
+    unknown = set(document.keys()) - {'name', 'identity', 'voice', 'description', 'version', 'personality', 'appearance', 'behavior'}
     if unknown:
         logger.warning('Unknown character fields: %s', unknown)
     
@@ -160,6 +165,11 @@ def _validate_character_config(document: Any) -> CharacterConfig:
         name=str(document.get('name', 'unknown')),
         identity=dict(document.get('identity', {})),
         voice=dict(document.get('voice', {})),
+        description=str(document.get('description', '')),
+        version=str(document.get('version', '1.0.0')),
+        personality=dict(document.get('personality', {})),
+        appearance=dict(document.get('appearance', {})),
+        behavior=dict(document.get('behavior', {})),
     )
 
 

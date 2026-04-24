@@ -47,8 +47,13 @@ class FastBrainProvider(AIProviderContract):
         """Async infer — delegates to sync query."""
         return self.query(prompt)
 
-    async def train(self, input_text: str, response_text: str) -> None:
+    def train(self, input_text: str, response_text: str) -> None:
+        """Synchronous train method."""
         logger.debug("FastBrain training stub: %s -> %s", input_text, response_text)
+
+    async def train(self, input_text: str, response_text: str) -> None:
+        """Async train method - delegates to sync version."""
+        self.train(input_text, response_text)
 
     async def shutdown(self) -> None:
         self._initialized = False
