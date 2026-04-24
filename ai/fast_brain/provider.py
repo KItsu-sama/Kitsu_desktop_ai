@@ -51,7 +51,7 @@ class FastBrainProvider(AIProviderContract):
         """Synchronous train method."""
         logger.debug("FastBrain training stub: %s -> %s", input_text, response_text)
 
-    async def train(self, input_text: str, response_text: str) -> None:
+    async def train_async(self, input_text: str, response_text: str) -> None:
         """Async train method - delegates to sync version."""
         self.train(input_text, response_text)
 

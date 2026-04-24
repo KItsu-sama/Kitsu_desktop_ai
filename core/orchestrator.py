@@ -34,6 +34,7 @@ from core.events import (
 )
 from personality.emotion_engine import EmotionEngine
 from personality.kitsu_self import KitsuSelf
+from core.behavior_engine import BehaviorEngine, AttentionConfig
 try:
     from core.brain.state import KitsuState
     from core.brain.router import IntentRouter
@@ -131,6 +132,10 @@ class Orchestrator(ModuleContract):
         self.hybrid_generator: Optional[HybridGenerator] = None
         self._compression_ready = False
         self.llm_fallback = LLMFallback(memory=None)
+        
+        # Behavior Engine for attention gate
+        behavior_config = AttentionConfig(**self.core_config.get("attention", {}))
+        self.behavior_engine = BehaviorEngine(behavior_config)
 
     # --- ModuleContract Implementation ---
 
@@ -335,30 +340,60 @@ class Orchestrator(ModuleContract):
     # --- Legacy Event Handlers (unchanged) ---
 
     async def _on_input(self, event: InputReceived) -> None:
-        """Route input through the legacy AI pipeline (async)."""
+        """Route input through behavior engine attention gate then AI pipeline (async)."""
         # Validate input
         if not event or not hasattr(event, 'text') or not isinstance(event.text, str):
             logger.warning("Invalid input event: %s", event)
             return
-            
-        # FastBrain first - run in executor to prevent blocking
-        if self.fast_brain and self.fast_brain.is_available():
-            try:
-                response = await asyncio.get_event_loop().run_in_executor(
-                    None, self.fast_brain.query, event.text
-                )
-            except (RuntimeError, ValueError, TimeoutError, ConnectionError) as exc:
-                logger.warning('FastBrain query failed: %s', exc)
-                response = None
-            except Exception as exc:
-                logger.error('Unexpected FastBrain error: %s', exc)
-                response = None
-            if response is not None:
-                if self.personality and isinstance(response, str):
-                    try:
-                        response = self.personality.decorate_response(response, source='fast_brain')
-                    except Exception as exc:
-                        logger.warning('Personality injection failed: %s', exc)
+        
+        # Get emotional state and context for behavior engine
+        emotion_state = self.emotion_engine.get_emotional_state() if self.emotion_engine else {}
+        context = {
+            "recent_inputs": getattr(self.core_memory, 'recent_memories', []) if self.core_memory else [],
+            "boredom_level": emotion_state.get("boredom", 0.0) if emotion_state else 0.0
+        }
+        
+        # Use behavior engine to decide what to do
+        behavior_decision = self.behavior_engine.decide_behavior(
+            user_input=event.text,
+            emotion_state=emotion_state,
+            context=context
+        )
+        
+        # Log behavior decision for debugging
+        logger.debug(f"Behavior decision: {behavior_decision.behavior_type.value}, "
+                   f"score: {behavior_decision.context.get('attention_score', 'N/A')}")
+        
+        # Handle IGNORE behavior - don't process further
+        if behavior_decision.behavior_type.value == "ignore":
+            logger.debug(f"Ignoring input: {event.text[:50]}...")
+            return
+        
+        # Handle REACT behavior (subtle acknowledgment)
+        if behavior_decision.behavior_type.value == "react" and not behavior_decision.response_required:
+            # Trigger subtle reaction without text response
+            if self.avatar and behavior_decision.reaction_type:
+                self.avatar.set_expression("neutral", "subtle", behavior_decision.reaction_type)
+            logger.debug(f"Subtle reaction: {behavior_decision.reaction_type}")
+            return
+        
+        # Process RESPOND and other behaviors through AI pipeline
+        if behavior_decision.response_required or behavior_decision.behavior_type.value in ["respond", "check_in"]:
+            # FastBrain first - run in executor to prevent blocking
+            if self.fast_brain and self.fast_brain.is_available():
+                try:
+                    response = await asyncio.get_event_loop().run_in_executor(
+                        None, self.fast_brain.query, event.text
+                    )
+                except (RuntimeError, ValueError, TimeoutError, ConnectionError) as exc:
+                    logger.warning('FastBrain query failed: %s', exc)
+                    response = None
+                if response is not None:
+                    if self.personality and isinstance(response, str):
+                        try:
+                            response = self.personality.decorate_response(response, source='fast_brain')
+                        except Exception as exc:
+                            logger.error('Personality injection failed: %s', exc)
 
                 bus.publish(ResponseReady(
                     input_text=event.text,
