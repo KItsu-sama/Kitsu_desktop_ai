@@ -1,0 +1,95 @@
+# ignore the user configuration file
+conf.yaml
+
+# ignore non-default background images
+/backgrounds/*
+!/backgrounds/README.md
+
+
+# macOS system files
+.DS_Store
+
+# Python files
+__pycache__/
+*.pyc
+lab.py
+.idea
+
+# Virtual environment
+.venv
+.conda
+conda
+
+# Sensitive data
+.env
+api_keys.py
+src/open_llm_vtuber/llm/user_credentials.json
+
+# Database files
+memory.db
+memory.db.bk
+
+# Logs
+server.log
+logs/*
+
+# Cache and models
+cache/*
+src/open_llm_vtuber/tts/asset
+src/open_llm_vtuber/tts/config
+src/open_llm_vtuber/asr/models*
+!src/open_llm_vtuber/asr/models/silero_vad.onnx
+asset
+models/*
+!models/piper_voice
+models/piper_voice/*
+
+
+# Legacy and specific directories
+legacy/
+chat_history/
+knowledge_base/
+submodules/MeloTTS
+openapi_assistants.json
+openapi_memgpt.json
+
+# memory log
+mem.json
+conf.yaml.backup
+
+*.exe
+
+tmp/
+private/
+mcp_servers.json
+
+.vscode/
+.gitnexus
+
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+
+# Runtime / generated
+data/config.json
+data/.first_run_complete
+data/training/
+data/models/
+logs/
+
+# Secrets
+*.env
+
+# tests/__pycache__/
+tests/*.pyc
+tests/

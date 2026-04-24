@@ -1,0 +1,42 @@
+{
+  "models": {
+    "tinyllama:1.1b": {
+      "id": "tinyllama:1.1b",
+      "name": "TinyLlama 1.1B",
+      "size_mb": 1100,
+      "description": "Lightweight 1.1B parameter model for SLM use",
+      "type": "slm",
+      "requirements": {
+        "ram_gb": 4,
+        "cpu_score": 30
+      },
+      "download_url": "https://huggingface.co/TinyLlama/TinyLlama-1.1B-Chat-v1.0",
+      "local_path": "models/tinyllama-1.1b-chat"
+    },
+    "full_slm": {
+      "id": "full_slm",
+      "name": "Full SLM",
+      "size_mb": 120,
+      "description": "Default full SLM model",
+      "type": "slm",
+      "requirements": {
+        "ram_gb": 8,
+        "cpu_score": 50
+      },
+      "local_path": "models/full_slm"
+    },
+    "micro_slm": {
+      "id": "micro_slm",
+      "name": "Micro SLM",
+      "size_mb": 20,
+      "description": "Lightweight micro SLM model",
+      "type": "slm",
+      "requirements": {
+        "ram_gb": 2,
+        "cpu_score": 20
+      },
+      "local_path": "models/micro_slm"
+    }
+  },
+  "default_slm": "tinyllama:1.1b"
+}

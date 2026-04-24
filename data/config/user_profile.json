@@ -1,0 +1,17 @@
+{
+  "name": "Zino",
+  "nickname": "Zi",
+  "refer_title": "Zi",
+  "gender": "male",
+  "status": "user",
+  "permissions": {
+    "is_admin": false,
+    "dev_console": false
+  },
+  "relationship": {
+    "trust_level": 0.5,
+    "affinity": 0.5,
+    "lore_tag": "stranger"
+  },
+  "completed_setup": true
+}

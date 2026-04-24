@@ -1,0 +1,4 @@
+psutil
+python
+rich
+numpy

@@ -1,0 +1,228 @@
+{
+  "main": {
+    "id": "c3786f6229731c4c",
+    "type": "split",
+    "children": [
+      {
+        "id": "c0ab52b9e2b848c3",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "4d21d746c1ad4ce3",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "docs/kitsu/99_meta/Kitsu_Phase1_Summary.md",
+                "mode": "source",
+                "source": false
+              },
+              "icon": "lucide-file",
+              "title": "Kitsu_Phase1_Summary"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "d75b4b97b70cd650",
+    "type": "split",
+    "children": [
+      {
+        "id": "f1ced1ec0218c525",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "ce1a37bcfb204113",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {
+                "sortOrder": "alphabetical",
+                "autoReveal": true
+              },
+              "icon": "lucide-folder-closed",
+              "title": "Files"
+            }
+          },
+          {
+            "id": "3a41b8208e8fe4c8",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "tag:#transformers",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              },
+              "icon": "lucide-search",
+              "title": "Search"
+            }
+          },
+          {
+            "id": "e18fe88d6f74efa8",
+            "type": "leaf",
+            "state": {
+              "type": "bookmarks",
+              "state": {},
+              "icon": "lucide-bookmark",
+              "title": "Bookmarks"
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "91ac2275dce560f5",
+    "type": "split",
+    "children": [
+      {
+        "id": "ce6e283e4a578a27",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "9c9dc5f7b3ae3eb6",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "Orchestrator.md.md",
+                "collapseAll": true,
+                "extraContext": true,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-coming-in",
+              "title": "Backlinks for Orchestrator.md"
+            }
+          },
+          {
+            "id": "ef170b7dcad2a2ac",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "Orchestrator.md.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              },
+              "icon": "links-going-out",
+              "title": "Outgoing links from Orchestrator.md"
+            }
+          },
+          {
+            "id": "4fe4fbcd92de4829",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-tags",
+              "title": "Tags"
+            }
+          },
+          {
+            "id": "3264ba7ea9c17f7d",
+            "type": "leaf",
+            "state": {
+              "type": "all-properties",
+              "state": {
+                "sortOrder": "frequency",
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-archive",
+              "title": "All properties"
+            }
+          },
+          {
+            "id": "135442b0d5fbcf52",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "docs/kitsu/99_meta/Kitsu_Phase1_Summary.md",
+                "followCursor": false,
+                "showSearch": false,
+                "searchQuery": ""
+              },
+              "icon": "lucide-list",
+              "title": "Outline of Kitsu_Phase1_Summary"
+            }
+          }
+        ],
+        "currentTab": 4
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "left-ribbon": {
+    "hiddenItems": {
+      "switcher:Open quick switcher": false,
+      "graph:Open graph view": false,
+      "canvas:Create new canvas": false,
+      "daily-notes:Open today's daily note": false,
+      "templates:Insert template": false,
+      "command-palette:Open command palette": false,
+      "bases:Create new base": false
+    }
+  },
+  "active": "4d21d746c1ad4ce3",
+  "lastOpenFiles": [
+    "layout.json",
+    "layout.txt",
+    "personality/__pycache__/kitsu_self_interface.cpython-314.pyc",
+    "personality/__pycache__/emotional_triggers.cpython-314.pyc",
+    "personality/__pycache__/personality_mapper.cpython-314.pyc",
+    "personality/__pycache__/emotion_stack_manager.cpython-314.pyc",
+    "personality/README_REFACTORING.md",
+    "personality/emotion_engine.py",
+    "personality/emotion_engine_fixed.py",
+    "personality/kitsu_self_interface.py",
+    "personality/emotional_triggers.py",
+    "personality/personality_mapper.py",
+    "legacy/llama.cpp/README.md",
+    "docs/kitsu/02_core/ORCHESTRATOR.md",
+    "docs/kitsu/01_system/Kitsu.md",
+    "core/ORCHESTRATOR.md",
+    "docs/SECURITY.md",
+    "docs/kitsu/99_meta/Kitsu_AGENTS.md",
+    "docs/kitsu/90_references/tauri/_Summary.md",
+    "docs/kitsu/90_references/open_llm_vtuber/_Summary.md",
+    "docs/kitsu/90_references/llama_cpp/_Summary.md",
+    "docs/kitsu/90_references/llama_cpp/SECURITY.md",
+    "docs/kitsu/90_references/llama_cpp/README.md",
+    "docs/kitsu/90_references/llama_cpp/CONTRIBUTING.md",
+    "docs/kitsu/90_references/llama_cpp/CLAUDE.md",
+    "docs/kitsu/90_references/llama_cpp/AGENTS.md",
+    "docs/kitsu/90_references/legacy_kitsu/_Summary.md",
+    "docs/kitsu/90_references/legacy_kitsu/UPGRADE_COMMANDS.md",
+    "docs/kitsu/90_references/legacy_kitsu/TECHNICAL_DEEP_DIVE.md",
+    "docs/kitsu/90_references/legacy_kitsu/SetupSystem.md",
+    "docs/kitsu/90_references/legacy_kitsu/Ref_Legacy_README.md",
+    "docs/kitsu/90_references/legacy_kitsu/QUICK_START.md",
+    "docs/kitsu/90_references/legacy_kitsu/PROJECT_STRUCTURE.md",
+    "docs/kitsu/90_references/legacy_kitsu/PROJECT_RATING.md",
+    "docs/kitsu/90_references/legacy_kitsu/PERFORMANCE.md",
+    "docs/kitsu/90_references/legacy_kitsu/ML_System.md",
+    "legacy/llama.cpp/tools/server/themes/buttons-top/buttons_top.png",
+    "Untitled 1.canvas",
+    "Untitled.canvas"
+  ]
+}

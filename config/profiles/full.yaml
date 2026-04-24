@@ -1,0 +1,43 @@
+name: full
+tier: high
+description: "Full SLM, optional LLM, 3D avatar, all features available."
+
+flags:
+  use_fast_brain: true
+  use_slm: true
+  use_llm: false
+  use_2d: true
+  use_3d: false
+  use_voice: true
+  use_shimeji: true
+  use_emotion: true
+  use_system_control: false
+
+startup_modules:
+  required:
+    - core.events
+    - core.bus
+    - core.clocks
+    - core.orchestrator
+    - core.health
+    - core.performance_manager
+    - config.capability_flags
+    - ai.fast_brain.engine
+    - ai.llm.engine
+    - personality.emotion_engine
+    - memory.manager
+    - system.gateway
+  optional:
+    - vtuber.avatar_controller
+    - ui.shimeji.behavior
+    - multimodal.speech.asr
+    - multimodal.speech.tts
+    - system.adapters.desktop
+    - system.adapters.power
+
+ui_mode: avatar_2d
+model_downloads:
+  - id: tinyllama:1.1b
+    size_mb: 1100
+    required: true
+    prompt: "Enable smarter responses with TinyLlama 1.1B? (~1.1GB)"

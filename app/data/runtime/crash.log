@@ -1,0 +1,4 @@
+{"error": "PyYAML is required to load YAML config files", "type": "BootstrapError"}
+{"error": "PyYAML is required to load YAML config files", "type": "BootstrapError"}
+{"error": "Failed to parse YAML: [Errno 2] No such file or directory: 'config\\\\defaults.yaml'", "type": "BootstrapError"}
+{"error": "PyYAML is required to load YAML config files", "type": "BootstrapError"}
