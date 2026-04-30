@@ -1,8 +1,8 @@
 {
-  "name": "davie",
-  "nickname": "dac",
-  "refer_title": "dac",
-  "gender": "male",
+  "name": "User",
+  "nickname": "User",
+  "refer_title": "User",
+  "gender": "unspecified",
   "status": "user",
   "permissions": {
     "is_admin": false,

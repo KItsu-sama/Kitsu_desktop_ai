@@ -25,6 +25,12 @@ from pathlib import Path
 from typing import Dict, Any, Optional
 from datetime import datetime
 
+# Ensure scripts directory is importable
+_script_dir = Path(__file__).parent
+_project_root = _script_dir.parent
+if str(_project_root) not in sys.path:
+    sys.path.insert(0, str(_project_root))
+
 log = logging.getLogger("kitsu.first_run")
 FIRST_RUN_FLAG = Path("data/runtime/.first_run_complete")
 
@@ -136,7 +142,10 @@ def write_system_config(system_info: Dict[str, Any]) -> bool:
         "python_version": system_info.get("python_version", "unknown"),
         "capabilities": system_info["capabilities"],
         "install_date": datetime.now().isoformat(),
-        "version": "0.1.0"
+        "version": "0.1.0",
+        "completed_setup": True,
+        "model": "kitsu:character",
+        "runtime": {}
     }
     
     return write_config_file(
@@ -219,7 +228,8 @@ def write_runtime_config(wizard_results: Dict[str, Any]) -> bool:
     """Write runtime configuration"""
     runtime = wizard_results.get("runtime", {
         "mode": "text",
-        "model": "gemma:2b",
+        "model": "kitsu:character",
+        "is_character_model": True,
         "temperature": 0.8,
         "streaming": True,
         "greet_on_startup": True,
@@ -368,7 +378,14 @@ def run_first_run() -> bool:
     log.info("\n⚙️  Running setup wizard...")
     
     try:
-        from scripts.setup_wizard import SetupWizard
+        # Try importing as a sibling module in the scripts directory first
+        try:
+            from setup_wizard import SetupWizard
+        except ModuleNotFoundError:
+            # If that fails, try adding scripts to path and import
+            if str(_script_dir) not in sys.path:
+                sys.path.insert(0, str(_script_dir))
+            from setup_wizard import SetupWizard
         
         wizard = SetupWizard(system_info)
         
@@ -379,11 +396,15 @@ def run_first_run() -> bool:
             log.info("  Non-interactive environment, using defaults")
             wizard_results = wizard.apply_defaults()
     
-    except ImportError:
-        log.error("  ✗ SetupWizard not available")
+    except ImportError as e:
+        log.error(f"  ✗ SetupWizard import failed: {e}")
+        import traceback
+        log.error(traceback.format_exc())
         return False
     except Exception as e:
         log.error(f"  ✗ Wizard failed: {e}")
+        import traceback
+        log.error(traceback.format_exc())
         return False
     
     # 3. Write configuration files

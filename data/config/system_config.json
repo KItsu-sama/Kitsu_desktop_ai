@@ -1,15 +1,18 @@
 {
   "platform": "windows",
   "platform_version": "10.0.19045",
-  "python_version": "3.13.7 (tags/v3.13.7:bcee1c3, Aug 14 2025, 14:15:11) [MSC v.1944 64 bit (AMD64)]",
+  "python_version": "3.14.4 (tags/v3.14.4:23116f9, Apr  7 2026, 14:10:54) [MSC v.1944 64 bit (AMD64)]",
   "capabilities": {
     "gpu": false,
     "cuda": false,
-    "audio_input": true,
-    "audio_output": true,
-    "display": true,
+    "audio_input": false,
+    "audio_output": false,
+    "display": false,
     "network": true
   },
-  "install_date": "2026-04-29T20:13:00.011145",
-  "version": "0.1.0"
+  "install_date": "2026-04-30T13:46:20.187440",
+  "version": "0.1.0",
+  "completed_setup": true,
+  "model": "kitsu:character",
+  "runtime": {}
 }

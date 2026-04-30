@@ -19,7 +19,7 @@ from typing import Dict, Any, Optional, List
 
 # Only import for validation (allowed exception per architecture)
 try:
-    from config.personality_config import VALID_MOODS, VALID_STYLES
+    from shared.personality_config import VALID_MOODS, VALID_STYLES
     EMOTION_CONFIG_AVAILABLE = True
 except ImportError:
     EMOTION_CONFIG_AVAILABLE = False
@@ -35,6 +35,16 @@ try:
     RICH_AVAILABLE = True
 except ImportError:
     RICH_AVAILABLE = False
+
+# Check for Windows encoding issues
+import platform
+if platform.system() == "Windows":
+    try:
+        import sys
+        if sys.stdout.encoding.lower() not in ['utf-8', 'utf8']:
+            RICH_AVAILABLE = False
+    except Exception:
+        RICH_AVAILABLE = False
 
 
 class SetupWizard:
@@ -204,7 +214,7 @@ class SetupWizard:
     
     def _setup_user_profile(self) -> Dict[str, Any]:
         """Configure user profile"""
-        self._print_section("👤 User Profile")
+        self._print_section("USER PROFILE")
         
         name = self._ask_question(
             "What's your name?",
@@ -262,7 +272,7 @@ class SetupWizard:
     
     def _setup_permissions(self) -> Dict[str, Any]:
         """Configure system permissions"""
-        self._print_section("🔒 Permissions")
+        self._print_section("PERMISSIONS")
         
         self._print_info(
             "Kitsu can integrate with your system.",
@@ -308,7 +318,7 @@ class SetupWizard:
     
     def _setup_personality(self) -> Dict[str, Any]:
         """Configure personality defaults"""
-        self._print_section("😊 Personality")
+        self._print_section("PERSONALITY")
         
         self._print_info(
             "Personality modes:",
@@ -369,7 +379,7 @@ class SetupWizard:
     
     def _setup_runtime(self) -> Dict[str, Any]:
         """Configure runtime settings"""
-        self._print_section("⚙️  Runtime Settings")
+        self._print_section("RUNTIME SETTINGS")
         
         # Model selection
         self._print_info(
@@ -459,7 +469,7 @@ class SetupWizard:
     
     def _setup_features(self) -> Dict[str, bool]:
         """Configure optional features from featurespec.json"""
-        self._print_section("🔌 Optional Features")
+        self._print_section("OPTIONAL FEATURES")
         
         if not self.features.get("features"):
             self._print("No optional features available")
@@ -518,17 +528,24 @@ class SetupWizard:
     def _print_welcome(self):
         """Print welcome message"""
         if self.console:
-            self.console.clear()
-            self.console.print(Panel.fit(
-                "[bold magenta]🦊 KITSU SETUP WIZARD[/bold magenta]\n"
-                "[white]Let's configure Kitsu together![/white]",
-                border_style="magenta",
-                box=box.DOUBLE_EDGE
-            ))
-            self.console.print("")
+            try:
+                self.console.clear()
+                self.console.print(Panel.fit(
+                    "[bold magenta]KITSU SETUP WIZARD[/bold magenta]\n"
+                    "[white]Let's configure Kitsu together![/white]",
+                    border_style="magenta",
+                    box=box.DOUBLE_EDGE
+                ))
+                self.console.print("")
+            except Exception:
+                # Fallback to plain text if unicode fails
+                print("\n" + "=" * 60)
+                print("  KITSU SETUP WIZARD")
+                print("=" * 60)
+                print("\nLet's configure Kitsu together!\n")
         else:
             print("\n" + "=" * 60)
-            print("  🦊 KITSU SETUP WIZARD")
+            print("  KITSU SETUP WIZARD")
             print("=" * 60)
             print("\nLet's configure Kitsu together!\n")
     
@@ -536,10 +553,10 @@ class SetupWizard:
         """Print section header"""
         if self.console:
             self.console.print(f"\n[bold cyan]{title}[/bold cyan]")
-            self.console.print("[cyan]" + "─" * 60 + "[/cyan]\n")
+            self.console.print("[cyan]" + "-" * 60 + "[/cyan]\n")
         else:
             print(f"\n{title}")
-            print("─" * 60 + "\n")
+            print("-" * 60 + "\n")
     
     def _print_info(self, title: str, items: List[str]):
         """Print informational list"""
