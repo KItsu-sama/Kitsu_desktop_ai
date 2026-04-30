@@ -1,0 +1,56 @@
+# config/ollama.yaml
+# Ollama backend configuration for Kitsu's AI pipeline
+# Edit model names to match what you have pulled in Ollama
+
+ollama:
+  base_url: "http://localhost:11434"
+  timeout: 30  # seconds per request
+
+  # FastBrain tier — NOT Ollama, handled in pure Python (patterns/cache/Markov)
+  # Falls through to SLM when it can't answer
+
+  # SLM tier — small, fast, personality-aware
+  # Use a model you have pulled: e.g. phi3:mini, gemma2:2b, qwen2.5:1.5b, tinyllama
+  slm:
+    model: "gemma:2b"       # change to match your pulled model
+    temperature: 0.7
+    top_p: 0.9
+    max_tokens: 256              # keep short for speed
+    stream: false
+    system_prompt: |
+      You are Kitsu, a fox-spirit AI companion. You are warm, playful, and witty.
+      Keep responses concise and natural. Never break character.
+
+  # LLM tier — larger, slower, for complex reasoning
+  # Use a bigger model: e.g. llama3.1:8b, mistral:7b, gemma2:9b
+  llm:
+    model: "llama3.2:3b"        # change to match your pulled model
+    temperature: 0.8
+    top_p: 0.95
+    max_tokens: 512
+    stream: false
+    system_prompt: |
+      You are Kitsu, a fox-spirit AI companion with a rich personality.
+      You are warm, clever, slightly mischievous, and deeply caring.
+      Adapt your tone to the emotional context provided.
+      Be concise but expressive. Never break character as Kitsu.
+
+  # Confidence threshold — if SLM response confidence < this, escalate to LLM
+  slm_confidence_threshold: 0.65
+
+  # Routing rules
+  routing:
+    # Patterns that bypass SLM and go straight to LLM
+    llm_keywords:
+      - "explain"
+      - "why"
+      - "how does"
+      - "analyze"
+      - "compare"
+      - "write a"
+      - "create"
+      - "code"
+      - "debug"
+      - "help me with"
+    # Max input length before forcing LLM (characters)
+    llm_input_length_threshold: 200

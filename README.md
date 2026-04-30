@@ -91,7 +91,7 @@ Pretrained models may hallucinate due to custom prompts/LoRA
   - Value cache
   - Looped reasoning
 
-## 🎭 EMOTION SYSTEM
+##  EMOTION SYSTEM
 
 ### Layers
 
@@ -295,29 +295,55 @@ automation
 
 ---
 
-## Project layout
+## Project Layout
 
 ```
-Kitsu_ai/
-├── app/            Startup sequencing — entry point, launcher, bootstrap
-├── core/           Runtime infrastructure — event bus, orchestrator, contracts
-├── config/         Capability flags, YAML schemas, hardware profiles
-├── ai/
-│   ├── fast_brain/ Markov chain, Huffman compression, learning loop
-│   ├── slm/        Style-shaping small language model layer
-│   └── llm/        Full LLM bridge (local GGUF or API)
-├── personality/    Emotion engine, mood/style/state system, triggers
-├── memory/         Short-term, episodic, vector, and preference stores
-├── router/         Policy router, strip controller, complexity scorer
-├── system/         Capability gateway, permission manager, OS adapters
-├── ui/             Avatar controller, shimeji physics, overlay HUD
-├── multimodal/     Voice input (ASR), voice output (TTS)
-├── modules/        Plugin loader, quiz solver, community mod API
-├── data/           Config data files — these ARE the mod API
-├── src-tauri/      Rust backend + frontend (desktop shell)
-├── infra/          Logging, metrics, tracing
-└── tests/          Unit, integration, performance tests
+kitsu-desktop-ai/
+├── src/                    # Core system components
+│   ├── application.py      # Main orchestrator
+│   ├── bus.py             # EventBus implementation
+│   ├── contracts.py       # Interface definitions
+│   └── gateway.py         # Security and permissions
+├── modules/               # Feature-based modules
+│   ├── ai_pipeline/       # AI processing layers
+│   │   ├── fast_brain/    # Markov chain + Huffman compression
+│   │   ├── slm/           # Style-shaping small language model
+│   │   └── llm/           # Full LLM bridge (local GGUF or API)
+│   ├── personality_system/ # Emotion and memory
+│   │   ├── emotion_engine.py
+│   │   ├── memory_manager.py
+│   │   └── reaction_mapper.py
+│   ├── desktop_companion/ # UI and desktop integration
+│   │   ├── avatar/        # 2D/3D character rendering
+│   │   ├── shimeji/       # Desktop overlay behavior
+│   │   └── speech/        # Voice input/output
+│   └── community_features/ # Plugins and extensions
+├── shared/               # Shared utilities
+│   ├── config/           # Configuration management
+│   ├── utils/            # Common utilities
+│   └── data/            # Data files and schemas
+├── docs/                # Documentation (Obsidian-ready)
+│   ├── notes/           # Atomic knowledge notes
+│   ├── architecture/    # System design docs
+│   ├── api/            # API documentation
+│   └── guides/         # Tutorials and how-tos
+├── scripts/            # Automation scripts
+├── tests/              # Test suites
+├── assets/             # Static resources
+├── src-tauri/          # Rust backend + frontend
+└── README.md
 ```
+
+## Documentation
+
+This project uses **Obsidian-compatible documentation** with bidirectional linking between code and documentation.
+
+- **[[docs/notes/project-overview]]** - High-level system understanding
+- **[[docs/notes/system-architecture]]** - Detailed system design  
+- **[[docs/notes/ai-pipeline]]** - AI processing flow
+- **[[docs/guides/developer-onboarding]]** - Getting started guide
+
+Open the `docs/` folder in Obsidian for the full knowledge graph experience.
 
 ---
 

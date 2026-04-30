@@ -590,7 +590,7 @@ Features: {len(enabled_features)} enabled
 """
         
         if self.console:
-            self.console.print(Panel(summary, border_style=".GREEN", box=box.DOUBLE_EDGE))
+            self.console.print(Panel(summary, border_style="green", box=box.DOUBLE_EDGE))
         else:
             print(summary)
     

@@ -4,7 +4,7 @@ import asyncio
 import sys
 from pathlib import Path
 
-from app.launcher import main
+from runtime.launcher import main
 
 DEFAULT_MODEL = "kitsu:character"
 LOGO = r"""
@@ -168,7 +168,7 @@ if __name__ == "__main__":
         print(f"Training dataset specified: {dataset_path}")
 
         try:
-            from core.learning.micro_trainer import MicroTrainer
+            from runtime.learning.micro_trainer import MicroTrainer
             import json
             import os
         except ImportError as e:

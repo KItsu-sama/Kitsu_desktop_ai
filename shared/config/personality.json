@@ -1,0 +1,11 @@
+{
+  "default_mood": "flirty",
+  "default_style": "sweet",
+  "enable_sass": true,
+  "enable_pranks": true,
+  "sass_level": 0.3,
+  "prank_frequency": 0.1,
+  "emotion_decay_rate": 0.1,
+  "emotion_threshold": 0.3,
+  "max_stack_size": 5
+}

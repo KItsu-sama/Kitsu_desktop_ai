@@ -1,6 +1,6 @@
 {
-  "browser_hooks": true,
-  "system_control": true,
+  "browser_hooks": false,
+  "system_control": false,
   "file_access": false,
   "safe_mode": true,
   "can_train": false,

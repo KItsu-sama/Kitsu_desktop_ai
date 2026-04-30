@@ -1,16 +1,3 @@
-{"error": "'Orchestrator' object has no attribute 'module_id'", "type": "BootstrapError"}
-{"error": "'Orchestrator' object has no attribute 'module_id'", "type": "BootstrapError"}
-{"error": "'MessageBus' object has no attribute 'emit'", "type": "AttributeError", "timestamp": 273890.755347}
-{"error": "'Orchestrator' object has no attribute 'degrade'", "type": "AttributeError", "timestamp": 273950.2156878}
-{"error": "Module already registered: core.bus", "type": "BootstrapError", "timestamp": 0.0}
-{"error": "Module already registered: core.bus", "type": "BootstrapError", "timestamp": 0.0}
-{"error": "Module already registered: core.bus", "type": "BootstrapError", "timestamp": 0.0}
-{"error": "Orchestrator.start() takes 1 positional argument but 2 were given", "type": "TypeError", "timestamp": 323636.7142348}
-{"error": "Character YAML must be a mapping", "type": "ConfigValidationError", "timestamp": 323648.547461}
-{"error": "'MessageBus' object has no attribute 'emit'", "type": "AttributeError", "timestamp": 323666.844964}
-{"error": "[WinError 10038] An operation was attempted on something that is not a socket", "type": "OSError", "timestamp": 326395.5059173}
-{"error": "Can't instantiate abstract class FastBrainProvider without an implementation for abstract method 'infer'", "type": "BootstrapError", "timestamp": 0.0}
-{"error": "EmotionController.__init__() missing 2 required positional arguments: 'kitsu_self' and 'reaction_mapper'", "type": "BootstrapError", "timestamp": 0.0}
-{"error": "'CapabilityFlags' object has no attribute 'use_avatar'", "type": "BootstrapError", "timestamp": 0.0}
-{"error": "'CapabilityFlags' object has no attribute 'use_memory'", "type": "BootstrapError", "timestamp": 0.0}
-{"error": "'RuntimeConfig' object has no attribute 'get'", "type": "BootstrapError", "timestamp": 0.0}
+{"error": "No module named 'domain.personality.engine'", "type": "BootstrapError", "timestamp": 0.0}
+{"error": "No module named 'domain.personality.engine'", "type": "BootstrapError", "timestamp": 0.0}
+{"error": "name 'PersonalityEngine' is not defined", "type": "BootstrapError", "timestamp": 0.0}

@@ -1,0 +1,13 @@
+{
+  "mode": "text",
+  "model": "tinyllama:1.1b",
+  "is_character_model": false,
+  "temperature": 0.8,
+  "streaming": true,
+  "greet_on_startup": true,
+  "continuous_decay": true,
+  "enable_tts": false,
+  "enable_stt": false,
+  "enable_avatar": false,
+  "memory_max_history": 200
+}
