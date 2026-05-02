@@ -130,7 +130,7 @@
           "name": "workspace.json",
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\.obsidian\\workspace.json",
           "type": "file",
-          "size": 6389,
+          "size": 6335,
           "children": []
         }
       ]
@@ -153,8 +153,124 @@
       "name": "README.md",
       "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\README.md",
       "type": "file",
-      "size": 17176,
+      "size": 17172,
       "children": []
+    },
+    {
+      "name": "SYSTEM_ARCHITECTURE.md",
+      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\SYSTEM_ARCHITECTURE.md",
+      "type": "file",
+      "size": 43139,
+      "children": []
+    },
+    {
+      "name": "app",
+      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\app",
+      "type": "directory",
+      "size": null,
+      "children": [
+        {
+          "name": "__init__.py",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\app\\__init__.py",
+          "type": "file",
+          "size": 465,
+          "children": []
+        },
+        {
+          "name": "adapters",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\app\\adapters",
+          "type": "directory",
+          "size": null,
+          "children": [
+            {
+              "name": "desktop.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\app\\adapters\\desktop.py",
+              "type": "file",
+              "size": 0,
+              "children": []
+            },
+            {
+              "name": "desktop_controller.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\app\\adapters\\desktop_controller.py",
+              "type": "file",
+              "size": 0,
+              "children": []
+            },
+            {
+              "name": "file_controller.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\app\\adapters\\file_controller.py",
+              "type": "file",
+              "size": 0,
+              "children": []
+            },
+            {
+              "name": "files.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\app\\adapters\\files.py",
+              "type": "file",
+              "size": 0,
+              "children": []
+            },
+            {
+              "name": "power.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\app\\adapters\\power.py",
+              "type": "file",
+              "size": 0,
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "adapters.py",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\app\\adapters.py",
+          "type": "file",
+          "size": 5027,
+          "children": []
+        },
+        {
+          "name": "commands",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\app\\commands",
+          "type": "directory",
+          "size": null,
+          "children": [
+            {
+              "name": "__init__.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\app\\commands\\__init__.py",
+              "type": "file",
+              "size": 0,
+              "children": []
+            },
+            {
+              "name": "command_handlers",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\app\\commands\\command_handlers",
+              "type": "directory",
+              "size": null,
+              "children": [
+                {
+                  "name": "__init__.py",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\app\\commands\\command_handlers\\__init__.py",
+                  "type": "file",
+                  "size": 0,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "name": "command_router.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\app\\commands\\command_router.py",
+              "type": "file",
+              "size": 70194,
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "user_manager.py",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\app\\user_manager.py",
+          "type": "file",
+          "size": 20669,
+          "children": []
+        }
+      ]
     },
     {
       "name": "assets",
@@ -206,11 +322,69 @@
       "size": null,
       "children": [
         {
+          "name": "config",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\data\\config",
+          "type": "directory",
+          "size": null,
+          "children": [
+            {
+              "name": "permissions.json",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\data\\config\\permissions.json",
+              "type": "file",
+              "size": 158,
+              "children": []
+            },
+            {
+              "name": "personality.json",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\data\\config\\personality.json",
+              "type": "file",
+              "size": 246,
+              "children": []
+            },
+            {
+              "name": "system_config.json",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\data\\config\\system_config.json",
+              "type": "file",
+              "size": 485,
+              "children": []
+            },
+            {
+              "name": "user_profile.json",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\data\\config\\user_profile.json",
+              "type": "file",
+              "size": 326,
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "learning",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\data\\learning",
+          "type": "directory",
+          "size": null,
+          "children": []
+        },
+        {
+          "name": "lora",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\data\\lora",
+          "type": "directory",
+          "size": null,
+          "children": []
+        },
+        {
           "name": "memory",
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\data\\memory",
           "type": "directory",
           "size": null,
-          "children": []
+          "children": [
+            {
+              "name": "backups",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\data\\memory\\backups",
+              "type": "directory",
+              "size": null,
+              "children": []
+            }
+          ]
         },
         {
           "name": "profiles",
@@ -224,7 +398,29 @@
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\data\\runtime",
           "type": "directory",
           "size": null,
-          "children": []
+          "children": [
+            {
+              "name": ".first_run_complete",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\data\\runtime\\.first_run_complete",
+              "type": "file",
+              "size": 19,
+              "children": []
+            },
+            {
+              "name": "crash.log",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\data\\runtime\\crash.log",
+              "type": "file",
+              "size": 302,
+              "children": []
+            },
+            {
+              "name": "feature_manifest.json",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\data\\runtime\\feature_manifest.json",
+              "type": "file",
+              "size": 107,
+              "children": []
+            }
+          ]
         }
       ]
     },
@@ -726,6 +922,13 @@
       "size": null,
       "children": [
         {
+          "name": "__init__.py",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\domain\\__init__.py",
+          "type": "file",
+          "size": 715,
+          "children": []
+        },
+        {
           "name": "ai",
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\domain\\ai",
           "type": "directory",
@@ -1020,6 +1223,20 @@
           ]
         },
         {
+          "name": "builder.py",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\domain\\builder.py",
+          "type": "file",
+          "size": 13629,
+          "children": []
+        },
+        {
+          "name": "capabilities.py",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\domain\\capabilities.py",
+          "type": "file",
+          "size": 7900,
+          "children": []
+        },
+        {
           "name": "contracts",
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\domain\\contracts",
           "type": "directory",
@@ -1040,6 +1257,20 @@
               "children": []
             }
           ]
+        },
+        {
+          "name": "energy.py",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\domain\\energy.py",
+          "type": "file",
+          "size": 14421,
+          "children": []
+        },
+        {
+          "name": "inertia.py",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\domain\\inertia.py",
+          "type": "file",
+          "size": 12608,
+          "children": []
         },
         {
           "name": "interaction",
@@ -1069,6 +1300,13 @@
               "children": []
             }
           ]
+        },
+        {
+          "name": "loop_guard.py",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\domain\\loop_guard.py",
+          "type": "file",
+          "size": 8456,
+          "children": []
         },
         {
           "name": "memory",
@@ -1121,24 +1359,31 @@
           "size": null,
           "children": [
             {
+              "name": "__init__.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\domain\\personality\\__init__.py",
+              "type": "file",
+              "size": 709,
+              "children": []
+            },
+            {
               "name": "emotion_config.py",
               "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\domain\\personality\\emotion_config.py",
               "type": "file",
-              "size": 22314,
+              "size": 22246,
               "children": []
             },
             {
               "name": "emotion_controller.py",
               "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\domain\\personality\\emotion_controller.py",
               "type": "file",
-              "size": 16105,
+              "size": 16051,
               "children": []
             },
             {
               "name": "emotion_engine.py",
               "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\domain\\personality\\emotion_engine.py",
               "type": "file",
-              "size": 42664,
+              "size": 42610,
               "children": []
             },
             {
@@ -1219,24 +1464,173 @@
               "children": []
             }
           ]
+        },
+        {
+          "name": "policy.py",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\domain\\policy.py",
+          "type": "file",
+          "size": 14768,
+          "children": []
+        },
+        {
+          "name": "presets.py",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\domain\\presets.py",
+          "type": "file",
+          "size": 18102,
+          "children": []
+        },
+        {
+          "name": "rate_limit.py",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\domain\\rate_limit.py",
+          "type": "file",
+          "size": 9499,
+          "children": []
+        },
+        {
+          "name": "rules.py",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\domain\\rules.py",
+          "type": "file",
+          "size": 16198,
+          "children": []
+        },
+        {
+          "name": "triggers.py",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\domain\\triggers.py",
+          "type": "file",
+          "size": 4577,
+          "children": []
+        },
+        {
+          "name": "unified_events.py",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\domain\\unified_events.py",
+          "type": "file",
+          "size": 13533,
+          "children": []
+        },
+        {
+          "name": "unified_manager.py",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\domain\\unified_manager.py",
+          "type": "file",
+          "size": 17216,
+          "children": []
+        },
+        {
+          "name": "vector.py",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\domain\\vector.py",
+          "type": "file",
+          "size": 8781,
+          "children": []
         }
       ]
     },
     {
-      "name": "infrastructure",
-      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\infrastructure",
+      "name": "features",
+      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\features",
       "type": "directory",
       "size": null,
       "children": [
         {
+          "name": "__init__.py",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\features\\__init__.py",
+          "type": "file",
+          "size": 3560,
+          "children": []
+        },
+        {
+          "name": "browser_integration",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\features\\browser_integration",
+          "type": "directory",
+          "size": null,
+          "children": []
+        },
+        {
+          "name": "community_features",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\features\\community_features",
+          "type": "directory",
+          "size": null,
+          "children": []
+        },
+        {
+          "name": "loader.py",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\features\\loader.py",
+          "type": "file",
+          "size": 2766,
+          "children": []
+        },
+        {
+          "name": "plugin_api.py",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\features\\plugin_api.py",
+          "type": "file",
+          "size": 0,
+          "children": []
+        },
+        {
+          "name": "quiz_solver",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\features\\quiz_solver",
+          "type": "directory",
+          "size": null,
+          "children": [
+            {
+              "name": "auto_solver.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\features\\quiz_solver\\auto_solver.py",
+              "type": "file",
+              "size": 0,
+              "children": []
+            },
+            {
+              "name": "config.json",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\features\\quiz_solver\\config.json",
+              "type": "file",
+              "size": 0,
+              "children": []
+            },
+            {
+              "name": "module.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\features\\quiz_solver\\module.py",
+              "type": "file",
+              "size": 0,
+              "children": []
+            },
+            {
+              "name": "performance_tracker.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\features\\quiz_solver\\performance_tracker.py",
+              "type": "file",
+              "size": 0,
+              "children": []
+            },
+            {
+              "name": "safety.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\features\\quiz_solver\\safety.py",
+              "type": "file",
+              "size": 0,
+              "children": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "infra",
+      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\infra",
+      "type": "directory",
+      "size": null,
+      "children": [
+        {
+          "name": "__init__.py",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\infra\\__init__.py",
+          "type": "file",
+          "size": 1827,
+          "children": []
+        },
+        {
           "name": "llm",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\infrastructure\\llm",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\infra\\llm",
           "type": "directory",
           "size": null,
           "children": [
             {
               "name": "llm_fallback_generator.py",
-              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\infrastructure\\llm\\llm_fallback_generator.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\infra\\llm\\llm_fallback_generator.py",
               "type": "file",
               "size": 12026,
               "children": []
@@ -1245,13 +1639,13 @@
         },
         {
           "name": "logging",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\infrastructure\\logging",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\infra\\logging",
           "type": "directory",
           "size": null,
           "children": [
             {
               "name": "logger.py",
-              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\infrastructure\\logging\\logger.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\infra\\logging\\logger.py",
               "type": "file",
               "size": 5459,
               "children": []
@@ -1260,20 +1654,49 @@
         },
         {
           "name": "multimodal",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\infrastructure\\multimodal",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\infra\\multimodal",
           "type": "directory",
           "size": null,
           "children": []
         },
         {
+          "name": "sandbox",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\infra\\sandbox",
+          "type": "directory",
+          "size": null,
+          "children": [
+            {
+              "name": "paths.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\infra\\sandbox\\paths.py",
+              "type": "file",
+              "size": 0,
+              "children": []
+            },
+            {
+              "name": "scopes.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\infra\\sandbox\\scopes.py",
+              "type": "file",
+              "size": 0,
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "smart_retrieval.py",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\infra\\smart_retrieval.py",
+          "type": "file",
+          "size": 0,
+          "children": []
+        },
+        {
           "name": "storage",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\infrastructure\\storage",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\infra\\storage",
           "type": "directory",
           "size": null,
           "children": [
             {
               "name": "preferences.py",
-              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\infrastructure\\storage\\preferences.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\infra\\storage\\preferences.py",
               "type": "file",
               "size": 6925,
               "children": []
@@ -1281,28 +1704,64 @@
           ]
         },
         {
+          "name": "stores",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\infra\\stores",
+          "type": "directory",
+          "size": null,
+          "children": [
+            {
+              "name": "__init__.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\infra\\stores\\__init__.py",
+              "type": "file",
+              "size": 0,
+              "children": []
+            },
+            {
+              "name": "episodic.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\infra\\stores\\episodic.py",
+              "type": "file",
+              "size": 9813,
+              "children": []
+            },
+            {
+              "name": "short_term.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\infra\\stores\\short_term.py",
+              "type": "file",
+              "size": 6387,
+              "children": []
+            },
+            {
+              "name": "vector_memory.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\infra\\stores\\vector_memory.py",
+              "type": "file",
+              "size": 8569,
+              "children": []
+            }
+          ]
+        },
+        {
           "name": "system",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\infrastructure\\system",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\infra\\system",
           "type": "directory",
           "size": null,
           "children": [
             {
               "name": "background_tasks.py",
-              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\infrastructure\\system\\background_tasks.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\infra\\system\\background_tasks.py",
               "type": "file",
               "size": 12948,
               "children": []
             },
             {
               "name": "kill_switch.py",
-              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\infrastructure\\system\\kill_switch.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\infra\\system\\kill_switch.py",
               "type": "file",
               "size": 6469,
               "children": []
             },
             {
               "name": "permission_manager.py",
-              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\infrastructure\\system\\permission_manager.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\infra\\system\\permission_manager.py",
               "type": "file",
               "size": 14432,
               "children": []
@@ -1317,6 +1776,13 @@
       "type": "directory",
       "size": null,
       "children": [
+        {
+          "name": "__init__.py",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\interfaces\\__init__.py",
+          "type": "file",
+          "size": 2201,
+          "children": []
+        },
         {
           "name": "api",
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\interfaces\\api",
@@ -1498,6 +1964,43 @@
           ]
         },
         {
+          "name": "learning",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\interfaces\\learning",
+          "type": "directory",
+          "size": null,
+          "children": [
+            {
+              "name": "micro_trainer.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\interfaces\\learning\\micro_trainer.py",
+              "type": "file",
+              "size": 3139,
+              "children": []
+            }
+          ]
+        },
+        {
+          "name": "overlay",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\interfaces\\overlay",
+          "type": "directory",
+          "size": null,
+          "children": [
+            {
+              "name": "hud.hud.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\interfaces\\overlay\\hud.hud.py",
+              "type": "file",
+              "size": 0,
+              "children": []
+            },
+            {
+              "name": "notifications.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\interfaces\\overlay\\notifications.py",
+              "type": "file",
+              "size": 0,
+              "children": []
+            }
+          ]
+        },
+        {
           "name": "tauri",
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\interfaces\\tauri",
           "type": "directory",
@@ -1514,90 +2017,11 @@
       ]
     },
     {
-      "name": "modules",
-      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\modules",
-      "type": "directory",
-      "size": null,
-      "children": [
-        {
-          "name": "__init__.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\modules\\__init__.py",
-          "type": "file",
-          "size": 0,
-          "children": []
-        },
-        {
-          "name": "browser_integration",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\modules\\browser_integration",
-          "type": "directory",
-          "size": null,
-          "children": []
-        },
-        {
-          "name": "community_features",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\modules\\community_features",
-          "type": "directory",
-          "size": null,
-          "children": []
-        },
-        {
-          "name": "loader.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\modules\\loader.py",
-          "type": "file",
-          "size": 2766,
-          "children": []
-        },
-        {
-          "name": "plugin_api.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\modules\\plugin_api.py",
-          "type": "file",
-          "size": 0,
-          "children": []
-        },
-        {
-          "name": "quiz_solver",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\modules\\quiz_solver",
-          "type": "directory",
-          "size": null,
-          "children": [
-            {
-              "name": "auto_solver.py",
-              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\modules\\quiz_solver\\auto_solver.py",
-              "type": "file",
-              "size": 0,
-              "children": []
-            },
-            {
-              "name": "config.json",
-              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\modules\\quiz_solver\\config.json",
-              "type": "file",
-              "size": 0,
-              "children": []
-            },
-            {
-              "name": "module.py",
-              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\modules\\quiz_solver\\module.py",
-              "type": "file",
-              "size": 0,
-              "children": []
-            },
-            {
-              "name": "performance_tracker.py",
-              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\modules\\quiz_solver\\performance_tracker.py",
-              "type": "file",
-              "size": 0,
-              "children": []
-            },
-            {
-              "name": "safety.py",
-              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\modules\\quiz_solver\\safety.py",
-              "type": "file",
-              "size": 0,
-              "children": []
-            }
-          ]
-        }
-      ]
+      "name": "r.py",
+      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\r.py",
+      "type": "file",
+      "size": 7365,
+      "children": []
     },
     {
       "name": "requirements.txt",
@@ -1612,6 +2036,41 @@
       "type": "directory",
       "size": null,
       "children": [
+        {
+          "name": "MODULE_SUMMARY.md",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\MODULE_SUMMARY.md",
+          "type": "file",
+          "size": 7483,
+          "children": []
+        },
+        {
+          "name": "README_REFACTORING.md",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\README_REFACTORING.md",
+          "type": "file",
+          "size": 6596,
+          "children": []
+        },
+        {
+          "name": "SLM_CHAT_INTEGRATION.md",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\SLM_CHAT_INTEGRATION.md",
+          "type": "file",
+          "size": 5763,
+          "children": []
+        },
+        {
+          "name": "VECTOR_SYSTEM_README.md",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\VECTOR_SYSTEM_README.md",
+          "type": "file",
+          "size": 9720,
+          "children": []
+        },
+        {
+          "name": "__init__.py",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\__init__.py",
+          "type": "file",
+          "size": 522,
+          "children": []
+        },
         {
           "name": "application.py",
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\application.py",
@@ -1630,7 +2089,7 @@
           "name": "bootstrap.py",
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\bootstrap.py",
           "type": "file",
-          "size": 19199,
+          "size": 18506,
           "children": []
         },
         {
@@ -1638,6 +2097,13 @@
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\bus.py",
           "type": "file",
           "size": 7986,
+          "children": []
+        },
+        {
+          "name": "capability_gateway.rs",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\capability_gateway.rs",
+          "type": "file",
+          "size": 0,
           "children": []
         },
         {
@@ -1707,7 +2173,7 @@
           "name": "launcher.py",
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\launcher.py",
           "type": "file",
-          "size": 11728,
+          "size": 11720,
           "children": []
         },
         {
@@ -1735,7 +2201,7 @@
           "name": "orchestrator.py",
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\orchestrator.py",
           "type": "file",
-          "size": 48769,
+          "size": 48772,
           "children": []
         },
         {
@@ -1749,7 +2215,7 @@
           "name": "policy_router.py",
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\policy_router.py",
           "type": "file",
-          "size": 10251,
+          "size": 10249,
           "children": []
         },
         {
@@ -1757,13 +2223,6 @@
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\profiles.py",
           "type": "file",
           "size": 7302,
-          "children": []
-        },
-        {
-          "name": "r.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\r.py",
-          "type": "file",
-          "size": 7365,
           "children": []
         },
         {
@@ -1777,7 +2236,7 @@
           "name": "strip_controller.py",
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\strip_controller.py",
           "type": "file",
-          "size": 6431,
+          "size": 6429,
           "children": []
         },
         {
@@ -1806,7 +2265,7 @@
           "name": "first_run.py",
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\scripts\\first_run.py",
           "type": "file",
-          "size": 15502,
+          "size": 16336,
           "children": []
         },
         {
@@ -1834,7 +2293,7 @@
           "name": "setup_wizard.py",
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\scripts\\setup_wizard.py",
           "type": "file",
-          "size": 23271,
+          "size": 23829,
           "children": []
         }
       ]
@@ -1849,6 +2308,13 @@
           "name": "__init__.py",
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\__init__.py",
           "type": "file",
+          "size": 642,
+          "children": []
+        },
+        {
+          "name": "budgets.py",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\budgets.py",
+          "type": "file",
           "size": 0,
           "children": []
         },
@@ -1857,6 +2323,13 @@
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\capability_flags.py",
           "type": "file",
           "size": 3805,
+          "children": []
+        },
+        {
+          "name": "complexity.py",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\complexity.py",
+          "type": "file",
+          "size": 0,
           "children": []
         },
         {
@@ -1910,6 +2383,36 @@
           "children": []
         },
         {
+          "name": "data",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\data",
+          "type": "directory",
+          "size": null,
+          "children": [
+            {
+              "name": "brain",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\data\\brain",
+              "type": "directory",
+              "size": null,
+              "children": []
+            },
+            {
+              "name": "runtime",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\data\\runtime",
+              "type": "directory",
+              "size": null,
+              "children": [
+                {
+                  "name": "crash.log",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\data\\runtime\\crash.log",
+                  "type": "file",
+                  "size": 0,
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
           "name": "defaults.yaml",
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\defaults.yaml",
           "type": "file",
@@ -1959,6 +2462,13 @@
           "children": []
         },
         {
+          "name": "mappings.py",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\mappings.py",
+          "type": "file",
+          "size": 0,
+          "children": []
+        },
+        {
           "name": "memory",
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\memory",
           "type": "directory",
@@ -1992,6 +2502,13 @@
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\mods",
           "type": "directory",
           "size": null,
+          "children": []
+        },
+        {
+          "name": "mood_tracker.py",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\mood_tracker.py",
+          "type": "file",
+          "size": 0,
           "children": []
         },
         {
@@ -2038,6 +2555,13 @@
           ]
         },
         {
+          "name": "retention.py",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\retention.py",
+          "type": "file",
+          "size": 0,
+          "children": []
+        },
+        {
           "name": "runtime",
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\runtime",
           "type": "directory",
@@ -2065,6 +2589,13 @@
               "children": []
             }
           ]
+        },
+        {
+          "name": "sass_generator.py",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\sass_generator.py",
+          "type": "file",
+          "size": 0,
+          "children": []
         },
         {
           "name": "schemas",
@@ -2096,10 +2627,45 @@
           ]
         },
         {
+          "name": "self_model.py",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\self_model.py",
+          "type": "file",
+          "size": 0,
+          "children": []
+        },
+        {
           "name": "session_logger.py",
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\session_logger.py",
           "type": "file",
           "size": 8055,
+          "children": []
+        },
+        {
+          "name": "signals.py",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\signals.py",
+          "type": "file",
+          "size": 0,
+          "children": []
+        },
+        {
+          "name": "snapshot.py",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\snapshot.py",
+          "type": "file",
+          "size": 0,
+          "children": []
+        },
+        {
+          "name": "tiers.py",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\tiers.py",
+          "type": "file",
+          "size": 0,
+          "children": []
+        },
+        {
+          "name": "transitions.py",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\transitions.py",
+          "type": "file",
+          "size": 0,
           "children": []
         },
         {
@@ -2170,452 +2736,15 @@
               "type": "file",
               "size": 1110,
               "children": []
-            }
-          ]
-        }
-      ]
-    },
-    {
-      "name": "src",
-      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src",
-      "type": "directory",
-      "size": null,
-      "children": [
-        {
-          "name": "MODULE_SUMMARY.md",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\MODULE_SUMMARY.md",
-          "type": "file",
-          "size": 7483,
-          "children": []
-        },
-        {
-          "name": "README_REFACTORING.md",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\README_REFACTORING.md",
-          "type": "file",
-          "size": 6596,
-          "children": []
-        },
-        {
-          "name": "SLM_CHAT_INTEGRATION.md",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\SLM_CHAT_INTEGRATION.md",
-          "type": "file",
-          "size": 5763,
-          "children": []
-        },
-        {
-          "name": "VECTOR_SYSTEM_README.md",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\VECTOR_SYSTEM_README.md",
-          "type": "file",
-          "size": 9720,
-          "children": []
-        },
-        {
-          "name": "__init__.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\__init__.py",
-          "type": "file",
-          "size": 0,
-          "children": []
-        },
-        {
-          "name": "adapters",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\adapters",
-          "type": "directory",
-          "size": null,
-          "children": [
-            {
-              "name": "desktop.py",
-              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\adapters\\desktop.py",
-              "type": "file",
-              "size": 0,
-              "children": []
             },
             {
-              "name": "desktop_controller.py",
-              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\adapters\\desktop_controller.py",
+              "name": "validation.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\utils\\validation.py",
               "type": "file",
-              "size": 0,
-              "children": []
-            },
-            {
-              "name": "file_controller.py",
-              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\adapters\\file_controller.py",
-              "type": "file",
-              "size": 0,
-              "children": []
-            },
-            {
-              "name": "files.py",
-              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\adapters\\files.py",
-              "type": "file",
-              "size": 0,
-              "children": []
-            },
-            {
-              "name": "power.py",
-              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\adapters\\power.py",
-              "type": "file",
-              "size": 0,
+              "size": 827,
               "children": []
             }
           ]
-        },
-        {
-          "name": "adapters.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\adapters.py",
-          "type": "file",
-          "size": 5027,
-          "children": []
-        },
-        {
-          "name": "budgets.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\budgets.py",
-          "type": "file",
-          "size": 0,
-          "children": []
-        },
-        {
-          "name": "builder.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\builder.py",
-          "type": "file",
-          "size": 13629,
-          "children": []
-        },
-        {
-          "name": "capabilities.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\capabilities.py",
-          "type": "file",
-          "size": 7900,
-          "children": []
-        },
-        {
-          "name": "capability_gateway.rs",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\capability_gateway.rs",
-          "type": "file",
-          "size": 0,
-          "children": []
-        },
-        {
-          "name": "commands",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\commands",
-          "type": "directory",
-          "size": null,
-          "children": [
-            {
-              "name": "__init__.py",
-              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\commands\\__init__.py",
-              "type": "file",
-              "size": 0,
-              "children": []
-            },
-            {
-              "name": "command_handlers",
-              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\commands\\command_handlers",
-              "type": "directory",
-              "size": null,
-              "children": [
-                {
-                  "name": "__init__.py",
-                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\commands\\command_handlers\\__init__.py",
-                  "type": "file",
-                  "size": 0,
-                  "children": []
-                }
-              ]
-            },
-            {
-              "name": "command_router.py",
-              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\commands\\command_router.py",
-              "type": "file",
-              "size": 70194,
-              "children": []
-            }
-          ]
-        },
-        {
-          "name": "complexity.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\complexity.py",
-          "type": "file",
-          "size": 0,
-          "children": []
-        },
-        {
-          "name": "data",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\data",
-          "type": "directory",
-          "size": null,
-          "children": [
-            {
-              "name": "brain",
-              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\data\\brain",
-              "type": "directory",
-              "size": null,
-              "children": []
-            },
-            {
-              "name": "runtime",
-              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\data\\runtime",
-              "type": "directory",
-              "size": null,
-              "children": [
-                {
-                  "name": "crash.log",
-                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\data\\runtime\\crash.log",
-                  "type": "file",
-                  "size": 0,
-                  "children": []
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "name": "energy.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\energy.py",
-          "type": "file",
-          "size": 14421,
-          "children": []
-        },
-        {
-          "name": "inertia.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\inertia.py",
-          "type": "file",
-          "size": 12608,
-          "children": []
-        },
-        {
-          "name": "learning",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\learning",
-          "type": "directory",
-          "size": null,
-          "children": [
-            {
-              "name": "micro_trainer.py",
-              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\learning\\micro_trainer.py",
-              "type": "file",
-              "size": 3139,
-              "children": []
-            }
-          ]
-        },
-        {
-          "name": "loop_guard.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\loop_guard.py",
-          "type": "file",
-          "size": 8456,
-          "children": []
-        },
-        {
-          "name": "mappings.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\mappings.py",
-          "type": "file",
-          "size": 0,
-          "children": []
-        },
-        {
-          "name": "mood_tracker.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\mood_tracker.py",
-          "type": "file",
-          "size": 0,
-          "children": []
-        },
-        {
-          "name": "overlay",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\overlay",
-          "type": "directory",
-          "size": null,
-          "children": [
-            {
-              "name": "hud.hud.py",
-              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\overlay\\hud.hud.py",
-              "type": "file",
-              "size": 0,
-              "children": []
-            },
-            {
-              "name": "notifications.py",
-              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\overlay\\notifications.py",
-              "type": "file",
-              "size": 0,
-              "children": []
-            }
-          ]
-        },
-        {
-          "name": "policy.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\policy.py",
-          "type": "file",
-          "size": 14768,
-          "children": []
-        },
-        {
-          "name": "presets.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\presets.py",
-          "type": "file",
-          "size": 18102,
-          "children": []
-        },
-        {
-          "name": "rate_limit.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\rate_limit.py",
-          "type": "file",
-          "size": 9499,
-          "children": []
-        },
-        {
-          "name": "retention.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\retention.py",
-          "type": "file",
-          "size": 0,
-          "children": []
-        },
-        {
-          "name": "rules.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\rules.py",
-          "type": "file",
-          "size": 16198,
-          "children": []
-        },
-        {
-          "name": "sandbox",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\sandbox",
-          "type": "directory",
-          "size": null,
-          "children": [
-            {
-              "name": "paths.py",
-              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\sandbox\\paths.py",
-              "type": "file",
-              "size": 0,
-              "children": []
-            },
-            {
-              "name": "scopes.py",
-              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\sandbox\\scopes.py",
-              "type": "file",
-              "size": 0,
-              "children": []
-            }
-          ]
-        },
-        {
-          "name": "sass_generator.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\sass_generator.py",
-          "type": "file",
-          "size": 0,
-          "children": []
-        },
-        {
-          "name": "self_model.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\self_model.py",
-          "type": "file",
-          "size": 0,
-          "children": []
-        },
-        {
-          "name": "signals.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\signals.py",
-          "type": "file",
-          "size": 0,
-          "children": []
-        },
-        {
-          "name": "smart_retrieval.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\smart_retrieval.py",
-          "type": "file",
-          "size": 0,
-          "children": []
-        },
-        {
-          "name": "snapshot.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\snapshot.py",
-          "type": "file",
-          "size": 0,
-          "children": []
-        },
-        {
-          "name": "stores",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\stores",
-          "type": "directory",
-          "size": null,
-          "children": [
-            {
-              "name": "__init__.py",
-              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\stores\\__init__.py",
-              "type": "file",
-              "size": 0,
-              "children": []
-            },
-            {
-              "name": "episodic.py",
-              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\stores\\episodic.py",
-              "type": "file",
-              "size": 9813,
-              "children": []
-            },
-            {
-              "name": "short_term.py",
-              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\stores\\short_term.py",
-              "type": "file",
-              "size": 6387,
-              "children": []
-            },
-            {
-              "name": "vector_memory.py",
-              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\stores\\vector_memory.py",
-              "type": "file",
-              "size": 8569,
-              "children": []
-            }
-          ]
-        },
-        {
-          "name": "tiers.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\tiers.py",
-          "type": "file",
-          "size": 0,
-          "children": []
-        },
-        {
-          "name": "transitions.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\transitions.py",
-          "type": "file",
-          "size": 0,
-          "children": []
-        },
-        {
-          "name": "triggers.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\triggers.py",
-          "type": "file",
-          "size": 4577,
-          "children": []
-        },
-        {
-          "name": "unified_events.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\unified_events.py",
-          "type": "file",
-          "size": 13533,
-          "children": []
-        },
-        {
-          "name": "unified_manager.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\unified_manager.py",
-          "type": "file",
-          "size": 17216,
-          "children": []
-        },
-        {
-          "name": "user_manager.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\user_manager.py",
-          "type": "file",
-          "size": 20669,
-          "children": []
-        },
-        {
-          "name": "vector.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\vector.py",
-          "type": "file",
-          "size": 8781,
-          "children": []
         }
       ]
     },
@@ -12303,7 +12432,2147 @@
       "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor",
       "type": "directory",
       "size": null,
-      "children": []
+      "children": [
+        {
+          "name": "Open-LLM-VTuber",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber",
+          "type": "directory",
+          "size": null,
+          "children": [
+            {
+              "name": ".cursor",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\.cursor",
+              "type": "directory",
+              "size": null,
+              "children": [
+                {
+                  "name": "rules",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\.cursor\\rules",
+                  "type": "directory",
+                  "size": null,
+                  "children": [
+                    {
+                      "name": "olv-core-rules.mdc",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\.cursor\\rules\\olv-core-rules.mdc",
+                      "type": "file",
+                      "size": 6218,
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": ".dockerignore",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\.dockerignore",
+              "type": "file",
+              "size": 1073,
+              "children": []
+            },
+            {
+              "name": ".gemini",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\.gemini",
+              "type": "directory",
+              "size": null,
+              "children": [
+                {
+                  "name": "GEMINI.md",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\.gemini\\GEMINI.md",
+                  "type": "file",
+                  "size": 6185,
+                  "children": []
+                },
+                {
+                  "name": "styleguide.md",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\.gemini\\styleguide.md",
+                  "type": "file",
+                  "size": 12307,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "name": ".gitattributes",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\.gitattributes",
+              "type": "file",
+              "size": 31,
+              "children": []
+            },
+            {
+              "name": ".github",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\.github",
+              "type": "directory",
+              "size": null,
+              "children": [
+                {
+                  "name": "FUNDING.yml",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\.github\\FUNDING.yml",
+                  "type": "file",
+                  "size": 838,
+                  "children": []
+                },
+                {
+                  "name": "ISSUE_TEMPLATE",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\.github\\ISSUE_TEMPLATE",
+                  "type": "directory",
+                  "size": null,
+                  "children": [
+                    {
+                      "name": "bug---question---get-help---bug---\u63d0\u95ee---\u6c42\u52a9.md",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\.github\\ISSUE_TEMPLATE\\bug---question---get-help---bug---\u63d0\u95ee---\u6c42\u52a9.md",
+                      "type": "file",
+                      "size": 2296,
+                      "children": []
+                    },
+                    {
+                      "name": "feature-request---\u529f\u80fd\u5efa\u8bae.md",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\.github\\ISSUE_TEMPLATE\\feature-request---\u529f\u80fd\u5efa\u8bae.md",
+                      "type": "file",
+                      "size": 2293,
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "name": "copilot-instructions.md",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\.github\\copilot-instructions.md",
+                  "type": "file",
+                  "size": 6185,
+                  "children": []
+                },
+                {
+                  "name": "workflows",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\.github\\workflows",
+                  "type": "directory",
+                  "size": null,
+                  "children": [
+                    {
+                      "name": "codeql.yml",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\.github\\workflows\\codeql.yml",
+                      "type": "file",
+                      "size": 4393,
+                      "children": []
+                    },
+                    {
+                      "name": "create_release.yml",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\.github\\workflows\\create_release.yml",
+                      "type": "file",
+                      "size": 10344,
+                      "children": []
+                    },
+                    {
+                      "name": "docker-blacksmith.yml",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\.github\\workflows\\docker-blacksmith.yml",
+                      "type": "file",
+                      "size": 6731,
+                      "children": []
+                    },
+                    {
+                      "name": "fossa_scan.yml",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\.github\\workflows\\fossa_scan.yml",
+                      "type": "file",
+                      "size": 286,
+                      "children": []
+                    },
+                    {
+                      "name": "ruff.yml",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\.github\\workflows\\ruff.yml",
+                      "type": "file",
+                      "size": 169,
+                      "children": []
+                    },
+                    {
+                      "name": "update-requirements.yml",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\.github\\workflows\\update-requirements.yml",
+                      "type": "file",
+                      "size": 946,
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": ".gitignore",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\.gitignore",
+              "type": "file",
+              "size": 1205,
+              "children": []
+            },
+            {
+              "name": ".gitmodules",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\.gitmodules",
+              "type": "file",
+              "size": 120,
+              "children": []
+            },
+            {
+              "name": ".pre-commit-config.yaml",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\.pre-commit-config.yaml",
+              "type": "file",
+              "size": 195,
+              "children": []
+            },
+            {
+              "name": ".python-version",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\.python-version",
+              "type": "file",
+              "size": 6,
+              "children": []
+            },
+            {
+              "name": "CLAUDE.md",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\CLAUDE.md",
+              "type": "file",
+              "size": 6392,
+              "children": []
+            },
+            {
+              "name": "CONTRIBUTING.md",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\CONTRIBUTING.md",
+              "type": "file",
+              "size": 346,
+              "children": []
+            },
+            {
+              "name": "LICENSE",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\LICENSE",
+              "type": "file",
+              "size": 1238,
+              "children": []
+            },
+            {
+              "name": "LICENSE-Live2D.md",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\LICENSE-Live2D.md",
+              "type": "file",
+              "size": 58350,
+              "children": []
+            },
+            {
+              "name": "README.CN.md",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\README.CN.md",
+              "type": "file",
+              "size": 10419,
+              "children": []
+            },
+            {
+              "name": "README.JP.md",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\README.JP.md",
+              "type": "file",
+              "size": 14769,
+              "children": []
+            },
+            {
+              "name": "README.KR.md",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\README.KR.md",
+              "type": "file",
+              "size": 13287,
+              "children": []
+            },
+            {
+              "name": "README.md",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\README.md",
+              "type": "file",
+              "size": 11694,
+              "children": []
+            },
+            {
+              "name": "assets",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\assets",
+              "type": "directory",
+              "size": null,
+              "children": [
+                {
+                  "name": "banner.cn.jpg",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\assets\\banner.cn.jpg",
+                  "type": "file",
+                  "size": 23704,
+                  "children": []
+                },
+                {
+                  "name": "banner.jpg",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\assets\\banner.jpg",
+                  "type": "file",
+                  "size": 24087,
+                  "children": []
+                },
+                {
+                  "name": "banner.kr.jpg",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\assets\\banner.kr.jpg",
+                  "type": "file",
+                  "size": 42615,
+                  "children": []
+                },
+                {
+                  "name": "i1.jpg",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\assets\\i1.jpg",
+                  "type": "file",
+                  "size": 274456,
+                  "children": []
+                },
+                {
+                  "name": "i1_app_mode.jpg",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\assets\\i1_app_mode.jpg",
+                  "type": "file",
+                  "size": 175419,
+                  "children": []
+                },
+                {
+                  "name": "i2.jpg",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\assets\\i2.jpg",
+                  "type": "file",
+                  "size": 534559,
+                  "children": []
+                },
+                {
+                  "name": "i2_pet_vscode.jpg",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\assets\\i2_pet_vscode.jpg",
+                  "type": "file",
+                  "size": 534559,
+                  "children": []
+                },
+                {
+                  "name": "i3.jpg",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\assets\\i3.jpg",
+                  "type": "file",
+                  "size": 315206,
+                  "children": []
+                },
+                {
+                  "name": "i3_browser_world_fun.jpg",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\assets\\i3_browser_world_fun.jpg",
+                  "type": "file",
+                  "size": 223657,
+                  "children": []
+                },
+                {
+                  "name": "i4.jpg",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\assets\\i4.jpg",
+                  "type": "file",
+                  "size": 348937,
+                  "children": []
+                },
+                {
+                  "name": "i4_pet_desktop.jpg",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\assets\\i4_pet_desktop.jpg",
+                  "type": "file",
+                  "size": 461516,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "name": "avatars",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\avatars",
+              "type": "directory",
+              "size": null,
+              "children": [
+                {
+                  "name": "mao.png",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\avatars\\mao.png",
+                  "type": "file",
+                  "size": 432032,
+                  "children": []
+                },
+                {
+                  "name": "shizuku.png",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\avatars\\shizuku.png",
+                  "type": "file",
+                  "size": 427786,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "name": "backgrounds",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\backgrounds",
+              "type": "directory",
+              "size": null,
+              "children": [
+                {
+                  "name": "README.md",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\backgrounds\\README.md",
+                  "type": "file",
+                  "size": 160,
+                  "children": []
+                },
+                {
+                  "name": "cartoon-night-landscape-moon.jpeg",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\backgrounds\\cartoon-night-landscape-moon.jpeg",
+                  "type": "file",
+                  "size": 156701,
+                  "children": []
+                },
+                {
+                  "name": "ceiling-window-room-night.jpeg",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\backgrounds\\ceiling-window-room-night.jpeg",
+                  "type": "file",
+                  "size": 96297,
+                  "children": []
+                },
+                {
+                  "name": "cityscape.jpeg",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\backgrounds\\cityscape.jpeg",
+                  "type": "file",
+                  "size": 317265,
+                  "children": []
+                },
+                {
+                  "name": "computer-room-illustration.jpeg",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\backgrounds\\computer-room-illustration.jpeg",
+                  "type": "file",
+                  "size": 302120,
+                  "children": []
+                },
+                {
+                  "name": "congress.jpg",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\backgrounds\\congress.jpg",
+                  "type": "file",
+                  "size": 976033,
+                  "children": []
+                },
+                {
+                  "name": "field-night-painting-moon.jpeg",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\backgrounds\\field-night-painting-moon.jpeg",
+                  "type": "file",
+                  "size": 248485,
+                  "children": []
+                },
+                {
+                  "name": "lernado-diff-classroom-center.jpeg",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\backgrounds\\lernado-diff-classroom-center.jpeg",
+                  "type": "file",
+                  "size": 160247,
+                  "children": []
+                },
+                {
+                  "name": "moon-over-mountain.jpeg",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\backgrounds\\moon-over-mountain.jpeg",
+                  "type": "file",
+                  "size": 245705,
+                  "children": []
+                },
+                {
+                  "name": "mountain-range-illustration.jpeg",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\backgrounds\\mountain-range-illustration.jpeg",
+                  "type": "file",
+                  "size": 226384,
+                  "children": []
+                },
+                {
+                  "name": "night-landscape-grass-moon.jpeg",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\backgrounds\\night-landscape-grass-moon.jpeg",
+                  "type": "file",
+                  "size": 347583,
+                  "children": []
+                },
+                {
+                  "name": "night-scene-cartoon-moon.jpeg",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\backgrounds\\night-scene-cartoon-moon.jpeg",
+                  "type": "file",
+                  "size": 147901,
+                  "children": []
+                },
+                {
+                  "name": "painting-valley-night-sky. 2.jpeg",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\backgrounds\\painting-valley-night-sky. 2.jpeg",
+                  "type": "file",
+                  "size": 465562,
+                  "children": []
+                },
+                {
+                  "name": "room-interior-illustration.jpeg",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\backgrounds\\room-interior-illustration.jpeg",
+                  "type": "file",
+                  "size": 302391,
+                  "children": []
+                },
+                {
+                  "name": "sdxl-classroom-door-view.jpeg",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\backgrounds\\sdxl-classroom-door-view.jpeg",
+                  "type": "file",
+                  "size": 221783,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "name": "characters",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\characters",
+              "type": "directory",
+              "size": null,
+              "children": [
+                {
+                  "name": "README.md",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\characters\\README.md",
+                  "type": "file",
+                  "size": 5669,
+                  "children": []
+                },
+                {
+                  "name": "en_nuke_debate.yaml",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\characters\\en_nuke_debate.yaml",
+                  "type": "file",
+                  "size": 763,
+                  "children": []
+                },
+                {
+                  "name": "en_unhelpful_ai.yaml",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\characters\\en_unhelpful_ai.yaml",
+                  "type": "file",
+                  "size": 389,
+                  "children": []
+                },
+                {
+                  "name": "zh_\u7c73\u7c92.yaml",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\characters\\zh_\u7c73\u7c92.yaml",
+                  "type": "file",
+                  "size": 427,
+                  "children": []
+                },
+                {
+                  "name": "zh_\u7ffb\u8bd1\u8154.yaml",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\characters\\zh_\u7ffb\u8bd1\u8154.yaml",
+                  "type": "file",
+                  "size": 1765,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "name": "config_templates",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\config_templates",
+              "type": "directory",
+              "size": null,
+              "children": [
+                {
+                  "name": "README.md",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\config_templates\\README.md",
+                  "type": "file",
+                  "size": 307,
+                  "children": []
+                },
+                {
+                  "name": "conf.ZH.default.yaml",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\config_templates\\conf.ZH.default.yaml",
+                  "type": "file",
+                  "size": 26786,
+                  "children": []
+                },
+                {
+                  "name": "conf.default.yaml",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\config_templates\\conf.default.yaml",
+                  "type": "file",
+                  "size": 25713,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "name": "doc",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\doc",
+              "type": "directory",
+              "size": null,
+              "children": [
+                {
+                  "name": "README.md",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\doc\\README.md",
+                  "type": "file",
+                  "size": 430,
+                  "children": []
+                },
+                {
+                  "name": "sample_conf",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\doc\\sample_conf",
+                  "type": "directory",
+                  "size": null,
+                  "children": [
+                    {
+                      "name": "sherpaASRTTS_sense_voice_melo.yaml",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\doc\\sample_conf\\sherpaASRTTS_sense_voice_melo.yaml",
+                      "type": "file",
+                      "size": 5013,
+                      "children": []
+                    },
+                    {
+                      "name": "sherpaASRTTS_sense_voice_piper_en.yaml",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\doc\\sample_conf\\sherpaASRTTS_sense_voice_piper_en.yaml",
+                      "type": "file",
+                      "size": 4737,
+                      "children": []
+                    },
+                    {
+                      "name": "sherpaASRTTS_sense_voice_vits_zh.yaml",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\doc\\sample_conf\\sherpaASRTTS_sense_voice_vits_zh.yaml",
+                      "type": "file",
+                      "size": 4984,
+                      "children": []
+                    },
+                    {
+                      "name": "sherpaASR_paraformer.yaml",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\doc\\sample_conf\\sherpaASR_paraformer.yaml",
+                      "type": "file",
+                      "size": 3905,
+                      "children": []
+                    },
+                    {
+                      "name": "sherpaASR_sense_voice.yaml",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\doc\\sample_conf\\sherpaASR_sense_voice.yaml",
+                      "type": "file",
+                      "size": 3851,
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "dockerfile",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\dockerfile",
+              "type": "file",
+              "size": 2246,
+              "children": []
+            },
+            {
+              "name": "frontend",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\frontend",
+              "type": "directory",
+              "size": null,
+              "children": []
+            },
+            {
+              "name": "live2d-models",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models",
+              "type": "directory",
+              "size": null,
+              "children": [
+                {
+                  "name": "mao_pro",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\mao_pro",
+                  "type": "directory",
+                  "size": null,
+                  "children": [
+                    {
+                      "name": "ReadMe.txt",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\mao_pro\\ReadMe.txt",
+                      "type": "file",
+                      "size": 2595,
+                      "children": []
+                    },
+                    {
+                      "name": "runtime",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\mao_pro\\runtime",
+                      "type": "directory",
+                      "size": null,
+                      "children": [
+                        {
+                          "name": "expressions",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\mao_pro\\runtime\\expressions",
+                          "type": "directory",
+                          "size": null,
+                          "children": [
+                            {
+                              "name": "exp_01.exp3.json",
+                              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\mao_pro\\runtime\\expressions\\exp_01.exp3.json",
+                              "type": "file",
+                              "size": 2127,
+                              "children": []
+                            },
+                            {
+                              "name": "exp_02.exp3.json",
+                              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\mao_pro\\runtime\\expressions\\exp_02.exp3.json",
+                              "type": "file",
+                              "size": 2127,
+                              "children": []
+                            },
+                            {
+                              "name": "exp_03.exp3.json",
+                              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\mao_pro\\runtime\\expressions\\exp_03.exp3.json",
+                              "type": "file",
+                              "size": 2127,
+                              "children": []
+                            },
+                            {
+                              "name": "exp_04.exp3.json",
+                              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\mao_pro\\runtime\\expressions\\exp_04.exp3.json",
+                              "type": "file",
+                              "size": 2131,
+                              "children": []
+                            },
+                            {
+                              "name": "exp_05.exp3.json",
+                              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\mao_pro\\runtime\\expressions\\exp_05.exp3.json",
+                              "type": "file",
+                              "size": 2132,
+                              "children": []
+                            },
+                            {
+                              "name": "exp_06.exp3.json",
+                              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\mao_pro\\runtime\\expressions\\exp_06.exp3.json",
+                              "type": "file",
+                              "size": 2131,
+                              "children": []
+                            },
+                            {
+                              "name": "exp_07.exp3.json",
+                              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\mao_pro\\runtime\\expressions\\exp_07.exp3.json",
+                              "type": "file",
+                              "size": 2133,
+                              "children": []
+                            },
+                            {
+                              "name": "exp_08.exp3.json",
+                              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\mao_pro\\runtime\\expressions\\exp_08.exp3.json",
+                              "type": "file",
+                              "size": 2128,
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "name": "mao_pro.4096",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\mao_pro\\runtime\\mao_pro.4096",
+                          "type": "directory",
+                          "size": null,
+                          "children": [
+                            {
+                              "name": "texture_00.png",
+                              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\mao_pro\\runtime\\mao_pro.4096\\texture_00.png",
+                              "type": "file",
+                              "size": 8209997,
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "name": "mao_pro.cdi3.json",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\mao_pro\\runtime\\mao_pro.cdi3.json",
+                          "type": "file",
+                          "size": 16814,
+                          "children": []
+                        },
+                        {
+                          "name": "mao_pro.moc3",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\mao_pro\\runtime\\mao_pro.moc3",
+                          "type": "file",
+                          "size": 870272,
+                          "children": []
+                        },
+                        {
+                          "name": "mao_pro.model3.json",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\mao_pro\\runtime\\mao_pro.model3.json",
+                          "type": "file",
+                          "size": 1744,
+                          "children": []
+                        },
+                        {
+                          "name": "mao_pro.physics3.json",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\mao_pro\\runtime\\mao_pro.physics3.json",
+                          "type": "file",
+                          "size": 23163,
+                          "children": []
+                        },
+                        {
+                          "name": "mao_pro.pose3.json",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\mao_pro\\runtime\\mao_pro.pose3.json",
+                          "type": "file",
+                          "size": 278,
+                          "children": []
+                        },
+                        {
+                          "name": "motions",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\mao_pro\\runtime\\motions",
+                          "type": "directory",
+                          "size": null,
+                          "children": [
+                            {
+                              "name": "mtn_01.motion3.json",
+                              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\mao_pro\\runtime\\motions\\mtn_01.motion3.json",
+                              "type": "file",
+                              "size": 29457,
+                              "children": []
+                            },
+                            {
+                              "name": "mtn_02.motion3.json",
+                              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\mao_pro\\runtime\\motions\\mtn_02.motion3.json",
+                              "type": "file",
+                              "size": 26052,
+                              "children": []
+                            },
+                            {
+                              "name": "mtn_03.motion3.json",
+                              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\mao_pro\\runtime\\motions\\mtn_03.motion3.json",
+                              "type": "file",
+                              "size": 24590,
+                              "children": []
+                            },
+                            {
+                              "name": "mtn_04.motion3.json",
+                              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\mao_pro\\runtime\\motions\\mtn_04.motion3.json",
+                              "type": "file",
+                              "size": 29461,
+                              "children": []
+                            },
+                            {
+                              "name": "special_01.motion3.json",
+                              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\mao_pro\\runtime\\motions\\special_01.motion3.json",
+                              "type": "file",
+                              "size": 37111,
+                              "children": []
+                            },
+                            {
+                              "name": "special_02.motion3.json",
+                              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\mao_pro\\runtime\\motions\\special_02.motion3.json",
+                              "type": "file",
+                              "size": 45500,
+                              "children": []
+                            },
+                            {
+                              "name": "special_03.motion3.json",
+                              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\mao_pro\\runtime\\motions\\special_03.motion3.json",
+                              "type": "file",
+                              "size": 52657,
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "name": "shizuku",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\shizuku",
+                  "type": "directory",
+                  "size": null,
+                  "children": [
+                    {
+                      "name": "ReadMe.txt",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\shizuku\\ReadMe.txt",
+                      "type": "file",
+                      "size": 2393,
+                      "children": []
+                    },
+                    {
+                      "name": "runtime",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\shizuku\\runtime",
+                      "type": "directory",
+                      "size": null,
+                      "children": [
+                        {
+                          "name": "motion",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\shizuku\\runtime\\motion",
+                          "type": "directory",
+                          "size": null,
+                          "children": [
+                            {
+                              "name": "01.motion3.json",
+                              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\shizuku\\runtime\\motion\\01.motion3.json",
+                              "type": "file",
+                              "size": 6663,
+                              "children": []
+                            },
+                            {
+                              "name": "02.motion3.json",
+                              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\shizuku\\runtime\\motion\\02.motion3.json",
+                              "type": "file",
+                              "size": 12177,
+                              "children": []
+                            },
+                            {
+                              "name": "03.motion3.json",
+                              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\shizuku\\runtime\\motion\\03.motion3.json",
+                              "type": "file",
+                              "size": 7219,
+                              "children": []
+                            },
+                            {
+                              "name": "04.motion3.json",
+                              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\shizuku\\runtime\\motion\\04.motion3.json",
+                              "type": "file",
+                              "size": 6824,
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "name": "shizuku.1024",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\shizuku\\runtime\\shizuku.1024",
+                          "type": "directory",
+                          "size": null,
+                          "children": [
+                            {
+                              "name": "texture_00.png",
+                              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\shizuku\\runtime\\shizuku.1024\\texture_00.png",
+                              "type": "file",
+                              "size": 581818,
+                              "children": []
+                            },
+                            {
+                              "name": "texture_01.png",
+                              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\shizuku\\runtime\\shizuku.1024\\texture_01.png",
+                              "type": "file",
+                              "size": 1039960,
+                              "children": []
+                            },
+                            {
+                              "name": "texture_02.png",
+                              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\shizuku\\runtime\\shizuku.1024\\texture_02.png",
+                              "type": "file",
+                              "size": 1256245,
+                              "children": []
+                            },
+                            {
+                              "name": "texture_03.png",
+                              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\shizuku\\runtime\\shizuku.1024\\texture_03.png",
+                              "type": "file",
+                              "size": 534673,
+                              "children": []
+                            },
+                            {
+                              "name": "texture_04.png",
+                              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\shizuku\\runtime\\shizuku.1024\\texture_04.png",
+                              "type": "file",
+                              "size": 1038025,
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "name": "shizuku.cdi3.json",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\shizuku\\runtime\\shizuku.cdi3.json",
+                          "type": "file",
+                          "size": 6717,
+                          "children": []
+                        },
+                        {
+                          "name": "shizuku.moc3",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\shizuku\\runtime\\shizuku.moc3",
+                          "type": "file",
+                          "size": 761472,
+                          "children": []
+                        },
+                        {
+                          "name": "shizuku.model3.json",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\shizuku\\runtime\\shizuku.model3.json",
+                          "type": "file",
+                          "size": 972,
+                          "children": []
+                        },
+                        {
+                          "name": "shizuku.physics3.json",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\shizuku\\runtime\\shizuku.physics3.json",
+                          "type": "file",
+                          "size": 4533,
+                          "children": []
+                        },
+                        {
+                          "name": "shizuku.pose3.json",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\live2d-models\\shizuku\\runtime\\shizuku.pose3.json",
+                          "type": "file",
+                          "size": 310,
+                          "children": []
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "model_dict.json",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\model_dict.json",
+              "type": "file",
+              "size": 708,
+              "children": []
+            },
+            {
+              "name": "pixi.lock",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\pixi.lock",
+              "type": "file",
+              "size": 91425,
+              "children": []
+            },
+            {
+              "name": "prompts",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\prompts",
+              "type": "directory",
+              "size": null,
+              "children": [
+                {
+                  "name": "README.md",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\prompts\\README.md",
+                  "type": "file",
+                  "size": 736,
+                  "children": []
+                },
+                {
+                  "name": "__init__.py",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\prompts\\__init__.py",
+                  "type": "file",
+                  "size": 0,
+                  "children": []
+                },
+                {
+                  "name": "prompt_loader.py",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\prompts\\prompt_loader.py",
+                  "type": "file",
+                  "size": 2368,
+                  "children": []
+                },
+                {
+                  "name": "utils",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\prompts\\utils",
+                  "type": "directory",
+                  "size": null,
+                  "children": [
+                    {
+                      "name": "concise_style_prompt.txt",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\prompts\\utils\\concise_style_prompt.txt",
+                      "type": "file",
+                      "size": 496,
+                      "children": []
+                    },
+                    {
+                      "name": "group_conversation_prompt.txt",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\prompts\\utils\\group_conversation_prompt.txt",
+                      "type": "file",
+                      "size": 403,
+                      "children": []
+                    },
+                    {
+                      "name": "live2d_expression_prompt.txt",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\prompts\\utils\\live2d_expression_prompt.txt",
+                      "type": "file",
+                      "size": 586,
+                      "children": []
+                    },
+                    {
+                      "name": "live_prompt.txt",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\prompts\\utils\\live_prompt.txt",
+                      "type": "file",
+                      "size": 435,
+                      "children": []
+                    },
+                    {
+                      "name": "mcp_prompt.txt",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\prompts\\utils\\mcp_prompt.txt",
+                      "type": "file",
+                      "size": 1729,
+                      "children": []
+                    },
+                    {
+                      "name": "proactive_speak_prompt.txt",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\prompts\\utils\\proactive_speak_prompt.txt",
+                      "type": "file",
+                      "size": 84,
+                      "children": []
+                    },
+                    {
+                      "name": "speakable_prompt.txt",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\prompts\\utils\\speakable_prompt.txt",
+                      "type": "file",
+                      "size": 1293,
+                      "children": []
+                    },
+                    {
+                      "name": "think_tag_prompt.txt",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\prompts\\utils\\think_tag_prompt.txt",
+                      "type": "file",
+                      "size": 433,
+                      "children": []
+                    },
+                    {
+                      "name": "tool_guidance_prompt.txt",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\prompts\\utils\\tool_guidance_prompt.txt",
+                      "type": "file",
+                      "size": 257,
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "pyproject.toml",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\pyproject.toml",
+              "type": "file",
+              "size": 1908,
+              "children": []
+            },
+            {
+              "name": "requirements-bilibili.txt",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\requirements-bilibili.txt",
+              "type": "file",
+              "size": 819,
+              "children": []
+            },
+            {
+              "name": "requirements.txt",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\requirements.txt",
+              "type": "file",
+              "size": 43238,
+              "children": []
+            },
+            {
+              "name": "run_server.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\run_server.py",
+              "type": "file",
+              "size": 7094,
+              "children": []
+            },
+            {
+              "name": "scripts",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\scripts",
+              "type": "directory",
+              "size": null,
+              "children": [
+                {
+                  "name": "run_bilibili_live.py",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\scripts\\run_bilibili_live.py",
+                  "type": "file",
+                  "size": 2085,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "name": "src",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src",
+              "type": "directory",
+              "size": null,
+              "children": [
+                {
+                  "name": "open_llm_vtuber",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber",
+                  "type": "directory",
+                  "size": null,
+                  "children": [
+                    {
+                      "name": "__init__.py",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\__init__.py",
+                      "type": "file",
+                      "size": 0,
+                      "children": []
+                    },
+                    {
+                      "name": "agent",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\agent",
+                      "type": "directory",
+                      "size": null,
+                      "children": [
+                        {
+                          "name": "__init__.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\agent\\__init__.py",
+                          "type": "file",
+                          "size": 0,
+                          "children": []
+                        },
+                        {
+                          "name": "agent_factory.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\agent\\agent_factory.py",
+                          "type": "file",
+                          "size": 5525,
+                          "children": []
+                        },
+                        {
+                          "name": "agents",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\agent\\agents",
+                          "type": "directory",
+                          "size": null,
+                          "children": [
+                            {
+                              "name": "__init__.py",
+                              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\agent\\agents\\__init__.py",
+                              "type": "file",
+                              "size": 0,
+                              "children": []
+                            },
+                            {
+                              "name": "agent_interface.py",
+                              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\agent\\agents\\agent_interface.py",
+                              "type": "file",
+                              "size": 1825,
+                              "children": []
+                            },
+                            {
+                              "name": "basic_memory_agent.py",
+                              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\agent\\agents\\basic_memory_agent.py",
+                              "type": "file",
+                              "size": 28714,
+                              "children": []
+                            },
+                            {
+                              "name": "hume_ai.py",
+                              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\agent\\agents\\hume_ai.py",
+                              "type": "file",
+                              "size": 9355,
+                              "children": []
+                            },
+                            {
+                              "name": "letta_agent.py",
+                              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\agent\\agents\\letta_agent.py",
+                              "type": "file",
+                              "size": 4431,
+                              "children": []
+                            },
+                            {
+                              "name": "mem0_llm.py",
+                              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\agent\\agents\\mem0_llm.py",
+                              "type": "file",
+                              "size": 0,
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "name": "input_types.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\agent\\input_types.py",
+                          "type": "file",
+                          "size": 2407,
+                          "children": []
+                        },
+                        {
+                          "name": "output_types.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\agent\\output_types.py",
+                          "type": "file",
+                          "size": 2336,
+                          "children": []
+                        },
+                        {
+                          "name": "stateless_llm",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\agent\\stateless_llm",
+                          "type": "directory",
+                          "size": null,
+                          "children": [
+                            {
+                              "name": "__init__.py",
+                              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\agent\\stateless_llm\\__init__.py",
+                              "type": "file",
+                              "size": 0,
+                              "children": []
+                            },
+                            {
+                              "name": "claude_llm.py",
+                              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\agent\\stateless_llm\\claude_llm.py",
+                              "type": "file",
+                              "size": 12125,
+                              "children": []
+                            },
+                            {
+                              "name": "llama_cpp_llm.py",
+                              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\agent\\stateless_llm\\llama_cpp_llm.py",
+                              "type": "file",
+                              "size": 2687,
+                              "children": []
+                            },
+                            {
+                              "name": "ollama_llm.py",
+                              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\agent\\stateless_llm\\ollama_llm.py",
+                              "type": "file",
+                              "size": 2638,
+                              "children": []
+                            },
+                            {
+                              "name": "openai_compatible_llm.py",
+                              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\agent\\stateless_llm\\openai_compatible_llm.py",
+                              "type": "file",
+                              "size": 10954,
+                              "children": []
+                            },
+                            {
+                              "name": "stateless_llm_interface.py",
+                              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\agent\\stateless_llm\\stateless_llm_interface.py",
+                              "type": "file",
+                              "size": 2392,
+                              "children": []
+                            },
+                            {
+                              "name": "stateless_llm_with_template.py",
+                              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\agent\\stateless_llm\\stateless_llm_with_template.py",
+                              "type": "file",
+                              "size": 7045,
+                              "children": []
+                            }
+                          ]
+                        },
+                        {
+                          "name": "stateless_llm_factory.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\agent\\stateless_llm_factory.py",
+                          "type": "file",
+                          "size": 3255,
+                          "children": []
+                        },
+                        {
+                          "name": "transformers.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\agent\\transformers.py",
+                          "type": "file",
+                          "size": 8176,
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "name": "asr",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\asr",
+                      "type": "directory",
+                      "size": null,
+                      "children": [
+                        {
+                          "name": "__init__.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\asr\\__init__.py",
+                          "type": "file",
+                          "size": 0,
+                          "children": []
+                        },
+                        {
+                          "name": "asr_factory.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\asr\\asr_factory.py",
+                          "type": "file",
+                          "size": 2496,
+                          "children": []
+                        },
+                        {
+                          "name": "asr_interface.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\asr\\asr_interface.py",
+                          "type": "file",
+                          "size": 1897,
+                          "children": []
+                        },
+                        {
+                          "name": "azure_asr.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\asr\\azure_asr.py",
+                          "type": "file",
+                          "size": 5509,
+                          "children": []
+                        },
+                        {
+                          "name": "faster_whisper_asr.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\asr\\faster_whisper_asr.py",
+                          "type": "file",
+                          "size": 1594,
+                          "children": []
+                        },
+                        {
+                          "name": "fun_asr.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\asr\\fun_asr.py",
+                          "type": "file",
+                          "size": 5114,
+                          "children": []
+                        },
+                        {
+                          "name": "groq_whisper_asr.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\asr\\groq_whisper_asr.py",
+                          "type": "file",
+                          "size": 1902,
+                          "children": []
+                        },
+                        {
+                          "name": "openai_whisper_asr.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\asr\\openai_whisper_asr.py",
+                          "type": "file",
+                          "size": 766,
+                          "children": []
+                        },
+                        {
+                          "name": "sherpa_onnx_asr.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\asr\\sherpa_onnx_asr.py",
+                          "type": "file",
+                          "size": 10453,
+                          "children": []
+                        },
+                        {
+                          "name": "utils.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\asr\\utils.py",
+                          "type": "file",
+                          "size": 6406,
+                          "children": []
+                        },
+                        {
+                          "name": "whisper_cpp_asr.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\asr\\whisper_cpp_asr.py",
+                          "type": "file",
+                          "size": 1134,
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "name": "chat_group.py",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\chat_group.py",
+                      "type": "file",
+                      "size": 12363,
+                      "children": []
+                    },
+                    {
+                      "name": "chat_history_manager.py",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\chat_history_manager.py",
+                      "type": "file",
+                      "size": 12914,
+                      "children": []
+                    },
+                    {
+                      "name": "config_manager",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\config_manager",
+                      "type": "directory",
+                      "size": null,
+                      "children": [
+                        {
+                          "name": "__init__.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\config_manager\\__init__.py",
+                          "type": "file",
+                          "size": 2956,
+                          "children": []
+                        },
+                        {
+                          "name": "agent.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\config_manager\\agent.py",
+                          "type": "file",
+                          "size": 8952,
+                          "children": []
+                        },
+                        {
+                          "name": "asr.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\config_manager\\asr.py",
+                          "type": "file",
+                          "size": 17015,
+                          "children": []
+                        },
+                        {
+                          "name": "character.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\config_manager\\character.py",
+                          "type": "file",
+                          "size": 3408,
+                          "children": []
+                        },
+                        {
+                          "name": "i18n.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\config_manager\\i18n.py",
+                          "type": "file",
+                          "size": 4441,
+                          "children": []
+                        },
+                        {
+                          "name": "live.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\config_manager\\live.py",
+                          "type": "file",
+                          "size": 1134,
+                          "children": []
+                        },
+                        {
+                          "name": "main.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\config_manager\\main.py",
+                          "type": "file",
+                          "size": 1052,
+                          "children": []
+                        },
+                        {
+                          "name": "stateless_llm.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\config_manager\\stateless_llm.py",
+                          "type": "file",
+                          "size": 11494,
+                          "children": []
+                        },
+                        {
+                          "name": "system.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\config_manager\\system.py",
+                          "type": "file",
+                          "size": 1627,
+                          "children": []
+                        },
+                        {
+                          "name": "tts.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\config_manager\\tts.py",
+                          "type": "file",
+                          "size": 33540,
+                          "children": []
+                        },
+                        {
+                          "name": "tts_preprocessor.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\config_manager\\tts_preprocessor.py",
+                          "type": "file",
+                          "size": 4936,
+                          "children": []
+                        },
+                        {
+                          "name": "utils.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\config_manager\\utils.py",
+                          "type": "file",
+                          "size": 5580,
+                          "children": []
+                        },
+                        {
+                          "name": "vad.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\config_manager\\vad.py",
+                          "type": "file",
+                          "size": 2764,
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "name": "conversations",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\conversations",
+                      "type": "directory",
+                      "size": null,
+                      "children": [
+                        {
+                          "name": "__init__.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\conversations\\__init__.py",
+                          "type": "file",
+                          "size": 0,
+                          "children": []
+                        },
+                        {
+                          "name": "conversation_handler.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\conversations\\conversation_handler.py",
+                          "type": "file",
+                          "size": 8171,
+                          "children": []
+                        },
+                        {
+                          "name": "conversation_utils.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\conversations\\conversation_utils.py",
+                          "type": "file",
+                          "size": 8343,
+                          "children": []
+                        },
+                        {
+                          "name": "group_conversation.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\conversations\\group_conversation.py",
+                          "type": "file",
+                          "size": 14259,
+                          "children": []
+                        },
+                        {
+                          "name": "single_conversation.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\conversations\\single_conversation.py",
+                          "type": "file",
+                          "size": 6849,
+                          "children": []
+                        },
+                        {
+                          "name": "tts_manager.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\conversations\\tts_manager.py",
+                          "type": "file",
+                          "size": 6724,
+                          "children": []
+                        },
+                        {
+                          "name": "types.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\conversations\\types.py",
+                          "type": "file",
+                          "size": 2101,
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "name": "live",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\live",
+                      "type": "directory",
+                      "size": null,
+                      "children": [
+                        {
+                          "name": "bilibili_live.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\live\\bilibili_live.py",
+                          "type": "file",
+                          "size": 12444,
+                          "children": []
+                        },
+                        {
+                          "name": "live_interface.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\live\\live_interface.py",
+                          "type": "file",
+                          "size": 3669,
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "name": "live2d_model.py",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\live2d_model.py",
+                      "type": "file",
+                      "size": 7377,
+                      "children": []
+                    },
+                    {
+                      "name": "mcpp",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\mcpp",
+                      "type": "directory",
+                      "size": null,
+                      "children": [
+                        {
+                          "name": "json_detector.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\mcpp\\json_detector.py",
+                          "type": "file",
+                          "size": 5475,
+                          "children": []
+                        },
+                        {
+                          "name": "mcp_client.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\mcpp\\mcp_client.py",
+                          "type": "file",
+                          "size": 7858,
+                          "children": []
+                        },
+                        {
+                          "name": "server_registry.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\mcpp\\server_registry.py",
+                          "type": "file",
+                          "size": 3873,
+                          "children": []
+                        },
+                        {
+                          "name": "tool_adapter.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\mcpp\\tool_adapter.py",
+                          "type": "file",
+                          "size": 10752,
+                          "children": []
+                        },
+                        {
+                          "name": "tool_executor.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\mcpp\\tool_executor.py",
+                          "type": "file",
+                          "size": 16081,
+                          "children": []
+                        },
+                        {
+                          "name": "tool_manager.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\mcpp\\tool_manager.py",
+                          "type": "file",
+                          "size": 1869,
+                          "children": []
+                        },
+                        {
+                          "name": "types.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\mcpp\\types.py",
+                          "type": "file",
+                          "size": 3192,
+                          "children": []
+                        },
+                        {
+                          "name": "utils",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\mcpp\\utils",
+                          "type": "directory",
+                          "size": null,
+                          "children": [
+                            {
+                              "name": "path.py",
+                              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\mcpp\\utils\\path.py",
+                              "type": "file",
+                              "size": 807,
+                              "children": []
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "name": "message_handler.py",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\message_handler.py",
+                      "type": "file",
+                      "size": 3185,
+                      "children": []
+                    },
+                    {
+                      "name": "proxy_handler.py",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\proxy_handler.py",
+                      "type": "file",
+                      "size": 12345,
+                      "children": []
+                    },
+                    {
+                      "name": "proxy_message_queue.py",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\proxy_message_queue.py",
+                      "type": "file",
+                      "size": 6710,
+                      "children": []
+                    },
+                    {
+                      "name": "routes.py",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\routes.py",
+                      "type": "file",
+                      "size": 9351,
+                      "children": []
+                    },
+                    {
+                      "name": "server.py",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\server.py",
+                      "type": "file",
+                      "size": 6135,
+                      "children": []
+                    },
+                    {
+                      "name": "service_context.py",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\service_context.py",
+                      "type": "file",
+                      "size": 23806,
+                      "children": []
+                    },
+                    {
+                      "name": "translate",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\translate",
+                      "type": "directory",
+                      "size": null,
+                      "children": [
+                        {
+                          "name": "__init__.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\translate\\__init__.py",
+                          "type": "file",
+                          "size": 0,
+                          "children": []
+                        },
+                        {
+                          "name": "deeplx.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\translate\\deeplx.py",
+                          "type": "file",
+                          "size": 993,
+                          "children": []
+                        },
+                        {
+                          "name": "tencent.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\translate\\tencent.py",
+                          "type": "file",
+                          "size": 4138,
+                          "children": []
+                        },
+                        {
+                          "name": "translate_factory.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\translate\\translate_factory.py",
+                          "type": "file",
+                          "size": 1178,
+                          "children": []
+                        },
+                        {
+                          "name": "translate_interface.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\translate\\translate_interface.py",
+                          "type": "file",
+                          "size": 244,
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "name": "tts",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\tts",
+                      "type": "directory",
+                      "size": null,
+                      "children": [
+                        {
+                          "name": "__init__.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\tts\\__init__.py",
+                          "type": "file",
+                          "size": 0,
+                          "children": []
+                        },
+                        {
+                          "name": "azure_tts.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\tts\\azure_tts.py",
+                          "type": "file",
+                          "size": 5502,
+                          "children": []
+                        },
+                        {
+                          "name": "bark_tts.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\tts\\bark_tts.py",
+                          "type": "file",
+                          "size": 1997,
+                          "children": []
+                        },
+                        {
+                          "name": "cartesia_tts.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\tts\\cartesia_tts.py",
+                          "type": "file",
+                          "size": 5843,
+                          "children": []
+                        },
+                        {
+                          "name": "coqui_tts.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\tts\\coqui_tts.py",
+                          "type": "file",
+                          "size": 4312,
+                          "children": []
+                        },
+                        {
+                          "name": "cosyvoice2_tts.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\tts\\cosyvoice2_tts.py",
+                          "type": "file",
+                          "size": 2021,
+                          "children": []
+                        },
+                        {
+                          "name": "cosyvoice_tts.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\tts\\cosyvoice_tts.py",
+                          "type": "file",
+                          "size": 1834,
+                          "children": []
+                        },
+                        {
+                          "name": "edge_tts.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\tts\\edge_tts.py",
+                          "type": "file",
+                          "size": 1558,
+                          "children": []
+                        },
+                        {
+                          "name": "elevenlabs_tts.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\tts\\elevenlabs_tts.py",
+                          "type": "file",
+                          "size": 5390,
+                          "children": []
+                        },
+                        {
+                          "name": "fish_api_tts.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\tts\\fish_api_tts.py",
+                          "type": "file",
+                          "size": 1922,
+                          "children": []
+                        },
+                        {
+                          "name": "gpt_sovits_tts.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\tts\\gpt_sovits_tts.py",
+                          "type": "file",
+                          "size": 2232,
+                          "children": []
+                        },
+                        {
+                          "name": "melo_tts.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\tts\\melo_tts.py",
+                          "type": "file",
+                          "size": 2079,
+                          "children": []
+                        },
+                        {
+                          "name": "minimax_tts.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\tts\\minimax_tts.py",
+                          "type": "file",
+                          "size": 3246,
+                          "children": []
+                        },
+                        {
+                          "name": "openai_tts.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\tts\\openai_tts.py",
+                          "type": "file",
+                          "size": 5802,
+                          "children": []
+                        },
+                        {
+                          "name": "piper_tts.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\tts\\piper_tts.py",
+                          "type": "file",
+                          "size": 4338,
+                          "children": []
+                        },
+                        {
+                          "name": "pyttsx3_tts.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\tts\\pyttsx3_tts.py",
+                          "type": "file",
+                          "size": 1971,
+                          "children": []
+                        },
+                        {
+                          "name": "sherpa_onnx_tts.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\tts\\sherpa_onnx_tts.py",
+                          "type": "file",
+                          "size": 3598,
+                          "children": []
+                        },
+                        {
+                          "name": "siliconflow_tts.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\tts\\siliconflow_tts.py",
+                          "type": "file",
+                          "size": 2552,
+                          "children": []
+                        },
+                        {
+                          "name": "spark_tts.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\tts\\spark_tts.py",
+                          "type": "file",
+                          "size": 2299,
+                          "children": []
+                        },
+                        {
+                          "name": "tts_factory.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\tts\\tts_factory.py",
+                          "type": "file",
+                          "size": 10032,
+                          "children": []
+                        },
+                        {
+                          "name": "tts_interface.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\tts\\tts_interface.py",
+                          "type": "file",
+                          "size": 2772,
+                          "children": []
+                        },
+                        {
+                          "name": "x_tts.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\tts\\x_tts.py",
+                          "type": "file",
+                          "size": 1441,
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "name": "utils",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\utils",
+                      "type": "directory",
+                      "size": null,
+                      "children": [
+                        {
+                          "name": "__init__.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\utils\\__init__.py",
+                          "type": "file",
+                          "size": 0,
+                          "children": []
+                        },
+                        {
+                          "name": "install_utils.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\utils\\install_utils.py",
+                          "type": "file",
+                          "size": 5077,
+                          "children": []
+                        },
+                        {
+                          "name": "sentence_divider.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\utils\\sentence_divider.py",
+                          "type": "file",
+                          "size": 20636,
+                          "children": []
+                        },
+                        {
+                          "name": "stream_audio.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\utils\\stream_audio.py",
+                          "type": "file",
+                          "size": 2963,
+                          "children": []
+                        },
+                        {
+                          "name": "tts_preprocessor.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\utils\\tts_preprocessor.py",
+                          "type": "file",
+                          "size": 5875,
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "name": "vad",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\vad",
+                      "type": "directory",
+                      "size": null,
+                      "children": [
+                        {
+                          "name": "__init__.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\vad\\__init__.py",
+                          "type": "file",
+                          "size": 0,
+                          "children": []
+                        },
+                        {
+                          "name": "silero.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\vad\\silero.py",
+                          "type": "file",
+                          "size": 7869,
+                          "children": []
+                        },
+                        {
+                          "name": "vad_factory.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\vad\\vad_factory.py",
+                          "type": "file",
+                          "size": 710,
+                          "children": []
+                        },
+                        {
+                          "name": "vad_interface.py",
+                          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\vad\\vad_interface.py",
+                          "type": "file",
+                          "size": 389,
+                          "children": []
+                        }
+                      ]
+                    },
+                    {
+                      "name": "websocket_handler.py",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\src\\open_llm_vtuber\\websocket_handler.py",
+                      "type": "file",
+                      "size": 23784,
+                      "children": []
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "name": "upgrade.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\upgrade.py",
+              "type": "file",
+              "size": 5940,
+              "children": []
+            },
+            {
+              "name": "upgrade_codes",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\upgrade_codes",
+              "type": "directory",
+              "size": null,
+              "children": [
+                {
+                  "name": "__init__.py",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\upgrade_codes\\__init__.py",
+                  "type": "file",
+                  "size": 0,
+                  "children": []
+                },
+                {
+                  "name": "compare_yaml.py",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\upgrade_codes\\compare_yaml.py",
+                  "type": "file",
+                  "size": 3066,
+                  "children": []
+                },
+                {
+                  "name": "config_sync.py",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\upgrade_codes\\config_sync.py",
+                  "type": "file",
+                  "size": 12465,
+                  "children": []
+                },
+                {
+                  "name": "from_version",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\upgrade_codes\\from_version",
+                  "type": "directory",
+                  "size": null,
+                  "children": [
+                    {
+                      "name": "__init__.py",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\upgrade_codes\\from_version\\__init__.py",
+                      "type": "file",
+                      "size": 0,
+                      "children": []
+                    },
+                    {
+                      "name": "v_1_1_1.py",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\upgrade_codes\\from_version\\v_1_1_1.py",
+                      "type": "file",
+                      "size": 4465,
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "name": "upgrade_core",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\upgrade_codes\\upgrade_core",
+                  "type": "directory",
+                  "size": null,
+                  "children": [
+                    {
+                      "name": "__init__.py",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\upgrade_codes\\upgrade_core\\__init__.py",
+                      "type": "file",
+                      "size": 0,
+                      "children": []
+                    },
+                    {
+                      "name": "comment_diff_fn.py",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\upgrade_codes\\upgrade_core\\comment_diff_fn.py",
+                      "type": "file",
+                      "size": 1658,
+                      "children": []
+                    },
+                    {
+                      "name": "comment_sync.py",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\upgrade_codes\\upgrade_core\\comment_sync.py",
+                      "type": "file",
+                      "size": 2155,
+                      "children": []
+                    },
+                    {
+                      "name": "constants.py",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\upgrade_codes\\upgrade_core\\constants.py",
+                      "type": "file",
+                      "size": 16421,
+                      "children": []
+                    },
+                    {
+                      "name": "language.py",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\upgrade_codes\\upgrade_core\\language.py",
+                      "type": "file",
+                      "size": 1838,
+                      "children": []
+                    },
+                    {
+                      "name": "upgrade_utils.py",
+                      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\upgrade_codes\\upgrade_core\\upgrade_utils.py",
+                      "type": "file",
+                      "size": 5036,
+                      "children": []
+                    }
+                  ]
+                },
+                {
+                  "name": "upgrade_manager.py",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\upgrade_codes\\upgrade_manager.py",
+                  "type": "file",
+                  "size": 2180,
+                  "children": []
+                },
+                {
+                  "name": "version_manager.py",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\upgrade_codes\\version_manager.py",
+                  "type": "file",
+                  "size": 3674,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "name": "uv.lock",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\uv.lock",
+              "type": "file",
+              "size": 705234,
+              "children": []
+            },
+            {
+              "name": "web_tool",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\web_tool",
+              "type": "directory",
+              "size": null,
+              "children": [
+                {
+                  "name": "README.md",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\web_tool\\README.md",
+                  "type": "file",
+                  "size": 917,
+                  "children": []
+                },
+                {
+                  "name": "index.html",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\web_tool\\index.html",
+                  "type": "file",
+                  "size": 3879,
+                  "children": []
+                },
+                {
+                  "name": "main.js",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\web_tool\\main.js",
+                  "type": "file",
+                  "size": 14559,
+                  "children": []
+                },
+                {
+                  "name": "recorder.js",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\vendor\\Open-LLM-VTuber\\web_tool\\recorder.js",
+                  "type": "file",
+                  "size": 4602,
+                  "children": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ]
 }

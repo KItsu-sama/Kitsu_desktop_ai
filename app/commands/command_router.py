@@ -1,5 +1,5 @@
 """
-interface/command_router.py
+app/commands/command_router.py
 
 Changes vs previous version:
   - _cmd_rate now also calls engine.compression.online_update(rating=N)

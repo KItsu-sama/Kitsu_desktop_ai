@@ -49,9 +49,9 @@ from domain.personality.emotion_config import (
     get_legacy_mode, validate_mood, validate_style,
     UNSAFE_COMBINATIONS
 )
-from domain.personality.emotion_stack_manager import EmotionStackManager
-from domain.personality.personality_mapper import PersonalityMapper
-from domain.personality.emotional_triggers import (
+from .emotion_stack_manager import EmotionStackManager
+from .personality_mapper import PersonalityMapper
+from .emotional_triggers import (
     detect_emotional_triggers, apply_trigger_effects, get_trigger_emotions,
     apply_personality_modifiers
 )

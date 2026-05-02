@@ -117,7 +117,7 @@ def register_ui_adapters():
     """Register all UI adapters with the interface registry."""
     try:
         # Register command router
-        from interfaces.desktop.commands.command_router import CommandRouter
+        from app.commands.command_router import CommandRouter
         # Note: This will be registered when the router is created
         
         # Register terminal interface

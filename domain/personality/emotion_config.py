@@ -384,7 +384,7 @@ def fix_protective_cold(p):
     p.style = "direct"
     return p
 
-def rule_gentle_mean(p): return p.state == "submissive" and p.mood == "mean"  # Fixed: "gentle" not in VALID_STATES, using "submissive" as closest
+def rule_gentle_mean(p): return p.state == "submissive" and p.mood == "mean"  
 def fix_gentle_mean(p):
     p.mood = "behave"
     return p

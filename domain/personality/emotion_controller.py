@@ -11,9 +11,9 @@ import time
 from typing import Dict, Any, Optional, List
 from dataclasses import dataclass
 
-from domain.personality.emotion_engine import EmotionEngine
-from domain.personality.kitsu_self import KitsuSelf
-from domain.personality.reaction_mapper import ReactionMapper, InteractionType
+from .emotion_engine import EmotionEngine
+from .kitsu_self import KitsuSelf
+from .reaction_mapper import ReactionMapper, InteractionType
 
 log = logging.getLogger(__name__)
 

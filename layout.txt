@@ -21,6 +21,22 @@
     ├── LICENSE
     ├── PERSONALITY_ENGINE_FIXES_SUMMARY.md
     ├── README.md
+    ├── SYSTEM_ARCHITECTURE.md
+    ├── app
+    │   ├── __init__.py
+    │   ├── adapters
+    │   │   ├── desktop.py
+    │   │   ├── desktop_controller.py
+    │   │   ├── file_controller.py
+    │   │   ├── files.py
+    │   │   └── power.py
+    │   ├── adapters.py
+    │   ├── commands
+    │   │   ├── __init__.py
+    │   │   ├── command_handlers
+    │   │   │   └── __init__.py
+    │   │   └── command_router.py
+    │   └── user_manager.py
     ├── assets
     │   ├── banner.jpg
     │   ├── images
@@ -28,9 +44,20 @@
     │   ├── screenshots
     │   └── sounds
     ├── data
+    │   ├── config
+    │   │   ├── permissions.json
+    │   │   ├── personality.json
+    │   │   ├── system_config.json
+    │   │   └── user_profile.json
+    │   ├── learning
+    │   ├── lora
     │   ├── memory
+    │   │   └── backups
     │   ├── profiles
     │   └── runtime
+    │       ├── .first_run_complete
+    │       ├── crash.log
+    │       └── feature_manifest.json
     ├── docs
     │   ├── SECURITY.md
     │   ├── api
@@ -100,6 +127,7 @@
     │       ├── project-overview.md
     │       └── system-architecture.md
     ├── domain
+    │   ├── __init__.py
     │   ├── ai
     │   │   ├── chat
     │   │   │   └── components.py
@@ -141,47 +169,84 @@
     │   │       ├── provider.py
     │   │       ├── style_processor.py
     │   │       └── templates.py
+    │   ├── builder.py
+    │   ├── capabilities.py
     │   ├── contracts
     │   │   ├── contracts.py
     │   │   └── interfaces.py
+    │   ├── energy.py
+    │   ├── inertia.py
     │   ├── interaction
     │   │   ├── input_manager.py
     │   │   ├── input_mux.py
     │   │   └── prompt_builder.py
+    │   ├── loop_guard.py
     │   ├── memory
     │   │   └── stores
     │   │       ├── __init__.py
     │   │       ├── episodic.py
     │   │       ├── short_term.py
     │   │       └── vector_memory.py
-    │   └── personality
-    │       ├── emotion_config.py
-    │       ├── emotion_controller.py
-    │       ├── emotion_engine.py
-    │       ├── emotion_manager.py
-    │       ├── emotion_model.py
-    │       ├── emotion_stack_manager.py
-    │       ├── emotional_triggers.py
-    │       ├── kitsu_self.py
-    │       ├── kitsu_self_interface.py
-    │       ├── memory_manager.py
-    │       ├── personality_mapper.py
-    │       ├── reaction_mapper.py
-    │       ├── scoring.py
-    │       └── trigger_manager.py
-    ├── infrastructure
+    │   ├── personality
+    │   │   ├── __init__.py
+    │   │   ├── emotion_config.py
+    │   │   ├── emotion_controller.py
+    │   │   ├── emotion_engine.py
+    │   │   ├── emotion_manager.py
+    │   │   ├── emotion_model.py
+    │   │   ├── emotion_stack_manager.py
+    │   │   ├── emotional_triggers.py
+    │   │   ├── kitsu_self.py
+    │   │   ├── kitsu_self_interface.py
+    │   │   ├── memory_manager.py
+    │   │   ├── personality_mapper.py
+    │   │   ├── reaction_mapper.py
+    │   │   ├── scoring.py
+    │   │   └── trigger_manager.py
+    │   ├── policy.py
+    │   ├── presets.py
+    │   ├── rate_limit.py
+    │   ├── rules.py
+    │   ├── triggers.py
+    │   ├── unified_events.py
+    │   ├── unified_manager.py
+    │   └── vector.py
+    ├── features
+    │   ├── __init__.py
+    │   ├── browser_integration
+    │   ├── community_features
+    │   ├── loader.py
+    │   ├── plugin_api.py
+    │   └── quiz_solver
+    │       ├── auto_solver.py
+    │       ├── config.json
+    │       ├── module.py
+    │       ├── performance_tracker.py
+    │       └── safety.py
+    ├── infra
+    │   ├── __init__.py
     │   ├── llm
     │   │   └── llm_fallback_generator.py
     │   ├── logging
     │   │   └── logger.py
     │   ├── multimodal
+    │   ├── sandbox
+    │   │   ├── paths.py
+    │   │   └── scopes.py
+    │   ├── smart_retrieval.py
     │   ├── storage
     │   │   └── preferences.py
+    │   ├── stores
+    │   │   ├── __init__.py
+    │   │   ├── episodic.py
+    │   │   ├── short_term.py
+    │   │   └── vector_memory.py
     │   └── system
     │       ├── background_tasks.py
     │       ├── kill_switch.py
     │       └── permission_manager.py
     ├── interfaces
+    │   ├── __init__.py
     │   ├── api
     │   ├── desktop
     │   │   ├── avatar
@@ -207,26 +272,26 @@
     │   │       ├── banner.py
     │   │       ├── interface.py
     │   │       └── splash.py
+    │   ├── learning
+    │   │   └── micro_trainer.py
+    │   ├── overlay
+    │   │   ├── hud.hud.py
+    │   │   └── notifications.py
     │   ├── tauri
     │   └── ui
-    ├── modules
-    │   ├── __init__.py
-    │   ├── browser_integration
-    │   ├── community_features
-    │   ├── loader.py
-    │   ├── plugin_api.py
-    │   └── quiz_solver
-    │       ├── auto_solver.py
-    │       ├── config.json
-    │       ├── module.py
-    │       ├── performance_tracker.py
-    │       └── safety.py
+    ├── r.py
     ├── requirements.txt
     ├── runtime
+    │   ├── MODULE_SUMMARY.md
+    │   ├── README_REFACTORING.md
+    │   ├── SLM_CHAT_INTEGRATION.md
+    │   ├── VECTOR_SYSTEM_README.md
+    │   ├── __init__.py
     │   ├── application.py
     │   ├── behavior_engine.py
     │   ├── bootstrap.py
     │   ├── bus.py
+    │   ├── capability_gateway.rs
     │   ├── clocks.py
     │   ├── container.py
     │   ├── desktop_controller.py
@@ -244,7 +309,6 @@
     │   ├── performance_manager.py
     │   ├── policy_router.py
     │   ├── profiles.py
-    │   ├── r.py
     │   ├── runtime_config.py
     │   ├── strip_controller.py
     │   └── system_monitor.py
@@ -257,7 +321,9 @@
     │   └── setup_wizard.py
     ├── shared
     │   ├── __init__.py
+    │   ├── budgets.py
     │   ├── capability_flags.py
+    │   ├── complexity.py
     │   ├── config
     │   │   ├── permissions.json
     │   │   ├── personality.json
@@ -265,6 +331,10 @@
     │   │   └── user_profile.json
     │   ├── config_loader.py
     │   ├── constants
+    │   ├── data
+    │   │   ├── brain
+    │   │   └── runtime
+    │   │       └── crash.log
     │   ├── defaults.yaml
     │   ├── factual_exceptions.json
     │   ├── file_security.py
@@ -272,26 +342,35 @@
     │   ├── loader.py
     │   ├── logging.py
     │   ├── lora
+    │   ├── mappings.py
     │   ├── memory
     │   │   └── backups
     │   ├── model_dict.json
     │   ├── models
     │   ├── mods
+    │   ├── mood_tracker.py
     │   ├── ollama.yaml
     │   ├── personality_config.py
     │   ├── profiles
     │   │   ├── balanced.yaml
     │   │   ├── full.yaml
     │   │   └── ultra_low.yaml
+    │   ├── retention.py
     │   ├── runtime
     │   │   ├── .first_run_complete
     │   │   ├── crash.log
     │   │   └── feature_manifest.json
+    │   ├── sass_generator.py
     │   ├── schemas
     │   │   ├── __init__.py
     │   │   ├── schema.py
     │   │   └── validation.py
+    │   ├── self_model.py
     │   ├── session_logger.py
+    │   ├── signals.py
+    │   ├── snapshot.py
+    │   ├── tiers.py
+    │   ├── transitions.py
     │   ├── triggers.json
     │   ├── ul_templates.json
     │   ├── unified_config.py
@@ -301,69 +380,8 @@
     │       ├── layout_maper.py
     │       ├── layout_mapper.py
     │       ├── metrics.py
-    │       └── tracing.py
-    ├── src
-    │   ├── MODULE_SUMMARY.md
-    │   ├── README_REFACTORING.md
-    │   ├── SLM_CHAT_INTEGRATION.md
-    │   ├── VECTOR_SYSTEM_README.md
-    │   ├── __init__.py
-    │   ├── adapters
-    │   │   ├── desktop.py
-    │   │   ├── desktop_controller.py
-    │   │   ├── file_controller.py
-    │   │   ├── files.py
-    │   │   └── power.py
-    │   ├── adapters.py
-    │   ├── budgets.py
-    │   ├── builder.py
-    │   ├── capabilities.py
-    │   ├── capability_gateway.rs
-    │   ├── commands
-    │   │   ├── __init__.py
-    │   │   ├── command_handlers
-    │   │   │   └── __init__.py
-    │   │   └── command_router.py
-    │   ├── complexity.py
-    │   ├── data
-    │   │   ├── brain
-    │   │   └── runtime
-    │   │       └── crash.log
-    │   ├── energy.py
-    │   ├── inertia.py
-    │   ├── learning
-    │   │   └── micro_trainer.py
-    │   ├── loop_guard.py
-    │   ├── mappings.py
-    │   ├── mood_tracker.py
-    │   ├── overlay
-    │   │   ├── hud.hud.py
-    │   │   └── notifications.py
-    │   ├── policy.py
-    │   ├── presets.py
-    │   ├── rate_limit.py
-    │   ├── retention.py
-    │   ├── rules.py
-    │   ├── sandbox
-    │   │   ├── paths.py
-    │   │   └── scopes.py
-    │   ├── sass_generator.py
-    │   ├── self_model.py
-    │   ├── signals.py
-    │   ├── smart_retrieval.py
-    │   ├── snapshot.py
-    │   ├── stores
-    │   │   ├── __init__.py
-    │   │   ├── episodic.py
-    │   │   ├── short_term.py
-    │   │   └── vector_memory.py
-    │   ├── tiers.py
-    │   ├── transitions.py
-    │   ├── triggers.py
-    │   ├── unified_events.py
-    │   ├── unified_manager.py
-    │   ├── user_manager.py
-    │   └── vector.py
+    │       ├── tracing.py
+    │       └── validation.py
     ├── src-tauri
     │   ├── frontend
     │   │   ├── assets
@@ -1700,3 +1718,302 @@
     │           ├── config.toml
     │           └── imports.lock
     └── vendor
+        └── Open-LLM-VTuber
+            ├── .cursor
+            │   └── rules
+            │       └── olv-core-rules.mdc
+            ├── .dockerignore
+            ├── .gemini
+            │   ├── GEMINI.md
+            │   └── styleguide.md
+            ├── .gitattributes
+            ├── .github
+            │   ├── FUNDING.yml
+            │   ├── ISSUE_TEMPLATE
+            │   │   ├── bug---question---get-help---bug---提问---求助.md
+            │   │   └── feature-request---功能建议.md
+            │   ├── copilot-instructions.md
+            │   └── workflows
+            │       ├── codeql.yml
+            │       ├── create_release.yml
+            │       ├── docker-blacksmith.yml
+            │       ├── fossa_scan.yml
+            │       ├── ruff.yml
+            │       └── update-requirements.yml
+            ├── .gitignore
+            ├── .gitmodules
+            ├── .pre-commit-config.yaml
+            ├── .python-version
+            ├── CLAUDE.md
+            ├── CONTRIBUTING.md
+            ├── LICENSE
+            ├── LICENSE-Live2D.md
+            ├── README.CN.md
+            ├── README.JP.md
+            ├── README.KR.md
+            ├── README.md
+            ├── assets
+            │   ├── banner.cn.jpg
+            │   ├── banner.jpg
+            │   ├── banner.kr.jpg
+            │   ├── i1.jpg
+            │   ├── i1_app_mode.jpg
+            │   ├── i2.jpg
+            │   ├── i2_pet_vscode.jpg
+            │   ├── i3.jpg
+            │   ├── i3_browser_world_fun.jpg
+            │   ├── i4.jpg
+            │   └── i4_pet_desktop.jpg
+            ├── avatars
+            │   ├── mao.png
+            │   └── shizuku.png
+            ├── backgrounds
+            │   ├── README.md
+            │   ├── cartoon-night-landscape-moon.jpeg
+            │   ├── ceiling-window-room-night.jpeg
+            │   ├── cityscape.jpeg
+            │   ├── computer-room-illustration.jpeg
+            │   ├── congress.jpg
+            │   ├── field-night-painting-moon.jpeg
+            │   ├── lernado-diff-classroom-center.jpeg
+            │   ├── moon-over-mountain.jpeg
+            │   ├── mountain-range-illustration.jpeg
+            │   ├── night-landscape-grass-moon.jpeg
+            │   ├── night-scene-cartoon-moon.jpeg
+            │   ├── painting-valley-night-sky. 2.jpeg
+            │   ├── room-interior-illustration.jpeg
+            │   └── sdxl-classroom-door-view.jpeg
+            ├── characters
+            │   ├── README.md
+            │   ├── en_nuke_debate.yaml
+            │   ├── en_unhelpful_ai.yaml
+            │   ├── zh_米粒.yaml
+            │   └── zh_翻译腔.yaml
+            ├── config_templates
+            │   ├── README.md
+            │   ├── conf.ZH.default.yaml
+            │   └── conf.default.yaml
+            ├── doc
+            │   ├── README.md
+            │   └── sample_conf
+            │       ├── sherpaASRTTS_sense_voice_melo.yaml
+            │       ├── sherpaASRTTS_sense_voice_piper_en.yaml
+            │       ├── sherpaASRTTS_sense_voice_vits_zh.yaml
+            │       ├── sherpaASR_paraformer.yaml
+            │       └── sherpaASR_sense_voice.yaml
+            ├── dockerfile
+            ├── frontend
+            ├── live2d-models
+            │   ├── mao_pro
+            │   │   ├── ReadMe.txt
+            │   │   └── runtime
+            │   │       ├── expressions
+            │   │       │   ├── exp_01.exp3.json
+            │   │       │   ├── exp_02.exp3.json
+            │   │       │   ├── exp_03.exp3.json
+            │   │       │   ├── exp_04.exp3.json
+            │   │       │   ├── exp_05.exp3.json
+            │   │       │   ├── exp_06.exp3.json
+            │   │       │   ├── exp_07.exp3.json
+            │   │       │   └── exp_08.exp3.json
+            │   │       ├── mao_pro.4096
+            │   │       │   └── texture_00.png
+            │   │       ├── mao_pro.cdi3.json
+            │   │       ├── mao_pro.moc3
+            │   │       ├── mao_pro.model3.json
+            │   │       ├── mao_pro.physics3.json
+            │   │       ├── mao_pro.pose3.json
+            │   │       └── motions
+            │   │           ├── mtn_01.motion3.json
+            │   │           ├── mtn_02.motion3.json
+            │   │           ├── mtn_03.motion3.json
+            │   │           ├── mtn_04.motion3.json
+            │   │           ├── special_01.motion3.json
+            │   │           ├── special_02.motion3.json
+            │   │           └── special_03.motion3.json
+            │   └── shizuku
+            │       ├── ReadMe.txt
+            │       └── runtime
+            │           ├── motion
+            │           │   ├── 01.motion3.json
+            │           │   ├── 02.motion3.json
+            │           │   ├── 03.motion3.json
+            │           │   └── 04.motion3.json
+            │           ├── shizuku.1024
+            │           │   ├── texture_00.png
+            │           │   ├── texture_01.png
+            │           │   ├── texture_02.png
+            │           │   ├── texture_03.png
+            │           │   └── texture_04.png
+            │           ├── shizuku.cdi3.json
+            │           ├── shizuku.moc3
+            │           ├── shizuku.model3.json
+            │           ├── shizuku.physics3.json
+            │           └── shizuku.pose3.json
+            ├── model_dict.json
+            ├── pixi.lock
+            ├── prompts
+            │   ├── README.md
+            │   ├── __init__.py
+            │   ├── prompt_loader.py
+            │   └── utils
+            │       ├── concise_style_prompt.txt
+            │       ├── group_conversation_prompt.txt
+            │       ├── live2d_expression_prompt.txt
+            │       ├── live_prompt.txt
+            │       ├── mcp_prompt.txt
+            │       ├── proactive_speak_prompt.txt
+            │       ├── speakable_prompt.txt
+            │       ├── think_tag_prompt.txt
+            │       └── tool_guidance_prompt.txt
+            ├── pyproject.toml
+            ├── requirements-bilibili.txt
+            ├── requirements.txt
+            ├── run_server.py
+            ├── scripts
+            │   └── run_bilibili_live.py
+            ├── src
+            │   └── open_llm_vtuber
+            │       ├── __init__.py
+            │       ├── agent
+            │       │   ├── __init__.py
+            │       │   ├── agent_factory.py
+            │       │   ├── agents
+            │       │   │   ├── __init__.py
+            │       │   │   ├── agent_interface.py
+            │       │   │   ├── basic_memory_agent.py
+            │       │   │   ├── hume_ai.py
+            │       │   │   ├── letta_agent.py
+            │       │   │   └── mem0_llm.py
+            │       │   ├── input_types.py
+            │       │   ├── output_types.py
+            │       │   ├── stateless_llm
+            │       │   │   ├── __init__.py
+            │       │   │   ├── claude_llm.py
+            │       │   │   ├── llama_cpp_llm.py
+            │       │   │   ├── ollama_llm.py
+            │       │   │   ├── openai_compatible_llm.py
+            │       │   │   ├── stateless_llm_interface.py
+            │       │   │   └── stateless_llm_with_template.py
+            │       │   ├── stateless_llm_factory.py
+            │       │   └── transformers.py
+            │       ├── asr
+            │       │   ├── __init__.py
+            │       │   ├── asr_factory.py
+            │       │   ├── asr_interface.py
+            │       │   ├── azure_asr.py
+            │       │   ├── faster_whisper_asr.py
+            │       │   ├── fun_asr.py
+            │       │   ├── groq_whisper_asr.py
+            │       │   ├── openai_whisper_asr.py
+            │       │   ├── sherpa_onnx_asr.py
+            │       │   ├── utils.py
+            │       │   └── whisper_cpp_asr.py
+            │       ├── chat_group.py
+            │       ├── chat_history_manager.py
+            │       ├── config_manager
+            │       │   ├── __init__.py
+            │       │   ├── agent.py
+            │       │   ├── asr.py
+            │       │   ├── character.py
+            │       │   ├── i18n.py
+            │       │   ├── live.py
+            │       │   ├── main.py
+            │       │   ├── stateless_llm.py
+            │       │   ├── system.py
+            │       │   ├── tts.py
+            │       │   ├── tts_preprocessor.py
+            │       │   ├── utils.py
+            │       │   └── vad.py
+            │       ├── conversations
+            │       │   ├── __init__.py
+            │       │   ├── conversation_handler.py
+            │       │   ├── conversation_utils.py
+            │       │   ├── group_conversation.py
+            │       │   ├── single_conversation.py
+            │       │   ├── tts_manager.py
+            │       │   └── types.py
+            │       ├── live
+            │       │   ├── bilibili_live.py
+            │       │   └── live_interface.py
+            │       ├── live2d_model.py
+            │       ├── mcpp
+            │       │   ├── json_detector.py
+            │       │   ├── mcp_client.py
+            │       │   ├── server_registry.py
+            │       │   ├── tool_adapter.py
+            │       │   ├── tool_executor.py
+            │       │   ├── tool_manager.py
+            │       │   ├── types.py
+            │       │   └── utils
+            │       │       └── path.py
+            │       ├── message_handler.py
+            │       ├── proxy_handler.py
+            │       ├── proxy_message_queue.py
+            │       ├── routes.py
+            │       ├── server.py
+            │       ├── service_context.py
+            │       ├── translate
+            │       │   ├── __init__.py
+            │       │   ├── deeplx.py
+            │       │   ├── tencent.py
+            │       │   ├── translate_factory.py
+            │       │   └── translate_interface.py
+            │       ├── tts
+            │       │   ├── __init__.py
+            │       │   ├── azure_tts.py
+            │       │   ├── bark_tts.py
+            │       │   ├── cartesia_tts.py
+            │       │   ├── coqui_tts.py
+            │       │   ├── cosyvoice2_tts.py
+            │       │   ├── cosyvoice_tts.py
+            │       │   ├── edge_tts.py
+            │       │   ├── elevenlabs_tts.py
+            │       │   ├── fish_api_tts.py
+            │       │   ├── gpt_sovits_tts.py
+            │       │   ├── melo_tts.py
+            │       │   ├── minimax_tts.py
+            │       │   ├── openai_tts.py
+            │       │   ├── piper_tts.py
+            │       │   ├── pyttsx3_tts.py
+            │       │   ├── sherpa_onnx_tts.py
+            │       │   ├── siliconflow_tts.py
+            │       │   ├── spark_tts.py
+            │       │   ├── tts_factory.py
+            │       │   ├── tts_interface.py
+            │       │   └── x_tts.py
+            │       ├── utils
+            │       │   ├── __init__.py
+            │       │   ├── install_utils.py
+            │       │   ├── sentence_divider.py
+            │       │   ├── stream_audio.py
+            │       │   └── tts_preprocessor.py
+            │       ├── vad
+            │       │   ├── __init__.py
+            │       │   ├── silero.py
+            │       │   ├── vad_factory.py
+            │       │   └── vad_interface.py
+            │       └── websocket_handler.py
+            ├── upgrade.py
+            ├── upgrade_codes
+            │   ├── __init__.py
+            │   ├── compare_yaml.py
+            │   ├── config_sync.py
+            │   ├── from_version
+            │   │   ├── __init__.py
+            │   │   └── v_1_1_1.py
+            │   ├── upgrade_core
+            │   │   ├── __init__.py
+            │   │   ├── comment_diff_fn.py
+            │   │   ├── comment_sync.py
+            │   │   ├── constants.py
+            │   │   ├── language.py
+            │   │   └── upgrade_utils.py
+            │   ├── upgrade_manager.py
+            │   └── version_manager.py
+            ├── uv.lock
+            └── web_tool
+                ├── README.md
+                ├── index.html
+                ├── main.js
+                └── recorder.js

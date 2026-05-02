@@ -190,7 +190,7 @@ class Orchestrator(ModuleContract):
         await self._initialize_engine()
         
         # Initialize command router with self as controller (use interface)
-        command_router_impl = get_interface(InterfaceType.UI)
+        command_router_impl = get_interface(InterfaceType.COMMAND_ROUTER)
         if command_router_impl and hasattr(command_router_impl, 'route'):
             self.command_router = command_router_impl
         else:
