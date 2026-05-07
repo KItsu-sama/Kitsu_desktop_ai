@@ -20,6 +20,7 @@
     │   └── workspace.json
     ├── LICENSE
     ├── PERSONALITY_ENGINE_FIXES_SUMMARY.md
+    ├── PERSONALITY_ENHANCEMENTS.md
     ├── README.md
     ├── SYSTEM_ARCHITECTURE.md
     ├── app
@@ -43,6 +44,8 @@
     │   ├── models
     │   ├── screenshots
     │   └── sounds
+    ├── characters
+    │   └── en_nuke_debate.yaml
     ├── data
     │   ├── config
     │   │   ├── permissions.json
@@ -57,7 +60,8 @@
     │   └── runtime
     │       ├── .first_run_complete
     │       ├── crash.log
-    │       └── feature_manifest.json
+    │       ├── feature_manifest.json
+    │       └── last_crash.json
     ├── docs
     │   ├── SECURITY.md
     │   ├── api
@@ -143,6 +147,7 @@
     │   │   │   ├── patterns.py
     │   │   │   ├── provider.py
     │   │   │   └── trainer.py
+    │   │   ├── judge.py
     │   │   ├── llm
     │   │   │   ├── __init__.py
     │   │   │   ├── context_builder.py
@@ -189,6 +194,7 @@
     │   │       └── vector_memory.py
     │   ├── personality
     │   │   ├── __init__.py
+    │   │   ├── basis.py
     │   │   ├── emotion_config.py
     │   │   ├── emotion_controller.py
     │   │   ├── emotion_engine.py
@@ -279,6 +285,9 @@
     │   │   └── notifications.py
     │   ├── tauri
     │   └── ui
+    │       └── dashboard.py
+    ├── layout.json
+    ├── layout.txt
     ├── r.py
     ├── requirements.txt
     ├── runtime
@@ -329,6 +338,7 @@
     │   │   ├── personality.json
     │   │   ├── system_config.json
     │   │   └── user_profile.json
+    │   ├── config.py
     │   ├── config_loader.py
     │   ├── constants
     │   ├── data
@@ -379,7 +389,9 @@
     │       ├── config.json
     │       ├── layout_maper.py
     │       ├── layout_mapper.py
+    │       ├── logger.py
     │       ├── metrics.py
+    │       ├── simhash.py
     │       ├── tracing.py
     │       └── validation.py
     ├── src-tauri
@@ -1717,6 +1729,9 @@
     │           ├── audits.toml
     │           ├── config.toml
     │           └── imports.lock
+    ├── test_personality_direct.py
+    ├── test_personality_enhancements.py
+    ├── test_personality_standalone.py
     └── vendor
         └── Open-LLM-VTuber
             ├── .cursor

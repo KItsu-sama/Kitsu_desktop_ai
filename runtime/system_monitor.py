@@ -209,14 +209,17 @@ class SystemMonitor:
         avg_latency = sum(m.latency_ms for m in module_healths) / len(module_healths) if module_healths else 0.0
         
         # System is healthy if all critical modules are healthy
-        critical_modules = ['core.orchestrator', 'legacy.fast_brain', 'legacy.emotion']
+        # Only require core.orchestrator as essential, legacy subsystems are optional
+        critical_modules = ['core.orchestrator']
         critical_healthy = all(
             m.module_id in critical_modules and m.healthy 
             for m in module_healths 
             if m.module_id in critical_modules
         )
         
-        system_ok = critical_healthy and failed_count == 0
+        # Allow system to be healthy if core modules are working, even if some optional legacy subsystems fail
+        optional_failures = [m.module_id for m in module_healths if not m.healthy and m.module_id.startswith('legacy.')]
+        system_ok = critical_healthy and (failed_count == 0 or all(f.startswith('legacy.') for f in optional_failures))
         
         return SystemHealth(
             ok=system_ok,

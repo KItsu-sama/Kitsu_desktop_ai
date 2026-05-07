@@ -23,11 +23,16 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Optional
 
+from rich.logging import RichHandler
+
 from domain.contracts.contracts import ModuleContract
 from runtime.events import EventBus, EventType, EventPayload
 from runtime.strip_controller import StripController
 
+# Configure logger with rich formatting
 logger = logging.getLogger('kitsu.router.policy_router')
+logger.addHandler(RichHandler(rich_tracebacks=True))
+logger.setLevel(logging.DEBUG)
 
 
 class RoutingTarget(Enum):
@@ -243,7 +248,7 @@ class PolicyRouter(ModuleContract):
             decision = await self.analyze(content, input_type)
             
             # Emit routing decision through Event Bus
-            self.event_bus.emit(
+            await self.event_bus.emit(
                 EventType.ROUTING_DECISION,
                 EventPayload(
                     source=self.module_id,

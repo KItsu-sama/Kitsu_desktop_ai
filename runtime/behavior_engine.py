@@ -434,7 +434,7 @@ class BehaviorEngine:
         try:
             # Try to find config file in common locations
             config_paths = [
-                os.path.join(os.path.dirname(__file__), "..", "config", "triggers.json"),
+                os.path.join(os.path.dirname(__file__), "..", "shared", "triggers.json"),
                 os.path.join(os.getcwd(), "config", "triggers.json"),
                 "config/triggers.json"
             ]

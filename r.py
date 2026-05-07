@@ -28,9 +28,9 @@ LOGO = r"""
         /░░/10\   ¯\░░░░░░░░░||░░░░░░░░░/¯   /01\░░\
         ░░░\010\     ¯\░░░░░░||░░░░░░/¯     /010/░░░
        ░░\░░¯001¯\_     \░░░░||░░░░/     _/¯011¯░░/░░
-       ░░11\░░░¯\10=¯ = _ \░░||░░/ _ = ¯=01/¯░░░/01░░
-       \░░\101\░░░░░░░░░░░'░░||░░'░░░░░░░░░░░/010/░░/
-        \░░\001░░░░_101\░░░░░||░░░░░/110_░░░░010/░░/
+       ░011\░░░░¯\0=¯ = _ \░░||░░/ _ = ¯=1/¯░░░░/010░
+       \░░0101\░░░░░░░░░░░'░░||░░'░░░░░░░░░░░/0100░░/
+        \░░\0010░░░_101\░░░░░||░░░░░/110_░░░1010/░░/
           \_░░░░░_/101/░░░/░░||░░\░░░\010\_░░░░░_/
              ¯\\_░░░░░░░░/|░░||░░|\░░░░░░░__//¯
                  ¯\\_░░░░\ ¯¯  ¯¯ /░░░░░//¯
@@ -91,6 +91,24 @@ def parse_args():
         help="Specify path to training dataset file"
     )
 
+    parser.add_argument(
+        "--bootstrap-only",
+        action="store_true",
+        help="Run bootstrap only and exit"
+    )
+
+    parser.add_argument(
+        "--test-mode",
+        action="store_true", 
+        help="Run in quick test mode"
+    )
+
+    parser.add_argument(
+        "--status",
+        action="store_true",
+        help="Show module status and exit"
+    )
+
     args = parser.parse_args()
     overrides = {}
     
@@ -117,6 +135,18 @@ def parse_args():
     # Store training dataset in overrides
     if args.training_dataset:
         overrides["training_dataset"] = args.training_dataset
+    
+    # Store bootstrap-only flag in overrides
+    if args.bootstrap_only:
+        overrides["bootstrap_only"] = True
+    
+    # Store test-mode flag in overrides
+    if args.test_mode:
+        overrides["test_mode"] = True
+    
+    # Store status flag in overrides
+    if args.status:
+        overrides["status"] = True
 
     # --model not provided at all
     if args.model is None:
@@ -208,4 +238,15 @@ if __name__ == "__main__":
 
         sys.exit(0)
 
-    sys.exit(asyncio.run(main()))
+    # Import launcher for feature flag routing
+    from runtime.launcher import Launcher
+    
+    # Handle feature flags
+    if overrides.get("bootstrap_only"):
+        sys.exit(asyncio.run(Launcher.bootstrap()))
+    elif overrides.get("test_mode"):
+        sys.exit(asyncio.run(Launcher.quick_start()))
+    elif overrides.get("status"):
+        sys.exit(asyncio.run(Launcher.show_status()))
+    else:
+        sys.exit(asyncio.run(main()))

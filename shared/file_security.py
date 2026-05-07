@@ -36,9 +36,12 @@ def is_path_allowed(path: Path) -> bool:
     except (ValueError, OSError):
         return False
 
-def safe_file_write(path: Path, content: str, encoding: str = 'utf-8', append: bool = False) -> bool:
+def safe_file_write(path, content, encoding='utf-8', append=False) -> bool:
     """Safely write content to a file with permission checks."""
     try:
+        # Convert string to Path if needed
+        path = Path(path) if isinstance(path, str) else path
+        
         # Check if path is allowed
         if not is_path_allowed(path):
             logger.error("Path not allowed for write operation: %s", path)
@@ -67,9 +70,12 @@ def safe_file_write(path: Path, content: str, encoding: str = 'utf-8', append: b
         logger.error("Unexpected error writing file %s: %s", path, e)
         return False
 
-def safe_file_read(path: Path, encoding: str = 'utf-8') -> Optional[str]:
+def safe_file_read(path, encoding='utf-8') -> Optional[str]:
     """Safely read content from a file with permission checks."""
     try:
+        # Convert string to Path if needed
+        path = Path(path) if isinstance(path, str) else path
+        
         # Check if path is allowed
         if not is_path_allowed(path):
             logger.error("Path not allowed for read operation: %s", path)

@@ -16,21 +16,29 @@ Kitsu is a local-first desktop AI companion with a modular architecture. The sys
 ## Startup Flow
 
 ```
-r.py (Entry Point)
+r.py (SINGLE ENTRY POINT)
+   ├─ Feature Flags:
+   │  ├─ --first-run        → scripts/first_run.py
+   │  ├─ --bootstrap-only   → bootstrap.py  
+   │  ├─ --test-mode        → quick_start.py
+   │  ├─ --status           → health dashboard
+   │  └─ (default)          → full startup
    ↓
 launcher.py (Phase 0: Initialization)
-   ├─ CLI Parsing
-   ├─ Logging Setup
+   ├─ CLI Parsing & Feature Flag Routing
+   ├─ Logging Setup + Startup Timer
+   ├─ Crash Recovery Check (data/runtime/last_crash.json)
    ├─ First-Run Check (FIRST_RUN_FLAG: data/runtime/.first_run_complete)
    │  └─ If NOT Complete → Call first_run.py
    │     ├─ Detect System Capabilities
    │     ├─ Run SetupWizard (interactive)
    │     ├─ Write Config Files (data/config/)
    │     └─ Mark first_run_complete
-   ├─ Load Config Files
+   ├─ Load Config Files (shared/config.py - ConfigMerger)
    │  ├─ defaults.yaml (Kitsu defaults)
    │  ├─ system_config.json (User system settings)
-   │  └─ Profile Config (Hardware profile overlay)
+   │  ├─ profile.json (Hardware profile)
+   │  └─ CLI overrides (highest priority)
    ├─ Hardware Profile Detection
    ├─ Capability Flags Lock (Read-only after this)
    └─ BuildAppContainer (Dependency Injection)
@@ -41,7 +49,7 @@ bootstrap.py (Phase 1: Container Setup)
    ├─ Register Core Services
    │  ├─ MessageBus (Event system)
    │  ├─ ClockService (Time management)
-   │  ├─ HealthMonitor (System health)
+   │  ├─ HealthMonitor (System health + dashboard)
    │  ├─ PerformanceManager (Resource management)
    │  └─ AI Providers (FastBrain, SLM, LLM)
    ├─ Register Domain Services
@@ -51,7 +59,7 @@ bootstrap.py (Phase 1: Container Setup)
    └─ Return AppContainer
    
    ↓
-main.py or kitsu_launcher.py (Phase 2: Runtime Startup)
+main.py (Phase 2: Runtime Startup)
    ├─ Start All Modules (Module Registry)
    ├─ Start KitsuEngine
    ├─ Connect Event Subscriptions
@@ -149,24 +157,40 @@ else:
 
 **Key Files Explained:**
 
-**`r.py` - lazy launcher**
+**`r.py` - SINGLE ENTRY POINT**
 
-**`launcher.py` - The Real Entry Point**
 ```python
-# Phase 0 Startup (12-step process)
-1. parse_args() → Get CLI flags
-2. _setup_logging() → Initialize logger
-3. _check_first_run() → Need setup?
+# Feature flag routing
+if "--bootstrap-only" in sys.argv:
+    launcher.bootstrap()
+elif "--test-mode" in sys.argv:
+    launcher.quick_start()
+elif "--status" in sys.argv:
+    launcher.show_status()
+else:
+    launcher.full_startup()  # default
+```
+
+**`launcher.py` - Core Launcher Methods**
+```python
+# Phase 0 Startup (with feature flags)
+1. parse_args() → Get CLI flags + feature routing
+2. _setup_logging() → Initialize logger + start timer
+3. _check_crash_recovery() → Load last_crash.json
+4. _check_first_run() → Need setup?
    └─ YES: run_first_run() (from scripts/)
-4. load_system_config() → Read data/config/system_config.json
-5. load_defaults() → Read shared/defaults.yaml
+5. load_config() → ConfigMerger.load() (shared/config.py)
+   ├─ defaults.yaml (base)
+   ├─ system_config.json (user)
+   ├─ profile.json (hardware)
+   └─ CLI overrides (highest)
 6. select_profile() → Choose hardware profile
 7. validate_config() → Check config validity
 8. build_runtime_config() → Merge all configs
 9. build_app_container() → DI setup (→ bootstrap.py)
 10. orchestrator.startup() → Start modules
 11. kitsu_engine.startup() → Start AI system
-12. orchestrator.run() → Main loop
+12. orchestrator.run() → Main loop + health monitoring
 ```
 
 **`bootstrap.py` - Dependency Injection**
@@ -347,11 +371,11 @@ if emotion.resistant:
 | `command_bridge.py` | Rust ↔ Python communication layer |
 | `event_bridge.py` | Event forwarding to Tauri |
 
-#### `interfaces/ui/` - Web UI
-| File | Purpose |
-|------|---------|
-| `dashboard.py` | Web dashboard for settings/monitoring |
-| `api_server.py` | REST API for UI communication |
+#### `interfaces/ui/` - Web UI & Dashboard
+| File               | Purpose                                                                        |
+|--------------------|--------------------------------------------------------------------------------|
+| **`dashboard.py`** | **Health monitoring dashboard** - Terminal UI with module status, personality, AI tier, memory usage |
+| `api_server.py`    | REST API for UI communication                                                  |
 
 #### `interfaces/api/` - External APIs
 | File | Purpose |
@@ -454,8 +478,9 @@ if emotion.resistant:
 
 | File | Purpose |
 |------|---------|
-| **`unified_config.py`** | Central configuration management |
-| **`config_loader.py`** | YAML/JSON configuration file loading |
+| **`config.py`** | **Standardized config loading** - ConfigMerger class with priority order |
+| **`unified_config.py`** | Central configuration management (legacy) |
+| **`config_loader.py`** | YAML/JSON configuration file loading (legacy) |
 | **`defaults.yaml`** | Default configuration values |
 | `capability_flags.py` | Feature flags for capability management |
 | `complexity.py` | Complexity scoring for prompts |
@@ -493,6 +518,7 @@ data/
 ├── runtime/
 │   ├── .first_run_complete       # Flag file (first setup done)
 │   ├── crash.log                 # Crash dump for recovery
+│   ├── last_crash.json           # Crash recovery data (timestamp, error, recovered)
 │   └── metrics.json              # Performance metrics
 ├── learning/
 │   ├── fast_brain.pkl            # Trained Markov model
@@ -820,25 +846,49 @@ Next time user is mentioned:
 
 ---
 
-### 6. Configuration System (`runtime/runtime_config.py`)
+### 6. Configuration System (`shared/config.py`)
+
+**Standardized Config Loading with ConfigMerger:**
+
+```python
+# shared/config.py - Single source of truth
+class Config:
+    @classmethod
+    def load(cls, cli_overrides: Dict[str, Any] = None) -> Dict[str, Any]:
+        return ConfigMerger([
+            "shared/defaults.yaml",           # 1. Defaults
+            "data/config/system_config.json", # 2. User settings  
+            "data/config/profile.json",       # 3. Hardware profile
+            CLI_ARGS                          # 4. CLI overrides (highest)
+        ]).merge()
+```
 
 **Config Merge Priority:**
 
 ```
-Default Values (shared/defaults.yaml)
-  ↓ OVERRIDE
-User System Config (data/config/system_config.json)
-  ↓ OVERRIDE
-Hardware Profile (runtime/profiles.py)
-  ↓ OVERRIDE
-CLI Arguments (--profile, --safe, etc.)
-  ↓ RESULT
+1. Default Values (shared/defaults.yaml)
+   ↓ OVERRIDE
+2. User System Config (data/config/system_config.json)
+   ↓ OVERRIDE
+3. Hardware Profile (data/config/profile.json)
+   ↓ OVERRIDE
+4. CLI Arguments (--profile, --safe, --debug, etc.)
+   ↓ RESULT
 RuntimeConfig.merged (final configuration)
 ```
+
+**Key Features:**
+
+- **ConfigMerger class** handles deep merging of dictionaries
+- **Priority order** ensures CLI args override everything
+- **Validation** ensures required config sections exist
+- **Backward compatibility** with existing config loaders
+- **Error handling** for missing or malformed config files
 
 **Key Config Files:**
 
 1. **`defaults.yaml`** - Shipping defaults
+
    ```yaml
    runtime:
      model: mistral-7b
@@ -855,11 +905,57 @@ RuntimeConfig.merged (final configuration)
    ```
 
 3. **Hardware Profiles** - Tier-based:
-   ```
+
+   ```text
    ultra_low    → CPU only, small models
    balanced     → GPU preferred, medium models
    full         → GPU required, all features
    ```
+
+---
+
+### 7. Health Monitoring & Dashboard (`runtime/health.py` + `interfaces/ui/dashboard.py`)
+
+**Real-time Health Monitoring:**
+
+```python
+# runtime/health.py - HealthMonitor.get_status()
+{
+    "personality": "playful/happy (0.8)",
+    "ai_tier": "SLM (4GB VRAM used)",
+    "memory_usage": "6.2/16GB (39%)",
+    "modules": "18/20 running",
+    "resources": "CPU: 23% │ GPU: 67%",
+    "module_details": {
+        "orchestrator": {"ok": True, "latency_ms": 2.1},
+        "emotion_engine": {"ok": True, "latency_ms": 1.8},
+        "llm_provider": {"ok": False, "detail": "OOM"}
+    }
+}
+```
+
+**Terminal Dashboard Output:**
+```
+┌─ Kitsu Health Dashboard ──────────────────────┐
+│ 🟢 Personality: playful/happy (0.8)           │
+│ 🟡 AI Tier: SLM (4GB VRAM used)              │
+│ 🟢 Modules: 18/20 running                    │
+│ Memory: 6.2/16GB (39%) │ CPU: 23% │ GPU: 67% │
+├─ Module Status ────────────────────────────┤
+│ 🟢 orchestrator: running (2.1ms)            │
+│ 🟢 emotion_engine: running (1.8ms)          │
+│ 🔴 llm_provider: failed (OOM)               │
+└──────────────────────────────────────────────┘
+```
+
+**Features:**
+
+- **Real-time monitoring** of all modules via health checks
+- **Visual indicators** (🟢🟡🔴) for quick status assessment
+- **Performance metrics** (latency, memory, CPU/GPU usage)
+- **CLI access**: `python r.py --status`
+- **WebSocket integration** for web dashboard
+- **Crash recovery tracking** with `last_crash.json`
 
 ---
 

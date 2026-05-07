@@ -130,7 +130,7 @@ Any other text will be processed as chat input.
                         break
                     
                     # Handle commands
-                    if user_input.lower().strip() in ['quit', 'exit', 'q']:
+                    if user_input.lower().strip() in ['/quit', '/exit', '/q']:
                         log.info("Quit command received")
                         orchestrator.request_stop()
                         break

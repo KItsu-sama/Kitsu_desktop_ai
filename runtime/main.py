@@ -36,6 +36,7 @@ if str(_project_root) not in sys.path:
 
 from runtime.kitsu_launcher import kitsuLauncher  # or Launcher from previous merge
 from runtime.launcher import main as launcher_main
+from runtime.bootstrap import build_app_container, BootstrapError
 from scripts.first_run import run_first_run
 
 # Runtime paths

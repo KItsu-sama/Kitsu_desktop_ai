@@ -79,12 +79,22 @@ class ModelManagerShell(ModuleContract):
             message_bus.register_handler('model_manager.unload', self._handle_unload)
 
     async def start(self) -> bool:
-        self.started = True
-        return True
+        try:
+            self.started = True
+            logger.info(f"{self.module_id} started successfully")
+            return True
+        except Exception as e:
+            logger.error(f"{self.module_id} failed to start: {e}", exc_info=True)
+            return False
 
     async def stop(self) -> bool:
-        self.started = False
-        return True
+        try:
+            self.started = False
+            logger.info(f"{self.module_id} stopped successfully")
+            return True
+        except Exception as e:
+            logger.error(f"{self.module_id} failed to stop: {e}", exc_info=True)
+            return False
 
     async def health_check(self):
         from runtime.health import HealthStatus

@@ -1,5 +1,5 @@
 """
-config/personality_config.py
+personality/emotion_config.py
 
 Canonical personality system configuration for Kitsu.
 This file defines the authoritative mood, style, state, and role values used across the system.
@@ -10,7 +10,7 @@ Three-Layer Architecture:
 - state: Micro-behavior layer (quirks/persona)
 - role: Behavioral overlay (contextual purpose)
 
-Total combinations: 4 moods × 7 styles × 6 states × 5 roles = 1260 personality states
+Total combinations: 4 moods × 7 styles × 9 states × 5 roles = 1260 personality states
 
 Responsibilities:
 - Define valid moods, styles, states, and roles
@@ -26,9 +26,10 @@ Non-responsibilities:
 """
 
 from __future__ import annotations
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from typing import Tuple, Optional, Dict, Any, Callable, List
 from enum import StrEnum
+from functools import lru_cache
 
 # ============================================================================
 # Enums for Type Safety
@@ -375,34 +376,28 @@ class Rule:
 # ----------------------------------------------------------------------------
 
 def rule_mean_cold(p): return p.mood == "mean" and p.style == "cold"
-def fix_mean_cold(p):
-    p.style = "sarcastic"
-    return p
+def fix_mean_cold(p: Personality) -> Personality:
+    return replace(p, style="sarcastic")
 
 def rule_protective_cold(p): return p.mood == "protective" and p.style == "cold"
-def fix_protective_cold(p):
-    p.style = "direct"
-    return p
+def fix_protective_cold(p: Personality) -> Personality:
+    return replace(p, style="direct")
 
-def rule_gentle_mean(p): return p.state == "submissive" and p.mood == "mean"  
-def fix_gentle_mean(p):
-    p.mood = "behave"
-    return p
+def rule_gentle_mean(p): return p.state == "submissive" and p.mood == "mean"
+def fix_gentle_mean(p: Personality) -> Personality:
+    return replace(p, mood="behave")
 
 def rule_observer_chaotic(p): return p.role == "observer" and p.style == "chaotic"
-def fix_observer_chaotic(p):
-    p.style = "cold"
-    return p
+def fix_observer_chaotic(p: Personality) -> Personality:
+    return replace(p, style="cold")
 
 def rule_glitch_tutor(p): return p.state == "glitch" and p.role == "tutor"
-def fix_glitch_tutor(p):
-    p.state = "analyst"
-    return p
+def fix_glitch_tutor(p: Personality) -> Personality:
+    return replace(p, state="analyst")
 
 def rule_caretaker_mean(p): return p.role == "caretaker" and p.mood == "mean"
-def fix_caretaker_mean(p):
-    p.mood = "behave"  # Caretaker should be supportive, not mean
-    return p
+def fix_caretaker_mean(p: Personality) -> Personality:
+    return replace(p, mood="behave")
 
 # ----------------------------------------------------------------------------
 # RULE REGISTRY
@@ -426,40 +421,51 @@ def resolve_personality(p: Personality, max_passes: int = 5) -> Personality:
     Apply rules iteratively until stable.
     Prevents infinite loops by tracking modified attributes.
     """
-    from dataclasses import asdict
+    original = p
+    seen_states = set()
     
     for _ in range(max_passes):
-        changed = False
-        modified_attributes = set()  # Track modified attributes to prevent re-modification
+        state_hash = f"{p.mood}:{p.style}:{p.state}:{p.role}"
+        if state_hash in seen_states:
+            return original  # Cycle detected
+        seen_states.add(state_hash)
         
+        changed = False
         for rule in sorted(RULES, key=lambda r: -r.priority):
             if rule.condition(p):
-                before = asdict(p)
                 p = rule.action(p)
-                after = asdict(p)
-                
-                # Identify changed attributes
-                changed_attrs = {attr for attr in ['mood', 'style', 'state', 'role'] if before.get(attr) != after.get(attr)}
-                
-                # Only apply if none of the changed attributes have been modified before
-                if not changed_attrs & modified_attributes:
-                    modified_attributes.update(changed_attrs)
-                    if before != after:
-                        changed = True
-                else:
-                    # Revert the change to prevent oscillation
-                    p = Personality(**before)
+                changed = True
         
         if not changed:
             break
-    
+        
     return p
 
 # ============================================================================
 # VALIDATION
 # ============================================================================
 
+def validate_personality_combos(p: Personality) -> Tuple[bool, Optional[str]]:
+    """Check role/style/state interactions for incompatible combinations."""
+    # Role-specific constraints
+    if p.role == "caretaker" and p.mood == "mean":
+        return False, "Caretaker cannot be mean"
+    if p.role == "observer" and p.style == "chaotic":
+        return False, "Observer cannot be chaotic"
+    if p.role == "tutor" and p.state == "glitch":
+        return False, "Tutor cannot have glitch state"
+    if p.role == "companion" and p.style == "cold":
+        return False, "Companion cannot be cold"
+    
+    # Style/state incompatibilities
+    if p.style == "direct" and p.mood == "flirty":
+        return False, "Direct style incompatible with flirty mood"
+    
+    return True, None
+
 def validate_full_personality(p: Personality) -> Tuple[bool, Optional[str]]:
+    """Validate personality attributes and their combinations."""
+    # Basic validation
     if p.mood not in VALID_MOODS:
         return False, f"Invalid mood: {p.mood}"
     if p.style not in VALID_STYLES:
@@ -468,6 +474,12 @@ def validate_full_personality(p: Personality) -> Tuple[bool, Optional[str]]:
         return False, f"Invalid state: {p.state}"
     if p.role not in VALID_ROLES:
         return False, f"Invalid role: {p.role}"
+    
+    # Combination validation
+    combo_valid, combo_msg = validate_personality_combos(p)
+    if not combo_valid:
+        return False, combo_msg
+    
     return True, None
 
 # ============================================================================
@@ -592,6 +604,93 @@ def get_legacy_mode(mood: str, style: str) -> str:
     return "Soft"
 
 # ============================================================================
+# Performance Optimization - Cached Lookups
+# ============================================================================
+
+@lru_cache(maxsize=128)
+def get_style_rules_cached(style: str) -> Dict[str, Any]:
+    """Cache frequently accessed style rules lookups.
+    
+    Args:
+        style: The personality style to look up
+        
+    Returns:
+        Style rules dictionary with caching
+    """
+    return STYLE_RULES.get(style, {"max_words": 20, "emojis_allowed": True})
+
+@lru_cache(maxsize=1024)
+def build_personality_cached(emotion: str, role: str, prev_hash: str = "") -> Personality:
+    """Cache personality builds to avoid recomputation.
+    
+    Args:
+        emotion: The primary emotion
+        role: The personality role
+        prev_hash: Hash of previous personality state (used for cache differentiation)
+        
+    Returns:
+        Cached or newly built personality
+    """
+    return build_personality(emotion, role, None)
+
+# ============================================================================
+# Configuration Validation
+# ============================================================================
+
+def validate_config() -> bool:
+    """Validate all configuration at module import time.
+    
+    Ensures enums and configuration dictionaries are aligned.
+    
+    Raises:
+        AssertionError: If any configuration mismatch is detected
+    """
+    # Check mood alignment
+    assert len(VALID_MOODS) == len(Mood), (
+        f"Mood enum/config mismatch: {len(VALID_MOODS)} vs {len(Mood)}"
+    )
+    
+    # Check style alignment  
+    assert len(VALID_STYLES) == len(Style), (
+        f"Style enum/config mismatch: {len(VALID_STYLES)} vs {len(Style)}"
+    )
+    
+    # Check state alignment
+    assert len(VALID_STATES) == len(State), (
+        f"State enum/config mismatch: {len(VALID_STATES)} vs {len(State)}"
+    )
+    
+    # Check role alignment
+    assert len(VALID_ROLES) == len(Role), (
+        f"Role enum/config mismatch: {len(VALID_ROLES)} vs {len(Role)}"
+    )
+    
+    # Verify all style rules exist
+    assert all(k in VALID_STYLES for k in STYLE_RULES), (
+        f"Missing style rules for: {set(STYLE_RULES.keys()) - VALID_STYLES}"
+    )
+    
+    # Verify no orphaned style rules
+    assert all(k in STYLE_RULES for k in VALID_STYLES), (
+        f"Missing style rule definitions for: {VALID_STYLES - set(STYLE_RULES.keys())}"
+    )
+    
+    # Verify EMOTION_TO_MOOD mappings are valid
+    invalid_moods = set(EMOTION_TO_MOOD.values()) - VALID_MOODS
+    assert not invalid_moods, f"Invalid moods in EMOTION_TO_MOOD: {invalid_moods}"
+    
+    # Verify EMOTION_TO_STYLE mappings are valid
+    invalid_styles = set(EMOTION_TO_STYLE.values()) - VALID_STYLES
+    assert not invalid_styles, f"Invalid styles in EMOTION_TO_STYLE: {invalid_styles}"
+    
+    # Verify EMOTION_TO_STATE mappings are valid
+    invalid_states = set(EMOTION_TO_STATE.values()) - VALID_STATES
+    assert not invalid_states, f"Invalid states in EMOTION_TO_STATE: {invalid_states}"
+    
+    print("✅ Personality configuration validated successfully")
+    return True
+
+# ============================================================================
 # Validation Helpers
 # ============================================================================
 
@@ -606,6 +705,13 @@ def validate_style(style: str) -> bool:
 def validate_state(state: str) -> bool:
     """Check if state is valid."""
     return state in VALID_STATES
+
+# ============================================================================
+# MODULE INITIALIZATION
+# ============================================================================
+
+# Validate configuration at import time
+validate_config()
 
 def validate_role(role: str) -> bool:
     """Check if role is valid."""

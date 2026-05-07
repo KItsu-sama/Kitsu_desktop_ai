@@ -9,11 +9,9 @@ __version__ = "0.0.1"
 
 # Application layer exports
 from .user_manager import UserManager
-from .adapters import AdapterManager
 from .commands.command_router import CommandRouter
 
 __all__ = [
     "UserManager",
-    "AdapterManager", 
     "CommandRouter"
 ]

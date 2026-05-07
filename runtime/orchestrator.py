@@ -183,28 +183,33 @@ class Orchestrator(ModuleContract):
 
     async def start(self) -> bool:
         """Start orchestrator + wire all event handlers."""
-        # Initialize shutdown event when event loop is available
-        if self._shutdown_event is None:
-            self._shutdown_event = asyncio.Event()
-        self.wire()
-        await self._initialize_engine()
-        
-        # Initialize command router with self as controller (use interface)
-        command_router_impl = get_interface(InterfaceType.COMMAND_ROUTER)
-        if command_router_impl and hasattr(command_router_impl, 'route'):
-            self.command_router = command_router_impl
-        else:
-            # Fallback to direct import for compatibility
-            from interfaces.desktop.commands.command_router import CommandRouter
-            self.command_router = CommandRouter(self)
-        
-        # Start system monitoring
-        if self.system_monitor:
-            await self.system_monitor.start_monitoring()
-        
-        self._running = True
-        logger.info("Orchestrator started and wired")
-        return True
+        try:
+            # Initialize shutdown event when event loop is available
+            if self._shutdown_event is None:
+                self._shutdown_event = asyncio.Event()
+            self.wire()
+            await self._initialize_engine()
+            
+            # Initialize command router with self as controller (use interface)
+            command_router_impl = get_interface(InterfaceType.COMMAND_ROUTER)
+            if command_router_impl and hasattr(command_router_impl, 'route'):
+                self.command_router = command_router_impl
+            else:
+                # Fallback to direct import for compatibility
+                from app.commands.command_router import CommandRouter
+                self.command_router = CommandRouter(self)
+            
+            # Start system monitoring
+            if self.system_monitor:
+                await self.system_monitor.start_monitoring()
+            
+            self._running = True
+            logger.info(f"{self.module_id} started and wired successfully")
+            return True
+        except Exception as e:
+            logger.error(f"{self.module_id} failed to start: {e}", exc_info=True)
+            self._running = False
+            return False
 
     async def stop(self) -> bool:
         """Stop orchestrator + shutdown all modules."""

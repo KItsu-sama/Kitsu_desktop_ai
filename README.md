@@ -20,6 +20,7 @@ capability profile to the hardware she runs on.
 ## AI ARCHITECTURE
 
 ## Architecture overview
+
 ```
 User input
     │
@@ -61,6 +62,7 @@ User input
 **FastBrain → SLM → LLM**
 
 #### FastBrain (Base Layer)
+
 - **Binary + Markov Chain + Huffman Tree**
 - **Handles:**
   - Common inputs (greetings, repeated phrases)
@@ -71,20 +73,25 @@ User input
   - Feeds confirmed outputs back into itself
 
 #### SLM (Style + Reasoning Lite)
+
 - Shapes personality (fox-like tone)
 - Handles normal conversation
 - Lightweight, offline
 
 #### LLM (Deep Reasoning)
+
 - Used only when needed:
   - Complex queries
   - Web search
   - Analysis
 
 ### Reasoning Optimization
+
 Pretrained models may hallucinate due to custom prompts/LoRA
 **Long-term goal:**
+
 - Custom LLM with:
+
   - Universal Transformers
   - Tokenizer + embeddings
   - Multi-head attention
@@ -96,15 +103,19 @@ Pretrained models may hallucinate due to custom prompts/LoRA
 ### Layers
 
 **Mood (Primary)**
+
 - behave, mean, flirty, protective
 
 **Style (Expression)**
+
 - chaotic, sweet, cold, direct, sarcastic, playful, eerie
 
 **State (Micro-behavior)**
+
 - normal, fox, glitch, analyst, submissive, detached
 
 ### Behavior Model
+
 - Emotions stored in decaying stack
 - Dominant emotion determines: `emotion → mood + style + state`
 - **Supports:**
@@ -113,6 +124,7 @@ Pretrained models may hallucinate due to custom prompts/LoRA
   - Personality overlays
 
 ### Special Rules
+
 - Spam detection → adds irritation
 - Unsafe combinations → auto-adjust
 - Style rules control:
@@ -123,10 +135,12 @@ Pretrained models may hallucinate due to custom prompts/LoRA
 ## ⚙️ STRIP / TIER SYSTEM
 
 ### Concept
+
 - **Tier system** = user-facing
 - **Strip system** = internal flags
 
 ### Flags (Read-only after startup)
+
 ```
 USE_FAST_BRAIN
 USE_SLM
@@ -355,7 +369,7 @@ You can override it in settings.
 | Tier   | RAM    | What runs                              | Profile         |
 |--------|--------|----------------------------------------|-----------------|
 | Micro  | <2 GB  | FastBrain + emotion templates only     | `ultra_low`     |
-| Low    | 2–4 GB | FastBrain + Micro-SLM + 2D avatar      | `ultra_low`     |
+| Low    | 2–4 GB | FastBrain + Micro-SLM + 2D avatar      | `low`           |
 | Mid    | 4–8 GB | FastBrain + Full SLM + 2D/3D toggle    | `balanced`      |
 | High   | 8+ GB  | Everything including LLM               | `full`          |
 

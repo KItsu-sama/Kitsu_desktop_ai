@@ -59,6 +59,11 @@ class HealthMonitor(ModuleContract):
                 try:
                     status = await module.health_check()
                     summary[module_id] = status
+                    # Debug log the health status
+                    if isinstance(status, dict):
+                        logger.debug('Health status for %s: ok=%s, details=%s', module_id, status.get('ok', True), {k:v for k,v in status.items() if k != 'ok'})
+                    else:
+                        logger.debug('Health status for %s: ok=%s, detail=%s', module_id, getattr(status, 'ok', True), getattr(status, 'detail', None))
                 except Exception as exc:
                     logger.exception('Health check failed for %s', module_id)
                     summary[module_id] = HealthStatus(module_id=module_id, ok=False, detail=str(exc))
@@ -70,15 +75,63 @@ class HealthMonitor(ModuleContract):
                 history.pop(0)
             failures = sum(1 for entry in history[-3:] if not (getattr(entry, 'ok', entry.get('ok', True) if isinstance(entry, dict) else True)))
             if failures >= 3:
-                reason = getattr(status, 'detail', 'Unknown cause')
+                # Get meaningful reason for failure
+                if isinstance(status, dict):
+                    # Handle dictionary-based health status
+                    if not status.get('ok', True):
+                        reason = status.get('detail', 'Health check returned false')
+                        # If no detail, try to infer from available data
+                        if reason == 'Health check returned false':
+                            if status.get('healthy_modules', 0) < status.get('module_count', 1):
+                                failed_count = status.get('failed_modules', 0)
+                                reason = f'{failed_count} module(s) failed'
+                            elif 'legacy_subsystems' in status:
+                                failed_legacy = [name for name, healthy in status['legacy_subsystems'].items() if not healthy]
+                                if failed_legacy:
+                                    reason = f'Legacy subsystems failed: {", ".join(failed_legacy)}'
+                            else:
+                                reason = 'System health check failed'
+                    else:
+                        reason = 'Health status inconsistent'
+                else:
+                    # Handle HealthStatus objects
+                    reason = getattr(status, 'detail', 'Health check returned false')
+                
                 logger.warning('Health degradation detected for %s — reason: %s', module_id, reason)
                 self.event_bus.publish(
                     EventPayload(
                         event_type=EventType.HEALTH_CHECK_FAILED,
                         source='core.health',
-                        data={'module_id': module_id, 'detail': getattr(status, 'detail', None)}
+                        data={'module_id': module_id, 'detail': reason}
                     )
                 )
 
     def get_summary(self) -> Dict[str, HealthStatus]:
         return {module_id: history[-1] for module_id, history in self._history.items() if history}
+
+    def get_status(self) -> Dict[str, any]:
+        """Get comprehensive system status for dashboard."""
+        summary = self.get_summary()
+        
+        # Count running vs failed modules
+        running = sum(1 for status in summary.values() if getattr(status, 'ok', True))
+        total = len(summary)
+        
+        # Mock data for now - would integrate with actual modules
+        status_data = {
+            "personality": getattr(self, '_personality_status', 'playful/happy (0.8)'),
+            "ai_tier": getattr(self, '_ai_tier_status', 'SLM (4GB VRAM used)'),
+            "memory_usage": getattr(self, '_memory_status', '6.2/16GB (39%)'),
+            "modules": f"{running}/{total} running",
+            "resources": getattr(self, '_resource_status', 'CPU: 23% │ GPU: 67%'),
+            "module_details": {
+                module_id: {
+                    "ok": getattr(status, 'ok', True),
+                    "detail": getattr(status, 'detail', None),
+                    "latency_ms": getattr(status, 'latency_ms', 0.0)
+                }
+                for module_id, status in summary.items()
+            }
+        }
+        
+        return status_data
