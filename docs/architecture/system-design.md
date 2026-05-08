@@ -1,9 +1,10 @@
 ---
-title: System Design Document
-tags: [architecture, design, system-overview]
-links: [[project-overview], [system-architecture], [ai-pipeline]]
+tags: [architecture, design, system-overview, documentation]
+aliases: ["System Architecture", "Kitsu Design"]
+project: Kitsu Desktop AI
+type: documentation
 created: 2026-04-27
-updated: 2026-04-27
+modified: 2026-04-27
 ---
 
 # System Design Document

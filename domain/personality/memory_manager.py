@@ -1124,6 +1124,15 @@ class MemoryManager:
         self.save()
         log.info("Memory manager closed")
 
+    async def stop(self) -> bool:
+        """Stop the memory manager (alias for close for lifecycle compatibility)."""
+        try:
+            await self.close()
+            return True
+        except Exception as e:
+            log.error(f"Failed to stop memory manager: {e}")
+            return False
+
     # ------------------------------------------------------------------
     # Response History for Command Compatibility
     # ------------------------------------------------------------------

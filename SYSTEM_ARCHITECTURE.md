@@ -1,21 +1,94 @@
 # Kitsu System Architecture Documentation
 
 ## Overview
-Kitsu is a local-first desktop AI companion with a modular architecture. The system follows a **startup → initialization → runtime** flow with clear separation of concerns across multiple subsystems.
+Kitsu is a local-first desktop AI companion with a **modern 4-layer architecture** that provides robust startup, lifecycle management, and resource-aware operation. The system has evolved from a simple AI assistant into a sophisticated cognitive runtime with comprehensive safety and stability systems.
 
 ---
 
 ## Table of Contents
-1. [Startup Flow](#startup-flow)
-2. [Folder Structure & Systems](#folder-structure--systems)
-3. [Core Systems](#core-systems)
-4. [Data Flow](#data-flow)
+1. [Modern 4-Layer Architecture](#modern-4-layer-architecture)
+2. [Startup Flow](#startup-flow)
+3. [Folder Structure & Systems](#folder-structure--systems)
+4. [Core Systems](#core-systems)
+5. [Data Flow](#data-flow)
+6. [Critical Stability Systems](#critical-stability-systems)
 
 ---
 
-## Startup Flow
+## Modern 4-Layer Architecture
+
+Kitsu runs on a **modern 4-layer architecture** that provides robust startup, lifecycle management, and resource-aware operation:
 
 ```
+ServiceContainer → ModuleRegistry → LifecycleManager → RuntimeOrchestrator
+```
+
+### Architecture Layers
+
+**1. ServiceContainer (Dependency Injection)**
+- **Purpose**: Automatic dependency resolution and service lifetime management
+- **Features**: Constructor injection with circular dependency detection
+- **Key Files**: `runtime/service_container.py`
+
+**2. ModuleRegistry (Module Management)**
+- **Purpose**: Centralized module registration and dependency validation
+- **Features**: State tracking (CREATED → INITIALIZING → RUNNING → DEGRADED → STOPPED)
+- **Key Files**: `runtime/module_registry.py`
+
+**3. LifecycleManager (Orchestration)**
+- **Purpose**: Phased startup with graceful degradation and health monitoring
+- **Features**: Resource-aware module management and automatic recovery
+- **Key Files**: `runtime/lifecycle_manager.py`
+
+**4. RuntimeOrchestrator (Main Loop)**
+- **Purpose**: Event-driven coordination and cross-system communication
+- **Features**: State machine integration and runtime behavior coordination
+- **Key Files**: `runtime/runtime_orchestrator.py`
+
+### Startup Phases
+
+The modern architecture executes startup in deterministic phases:
+
+1. **Phase 0** - Core Services (logger, config, container)
+2. **Phase 1** - Communication (event_bus, message_bus)
+3. **Phase 2** - Runtime Control (orchestrator, registry, lifecycle)
+4. **Phase 3** - Monitoring (health_monitor, performance_manager)
+5. **Phase 4** - Cognition (memory, emotion, judge, router, slm, llm)
+6. **Phase 5** - Shell Systems (desktop_pet, wallpaper, cursor, voice)
+
+### Legacy Compatibility
+
+The system maintains **full backward compatibility** through:
+- **Legacy Compatibility Layer** (`runtime/legacy_compat.py`)
+- **Adapter Pattern** for legacy modules
+- **Graceful Migration Path** from legacy to modern architecture
+
+## Startup Flow
+
+### Modern Architecture Startup
+
+```
+r.py (Simple Entry Point)
+   └── launcher.py (Legacy Compatibility)
+         ├── Modern Architecture Delegation
+         │     └── runtime/modern_launcher.py
+         │           ├── ServiceContainer (DI)
+         │           ├── ModuleRegistry
+         │           ├── LifecycleManager
+         │           └── RuntimeOrchestrator
+         └── Legacy Fallback (if needed)
+```
+
+### 4-Layer Startup Flow
+
+1. **ServiceContainer** creates DI container and registers core services
+2. **ModuleRegistry** validates dependencies and tracks module states
+3. **LifecycleManager** executes phased startup with graceful degradation
+4. **RuntimeOrchestrator** starts main event loop with health monitoring
+
+### Legacy Startup (Preserved)
+
+The legacy startup flow is preserved for compatibility:
 r.py (SINGLE ENTRY POINT)
    ├─ Feature Flags:
    │  ├─ --first-run        → scripts/first_run.py
@@ -958,6 +1031,118 @@ RuntimeConfig.merged (final configuration)
 - **Crash recovery tracking** with `last_crash.json`
 
 ---
+
+## Critical Stability Systems
+
+Kitsu includes comprehensive safety and stability systems that ensure reliable operation:
+
+### 1. Capability Permissions System (`domain/capabilities/`)
+
+**Purpose**: Prevent dangerous operations by requiring explicit permission.
+
+**Key Components**:
+- `CapabilityManager` - Central permission controller
+- `Capability` enum - Defines dangerous operations (file access, desktop control, etc.)
+- `PermissionLevel` - DENIED, PROMPT, TEMPORARY, GRANTED
+- `AuditEntry` - Comprehensive audit logging
+
+**Features**:
+- Permission prompts with scope limits
+- Temporary grants with expiration
+- Risk assessment and auto-grant rules
+- Comprehensive audit trail
+
+### 2. Resource-Aware Inference Controller (`domain/inference/`)
+
+**Purpose**: Dynamically adapts to system resources for student laptop compatibility.
+
+**Key Components**:
+- `ResourceController` - System resource monitor
+- `InferenceTier` - LLM → SLM → REFLEX
+- `RenderTier` - 3D → 2D → CHIBI → MINIMAL
+- `SystemMetrics` - CPU, memory, battery, thermal monitoring
+
+**Features**:
+- Automatic tier switching based on resources
+- Battery and thermal awareness
+- Performance monitoring and optimization
+- Student laptop optimization
+
+### 3. State Machine Layer (`domain/state/`)
+
+**Purpose**: Provides structured behavior states for consistent, efficient operation.
+
+**Key Components**:
+- `BehaviorStateMachine` - State transition controller
+- `BehaviorState` - ACTIVE, IDLE, SLEEPY, FOCUSED, PLAYFUL, OVERLOADED, LOW_POWER
+- `StateConfig` - Resource allocation per state
+- `StateTransitionRule` - Conditional state changes
+
+**Features**:
+- Seven behavior states with different resource profiles
+- Smooth transitions and conditional rules
+- Resource-aware state selection
+- History tracking and analytics
+
+### 4. Tool Grounding System (`domain/grounding/`)
+
+**Purpose**: The REAL hallucination solution - models don't invent, tools verify.
+
+**Key Components**:
+- `ToolGroundingSystem` - Central grounding controller
+- `GroundingType` - FILE_SYSTEM, SYSTEM_INFO, NETWORK, etc.
+- `VerificationStatus` - VERIFIED, FAILED, PARTIAL, DENIED
+- `GroundedResponse` - Response generated from verified data
+
+**Process Flow**:
+1. Model decides what information is needed
+2. Tool verifies and retrieves actual data
+3. Response generated from tool output
+4. Confidence score based on verification success
+
+### 5. Failure Recovery System (`domain/core/failure_recovery.py`)
+
+**Purpose**: Automatic detection, recovery, and prevention of system failures.
+
+**Features**:
+- Rule-based recovery strategies
+- Health monitoring with circuit breaker patterns
+- Comprehensive logging and analytics
+- Automatic degradation and escalation
+
+### 6. Energy Budget System (`shared/budgets.py`)
+
+**Purpose**: Balances performance with battery life for mobile efficiency.
+
+**Key Components**:
+- `BudgetManager` - Central budget controller
+- `BudgetType` - LATENCY, ENERGY, CPU, MEMORY, NETWORK, ANIMATION
+- `EnergyBudget` - Specialized energy management
+- `BudgetState` - Current usage and status
+
+**Features**:
+- Real-time budget monitoring
+- Automatic budget adjustments
+- Energy-aware resource allocation
+- Performance optimization
+
+## System Integration
+
+The `KitsuOrchestrator` (`domain/core/`) coordinates all critical systems:
+
+### Integration Flow
+1. **User Input** → Attention Engine → State Machine
+2. **State Changes** → Resource Controller → Budget Manager  
+3. **Budget Alerts** → Resource Controller → Inference/Render Tiers
+4. **Capability Requests** → Safety Check → Permission Grant/Deny
+5. **Model Responses** → Tool Grounding → Verified Output
+
+### Key Integrations
+- **Attention → State Machine**: Emotional triggers update behavior state
+- **Resource → State Machine**: CPU/memory/battery affect state transitions
+- **Budget → Resource**: Energy limits force lower inference/render tiers
+- **State → Budget**: LOW_POWER state enables energy saving
+- **Capability → Safety**: All dangerous operations require permission
 
 ## Data Flow
 

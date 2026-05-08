@@ -19,7 +19,48 @@ capability profile to the hardware she runs on.
 
 ## AI ARCHITECTURE
 
-## Architecture overview
+## Modern 4-Layer Architecture
+
+Kitsu runs on a **modern 4-layer architecture** that provides robust startup, lifecycle management, and resource-aware operation:
+
+```
+ServiceContainer → ModuleRegistry → LifecycleManager → RuntimeOrchestrator
+```
+
+### Architecture Layers
+
+**1. ServiceContainer (Dependency Injection)**
+- Automatic dependency resolution
+- Constructor injection with circular dependency detection
+- Service lifetime management
+
+**2. ModuleRegistry (Module Management)**
+- Centralized module registration
+- Dependency validation
+- State tracking (CREATED → INITIALIZING → RUNNING → DEGRADED → STOPPED)
+
+**3. LifecycleManager (Orchestration)**
+- Phased startup with graceful degradation
+- Health monitoring and automatic recovery
+- Resource-aware module management
+
+**4. RuntimeOrchestrator (Main Loop)**
+- Event-driven coordination
+- State machine integration
+- Cross-system communication
+
+### Startup Phases
+
+1. **Phase 0** - Core Services (logger, config, container)
+2. **Phase 1** - Communication (event_bus, message_bus)
+3. **Phase 2** - Runtime Control (orchestrator, registry, lifecycle)
+4. **Phase 3** - Monitoring (health_monitor, performance_manager)
+5. **Phase 4** - Cognition (memory, emotion, judge, router, slm, llm)
+6. **Phase 5** - Shell Systems (desktop_pet, wallpaper, cursor, voice)
+
+## Legacy AI Pipeline
+
+The original AI pipeline is preserved within the modern architecture:
 
 ```
 User input
@@ -167,6 +208,37 @@ USE_SHIMEJI
 ### Fallback Chain
 3D → 2D → SLM → FastBrain → Basic chatbot
 
+## 🛡️ CRITICAL SYSTEMS
+
+Kitsu includes comprehensive safety and stability systems:
+
+### Capability Permissions System
+- **Safety gating** for dangerous operations
+- **Risk assessment** (High/Medium/Low)
+- **Permission levels**: DENIED, PROMPT, TEMPORARY, GRANTED
+- **Audit logging** for all operations
+
+### Resource-Aware Controller
+- **Dynamic tier switching**: LLM → SLM → REFLEX
+- **Student laptop optimization** with automatic adaptation
+- **Battery and thermal awareness**
+- **Performance monitoring** and degradation
+
+### State Machine
+- **7 behavior states**: ACTIVE, IDLE, SLEEPY, FOCUSED, PLAYFUL, OVERLOADED, LOW_POWER
+- **Resource-aware transitions** based on system conditions
+- **Smooth state changes** with history tracking
+
+### Tool Grounding
+- **Hallucination prevention** through tool verification
+- **Model decides → Tool verifies → Response generated**
+- **Confidence scoring** based on verification success
+
+### Failure Recovery
+- **Automatic detection** and recovery from failures
+- **Circuit breaker patterns** to prevent cascading failures
+- **Health monitoring** with comprehensive logging
+
 ## 🖥️ PLATFORM ARCHITECTURE
 
 ### Core App (Tauri)
@@ -313,51 +385,84 @@ automation
 
 ```
 kitsu-desktop-ai/
-├── src/                    # Core system components
-│   ├── application.py      # Main orchestrator
-│   ├── bus.py             # EventBus implementation
-│   ├── contracts.py       # Interface definitions
-│   └── gateway.py         # Security and permissions
-├── modules/               # Feature-based modules
-│   ├── ai_pipeline/       # AI processing layers
-│   │   ├── fast_brain/    # Markov chain + Huffman compression
-│   │   ├── slm/           # Style-shaping small language model
-│   │   └── llm/           # Full LLM bridge (local GGUF or API)
-│   ├── personality_system/ # Emotion and memory
-│   │   ├── emotion_engine.py
-│   │   ├── memory_manager.py
-│   │   └── reaction_mapper.py
-│   ├── desktop_companion/ # UI and desktop integration
-│   │   ├── avatar/        # 2D/3D character rendering
-│   │   ├── shimeji/       # Desktop overlay behavior
-│   │   └── speech/        # Voice input/output
-│   └── community_features/ # Plugins and extensions
-├── shared/               # Shared utilities
-│   ├── config/           # Configuration management
-│   ├── utils/            # Common utilities
-│   └── data/            # Data files and schemas
-├── docs/                # Documentation (Obsidian-ready)
-│   ├── notes/           # Atomic knowledge notes
-│   ├── architecture/    # System design docs
-│   ├── api/            # API documentation
-│   └── guides/         # Tutorials and how-tos
-├── scripts/            # Automation scripts
-├── tests/              # Test suites
-├── assets/             # Static resources
-├── src-tauri/          # Rust backend + frontend
-└── README.md
+├── r.py                           # Simple entry point (delegates to launcher)
+├── runtime/                       # Modern 4-layer architecture
+│   ├── modern_launcher.py         # Modern launcher with DI and lifecycle
+│   ├── legacy_compat.py           # Legacy compatibility layer
+│   ├── runtime_orchestrator.py    # Main event loop coordinator
+│   ├── module_registry.py         # Module registration and state tracking
+│   ├── lifecycle_manager.py       # Lifecycle orchestration
+│   ├── service_container.py       # Dependency injection container
+│   ├── bootstrap.py               # Legacy bootstrap (preserved)
+│   ├── launcher.py                 # Legacy launcher (preserved)
+│   ├── orchestrator.py             # Legacy orchestrator (preserved)
+│   └── MODULE_SUMMARY.md          # Runtime documentation
+├── domain/                        # Core business logic and stability systems
+│   ├── core/                      # Central orchestration and contracts
+│   ├── capabilities/              # Safety and permission system
+│   ├── attention/                 # Attention engine for "alive" feeling
+│   ├── state/                     # Behavior state machine
+│   ├── inference/                 # Resource-aware AI controller
+│   ├── grounding/                 # Tool grounding for hallucination prevention
+│   ├── personality/               # Emotion and personality system
+│   ├── ai/                        # AI providers (FastBrain, SLM, LLM)
+│   ├── memory/                    # Learning and memory systems
+│   └── contracts/                 # Interface definitions
+├── app/                           # Application layer
+│   ├── commands/                  # CLI command handlers
+│   ├── adapters/                  # System integration adapters
+│   └── user_manager.py            # User profile management
+├── interfaces/                    # UI and display layers
+│   ├── desktop/                   # Desktop application and permissions
+│   ├── api/                       # REST and WebSocket APIs
+│   ├── learning/                  # Analytics and learning UI
+│   └── overlay/                   # Always-on display components
+├── features/                      # Pluggable features
+│   ├── browser_integration/        # Web integration features
+│   ├── quiz_solver/               # Educational assistance
+│   └── community_features/        # User-created features
+├── infra/                         # Infrastructure and services
+│   ├── llm/                       # AI model integration
+│   ├── logging/                   # Structured logging
+│   ├── multimodal/                # Multi-modal processing
+│   ├── sandbox/                   # Isolated execution
+│   └── storage/                   # Data persistence
+├── shared/                        # Shared utilities
+│   ├── config/                    # Configuration management
+│   ├── constants/                 # System constants
+│   ├── data/                      # Data files and schemas
+│   └── budgets.py                 # Resource budget management
+├── src-tauri/                     # Rust-based desktop framework
+├── vendor/                        # Third-party libraries
+├── scripts/                       # Setup and automation scripts
+├── tests/                         # Test suites
+├── assets/                        # Static resources
+├── data/                          # Runtime data and user state
+└── docs/                          # Documentation (Obsidian-ready)
 ```
 
 ## Documentation
 
 This project uses **Obsidian-compatible documentation** with bidirectional linking between code and documentation.
 
-- **[[docs/notes/project-overview]]** - High-level system understanding
-- **[[docs/notes/system-architecture]]** - Detailed system design  
-- **[[docs/notes/ai-pipeline]]** - AI processing flow
-- **[[docs/guides/developer-onboarding]]** - Getting started guide
+### 📚 Documentation Vault
+- **[[docs/README|Documentation Home]]** - Complete documentation index
+- **[[docs/guides/developer-onboarding|Developer Onboarding]]** - Getting started guide
+- **[[docs/architecture/system-design|System Architecture]]** - Technical architecture overview
 
-Open the `docs/` folder in Obsidian for the full knowledge graph experience.
+### 🔍 Quick Links
+- [[docs/kitsu/01_system|System Overview]] - Core system concepts
+- [[docs/kitsu/02_core|Core Components]] - Architecture components  
+- [[docs/kitsu/03_modules|Modules]] - Feature modules
+- [[docs/SECURITY|Security]] - Security policies
+
+### 🛠️ Using with Obsidian
+1. Install [Obsidian](https://obsidian.md/)
+2. Open the `docs/` folder as a vault
+3. Enable community plugins for enhanced navigation
+4. Use the graph view to explore connections between concepts
+
+The documentation uses Obsidian's [[wikilinks]] for navigation - click any link to explore related concepts.
 
 ---
 
@@ -404,18 +509,49 @@ the validation rules. Example: 3D avatar + no LLM, or voice-only + no avatar.
 
 ## Startup sequence
 
+### Modern Architecture Startup
+
 ```
-main.py
-  └── launcher.py
-        ├── 1. logging online
-        ├── 2. validate config schema
-        ├── 3. load defaults.yaml
-        ├── 4. overlay active profile
-        ├── 5. detect hardware tier (via Tauri IPC)
-        ├── 6. set capability flags
-        ├── 7. LOCK flags ← read-only from here
-        ├── 8. bootstrap.py (wire subsystems)
-        └── 9. orchestrator.run() (event loop)
+r.py (Simple Entry Point)
+   └── launcher.py (Legacy Compatibility)
+         ├── Modern Architecture Delegation
+         │     └── runtime/modern_launcher.py
+         │           ├── ServiceContainer (DI)
+         │           ├── ModuleRegistry
+         │           ├── LifecycleManager
+         │           └── RuntimeOrchestrator
+         └── Legacy Fallback (if needed)
+```
+
+### 4-Layer Startup Flow
+
+1. **ServiceContainer** creates DI container and registers core services
+2. **ModuleRegistry** validates dependencies and tracks module states
+3. **LifecycleManager** executes phased startup with graceful degradation
+4. **RuntimeOrchestrator** starts main event loop with health monitoring
+
+### Legacy Startup (Preserved)
+
+```
+launcher.py (Phase 0: Initialization)
+   ├─ CLI Parsing & Feature Flag Routing
+   ├─ Logging Setup + Startup Timer
+   ├─ First-Run Check
+   ├─ Config Loading (defaults.yaml + system_config.json + profile)
+   ├─ Hardware Profile Detection
+   ├─ Capability Flags Lock
+   └─ BuildAppContainer (Dependency Injection)
+   ↓
+bootstrap.py (Phase 1: Container Setup)
+   ├─ Create ServiceContainer
+   ├─ Register Core Services
+   └─ Return AppContainer
+   ↓
+orchestrator.py (Phase 2: Main Event Loop)
+   ├─ Listen for Events
+   ├─ Route to Personality Engine
+   ├─ Generate Response
+   └─ Update Emotion State
 ```
 
 Steps 1–7 failing causes an immediate clean exit with a clear error message.
@@ -452,28 +588,45 @@ This is a hybrid system combining:
 
 ## Key architectural rules
 
+### Modern Architecture Principles
+
+**4-Layer Separation of Concerns:**
+- ServiceContainer handles dependency injection only
+- ModuleRegistry manages module lifecycle and dependencies
+- LifecycleManager orchestrates startup/shutdown phases
+- RuntimeOrchestrator coordinates runtime behavior
+
+**Interface-Driven Design:**
+- All modules implement standardized lifecycle interfaces
+- Capability-based feature detection
+- Graceful degradation with null implementations
+
+**Resource-Aware Operation:**
+- Automatic tier switching based on system resources
+- Battery and thermal awareness
+- Student laptop optimization
+
+**Safety First:**
+- Capability sandboxing for dangerous operations
+- Tool grounding prevents hallucinations
+- Comprehensive audit logging
+
+### Legacy Architecture Principles (Preserved)
+
 **Import discipline** — modules only import "downward":
-- `core/` never imports from `ai/`, `personality/`, or `ui/`
-- `config/` imports nothing from the project
-- `core/events.py` and `core/contracts.py` import nothing from the project
-- Cross-module communication goes through `core/bus.py` (EventBus)
+- `domain/` never imports from `app/`, `interfaces/`, or `features/`
+- `shared/` imports nothing from the project
+- Cross-module communication goes through event bus
 
-**Capability gateway** — all system actions (file access, OS control, automation)
-must pass through `system/gateway.py`. No module calls OS APIs directly.
+**Capability gateway** — all system actions must pass through permission checks
 
-**Data files are the mod API** — everything in `data/` is a versioned JSON file
-that community mods can override. Never hardcode values that belong in `data/`.
+**Data files are the mod API** — everything in `data/` is versioned JSON
 
-**FastBrain is always hot** — even in sleep mode, the FastBrain stays loaded.
-SLM and LLM unload after 5 minutes idle. FastBrain never unloads.
+**FastBrain is always hot** — even in sleep mode, the FastBrain stays loaded
 
-**Emotion is always on** — even with no avatar and no SLM, the emotion engine
-runs and shapes template selection. This is what makes ultra-low mode feel
-like kitsu, not a generic chatbot.
+**Emotion is always on** — even with no avatar, the emotion engine runs and shapes responses
 
-**Null implementations, not flag checks** — every optional subsystem has a null
-implementation that satisfies its contract. Call sites never do `if USE_SLM:`.
-The null SLM just returns `None` and the router handles it.
+**Null implementations, not flag checks** — every optional subsystem has a null implementation
 
 ---
 

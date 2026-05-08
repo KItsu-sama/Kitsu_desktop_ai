@@ -65,6 +65,9 @@ class EmotionController:
         # Background processing task
         self.processing_task = None
         
+        # Shutdown flag for proper loop termination
+        self._shutdown_requested = False
+        
         log.info("EmotionController initialized")
     
     async def start(self) -> None:
@@ -74,12 +77,18 @@ class EmotionController:
     
     async def stop(self) -> None:
         """Stop emotion controller"""
+        # Set shutdown flag first
+        self._shutdown_requested = True
+        
         if self.processing_task:
+            # Cancel the task
             self.processing_task.cancel()
             try:
                 await self.processing_task
             except asyncio.CancelledError:
                 pass
+            except Exception as e:
+                log.error(f"Error stopping emotion controller: {e}")
         log.info("EmotionController stopped")
     
     # =========================================================================
@@ -336,10 +345,18 @@ class EmotionController:
         """Background task to process queued responses"""
         log.info("Starting response processing loop")
         
-        while True:
+        while not self._shutdown_requested:
             try:
-                # Get next response
-                response = await self.response_queue.get()
+                # Get next response with shorter timeout to allow responsive shutdown
+                try:
+                    log.debug("Waiting for response...")
+                    response = await asyncio.wait_for(
+                        self.response_queue.get(), 
+                        timeout=1.0  # 1 second timeout for responsive shutdown
+                    )
+                except asyncio.TimeoutError:
+                    # No response received in timeout, check shutdown and continue
+                    continue
                 
                 # Execute all components simultaneously
                 tasks = []
@@ -362,17 +379,23 @@ class EmotionController:
                         self._update_memory(response)
                     ))
                 
-                # Wait for all to complete
+                # Wait for all to complete with timeout to prevent hanging
                 if tasks:
-                    await asyncio.gather(*tasks, return_exceptions=True)
-                
-                # Wait for response duration
-                await asyncio.sleep(response.duration)
+                    try:
+                        await asyncio.wait_for(
+                            asyncio.gather(*tasks, return_exceptions=True),
+                            timeout=response.duration + 1.0  # Add buffer to duration
+                        )
+                    except asyncio.TimeoutError:
+                        log.warning("Response execution timed out")
                 
             except asyncio.CancelledError:
+                log.debug("Response processing cancelled")
                 break
             except Exception as e:
                 log.error(f"Error processing response: {e}")
+        
+        log.info("Response processing loop stopped")
     
     async def _execute_avatar_animation(self, response: EmotionalResponse) -> None:
         """Execute avatar animation"""

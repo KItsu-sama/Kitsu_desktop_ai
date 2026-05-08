@@ -456,26 +456,55 @@ class Orchestrator(ModuleContract):
     # --- Main Loop ---
 
     async def run(self) -> None:
-        """Run the main orchestrator event loop."""
+        """Run main orchestrator event loop."""
         # Ensure shutdown event is initialized
         if self._shutdown_event is None:
             self._shutdown_event = asyncio.Event()
+        
+        # Add signal handler for Ctrl+C
+        import signal
+        def signal_handler(signum, frame):
+            logger.info("Interrupt signal received, shutting down...")
+            self.request_stop()
+        
+        try:
+            signal.signal(signal.SIGINT, signal_handler)
+        except ValueError:
+            # Signal handling not available in all environments
+            pass
             
         logger.info("Orchestrator main loop started.")
         
-        # Start chat loop task
-        chat_task = asyncio.create_task(self._chat_loop()) if getattr(self, '_chat_enabled', True) else None
+        # Start chat loop task (always enable for text mode)
+        self._chat_enabled = True
+        logger.info("Starting chat loop task...")
+        try:
+            chat_task = asyncio.create_task(self._chat_loop())
+            logger.info("Chat loop task created successfully")
+        except Exception as e:
+            logger.error(f"Failed to create chat loop task: {e}")
+            chat_task = None
         
         try:
             # Run active monitoring loop with emotion manager heartbeat
             while self._shutdown_event and not self._shutdown_event.is_set():
                 try:
-                    # EmotionManager heartbeat (1-second tick)
+                    # EmotionManager heartbeat (1-second tick) with timeout safeguard
                     if self.emotion_manager:
-                        await self.emotion_manager.tick()
+                        try:
+                            await asyncio.wait_for(self.emotion_manager.tick(), timeout=0.5)
+                        except asyncio.TimeoutError:
+                            logger.warning("EmotionManager.tick() timed out")
+                        except Exception as e:
+                            logger.error(f"EmotionManager.tick() failed: {e}")
                     
-                    # Check module health periodically
-                    await self._check_module_health()
+                    # Check module health periodically with timeout safeguard
+                    try:
+                        await asyncio.wait_for(self._check_module_health(), timeout=0.3)
+                    except asyncio.TimeoutError:
+                        logger.warning("Module health check timed out")
+                    except Exception as e:
+                        logger.error(f"Module health check failed: {e}")
                     
                     # Wait a short time before next check
                     # Use wait_for with timeout to allow shutdown interruption
@@ -509,26 +538,62 @@ class Orchestrator(ModuleContract):
 
     async def _chat_loop(self) -> None:
         """Interactive chat loop for user input."""
-        logger.info("Chat loop started. Type 'help' for commands or 'quit' to exit.")
-        
         try:
-            while not (self._shutdown_event and self._shutdown_event.is_set()):
+            logger.info("Chat loop started. Type 'help' for commands or 'quit' to exit.")
+            
+            # Add timeout to prevent hanging
+            input_timeout = 5.0  # 5 seconds timeout for input
+            
+            while not self._shutdown_event.is_set():
                 try:
-                    # Get user input with better error handling
+                    # Get user input with timeout to prevent hanging
+                    import sys
+                    
+                    # Check if stdin is available
+                    if sys.stdin is None or sys.stdin.closed:
+                        logger.warning("Stdin not available, exiting chat loop")
+                        self.request_stop()
+                        break
+                    
+                    # Use a timeout-based input approach to prevent hanging
                     try:
-                        user_input = await asyncio.get_event_loop().run_in_executor(
-                            None, 
-                            lambda: input("\n> ")
+                        # Try to get input with timeout
+                        user_input = await asyncio.wait_for(
+                            asyncio.to_thread(input, "\n> "),
+                            timeout=input_timeout
                         )
+                    except asyncio.TimeoutError:
+                        # Timeout occurred - show a message and continue
+                        logger.debug("Input timeout, continuing loop")
+                        print("\n> (no input received, continuing...)")
+                        continue
                     except (EOFError, KeyboardInterrupt):
                         # Handle closed stdin or interrupt gracefully
                         logger.info("Input stream closed or interrupted")
                         self.request_stop()
                         break
                     except Exception as e:
-                        logger.error("Input error: %s", e)
-                        self.request_stop()
-                        break
+                        # Fallback for terminal issues
+                        logger.debug("Input method failed, trying alternative: %s", e)
+                        try:
+                            # Alternative input method with timeout
+                            user_input = await asyncio.wait_for(
+                                asyncio.get_event_loop().run_in_executor(
+                                    None, 
+                                    lambda: sys.stdin.readline().strip()
+                                ),
+                                timeout=input_timeout
+                            )
+                            if not user_input:  # Empty line means EOF
+                                raise EOFError
+                        except asyncio.TimeoutError:
+                            logger.debug("Alternative input timeout, continuing loop")
+                            print("\n> (no input received, continuing...)")
+                            continue
+                        except (EOFError, KeyboardInterrupt):
+                            logger.info("Input stream closed or interrupted")
+                            self.request_stop()
+                            break
                     
                     # Handle commands
                     if user_input.lower().strip() in ['quit', 'exit', 'q']:

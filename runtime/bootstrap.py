@@ -125,6 +125,22 @@ class ServiceRegistry:
         # Clock service
         container.register_singleton(ClockService, ClockService)
         
+        # Core stability systems
+        from domain.core.failure_recovery import FAILURE_RECOVERY_SYSTEM, FailureRecoverySystem
+        from domain.capabilities.capability_manager import CAPABILITY_MANAGER, CapabilityManager
+        from domain.inference.resource_controller import RESOURCE_CONTROLLER, ResourceController
+        from domain.state.behavior_state_machine import BEHAVIOR_STATE_MACHINE, BehaviorStateMachine
+        from domain.grounding.tool_grounding import TOOL_GROUNDING_SYSTEM, ToolGroundingSystem
+        from runtime.runtime_orchestrator import RuntimeOrchestrator, get_runtime_orchestrator
+        
+        # Register stability systems as singletons
+        container.register_instance(FailureRecoverySystem, FAILURE_RECOVERY_SYSTEM)
+        container.register_instance(CapabilityManager, CAPABILITY_MANAGER)
+        container.register_instance(ResourceController, RESOURCE_CONTROLLER)
+        container.register_instance(BehaviorStateMachine, BEHAVIOR_STATE_MACHINE)
+        container.register_instance(ToolGroundingSystem, TOOL_GROUNDING_SYSTEM)
+        container.register_instance(RuntimeOrchestrator, get_runtime_orchestrator())
+        
         # Use factories for complex services
         def create_health_monitor():
             event_bus = container.get(MessageBus)
@@ -141,7 +157,7 @@ class ServiceRegistry:
         container.register_singleton(HealthMonitor, factory=create_health_monitor)
         container.register_singleton(PerformanceManager, factory=create_performance_manager)
         
-        logger.info("Registered core services")
+        logger.info("Registered core services with stability systems")
     
     @staticmethod
     def register_application_services(container, runtime_config) -> None:

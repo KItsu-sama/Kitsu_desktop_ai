@@ -15,6 +15,7 @@ from enum import Enum
 
 from domain.contracts.contracts import ModuleContract
 from runtime.events import EventBus, EventType, EventPayload
+from runtime.container import get_container
 
 logger = logging.getLogger(__name__)
 
@@ -28,10 +29,12 @@ class ModuleType(Enum):
 
 class ModuleStatus(Enum):
     """Module status states."""
-    UNKNOWN = "unknown"
+    INITIALIZING = "initializing"
     REGISTERED = "registered"
     STARTING = "starting"
     RUNNING = "running"
+    DEGRADED = "degraded"
+    RECOVERING = "recovering"
     STOPPING = "stopping"
     STOPPED = "stopped"
     FAILED = "failed"
@@ -44,7 +47,7 @@ class ModuleInfo:
     module_type: ModuleType
     module_class: Type
     instance: Optional[Any] = None
-    status: ModuleStatus = ModuleStatus.UNKNOWN
+    status: ModuleStatus = ModuleStatus.INITIALIZING
     dependencies: List[str] = None
     metadata: Dict[str, Any] = None
     
@@ -152,8 +155,16 @@ class UnifiedModuleRegistry:
                     logger.error(f"Dependency {dep} not available for {module_id}")
                     return False
             
-            # Create instance
-            instance = module_info.module_class(**kwargs)
+            # Try to create instance using DI container first
+            try:
+                container = get_container()
+                instance = container.get(module_info.module_class)
+                logger.debug(f"Created instance for {module_id} using DI container")
+            except Exception:
+                # Fallback to direct instantiation with kwargs
+                instance = module_info.module_class(**kwargs)
+                logger.debug(f"Created instance for {module_id} using direct instantiation")
+            
             module_info.instance = instance
             module_info.status = ModuleStatus.REGISTERED
             
@@ -224,8 +235,10 @@ class UnifiedModuleRegistry:
             logger.error(f"Module {module_id} not registered")
             return False
         
-        if module_info.status != ModuleStatus.RUNNING:
-            logger.warning(f"Module {module_id} not running: {module_info.status.value}")
+        # Check if module is in a stoppable state
+        stoppable_states = [ModuleStatus.RUNNING, ModuleStatus.DEGRADED, ModuleStatus.FAILED]
+        if module_info.status not in stoppable_states:
+            logger.debug(f"Module {module_id} not in stoppable state: {module_info.status.value}")
             return True
         
         try:
@@ -239,7 +252,7 @@ class UnifiedModuleRegistry:
             for dependent in dependents:
                 await self.stop_module(dependent)
             
-            # Stop the module
+            # Stop module
             if hasattr(module_info.instance, 'stop'):
                 result = await module_info.instance.stop()
                 module_info.status = ModuleStatus.STOPPED if result else ModuleStatus.FAILED

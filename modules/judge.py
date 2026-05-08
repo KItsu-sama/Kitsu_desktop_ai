@@ -41,3 +41,20 @@ def judge_response(ctx: RequestContext, response_text: str) -> JudgeResult:
         coherent=coherent,
         factually_safe=factually_safe
     )
+
+def _check_character(response: str, vibe: list[float]) -> int:
+    # v0: warmth index. if warmth > 0.6, response should not be terse/harsh
+    # implement as simple heuristic first, replace with tiny embedding later
+    warmth = vibe[0] if len(vibe) > 0 else 0.5
+    if warmth > 0.7 and len(response) < 10:
+        return 0  # warmth mode should not give 1-word responses
+    return 1
+
+def _check_coherent(response: str, ctx_text: str) -> int:
+    # v0: must have a complete sentence, not empty, not truncated
+    return 1 if response and response.strip() and len(response) > 3 else 0
+
+def _check_factual(response: str, ctx_text: str) -> int:
+    # v0: conservative — flag responses asserting specific numbers/dates not in ctx
+    # implement proper RAG cross-check in v1
+    return 1  # default safe, add heuristics incrementally

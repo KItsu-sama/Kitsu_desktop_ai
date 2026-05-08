@@ -1,0 +1,23 @@
+{
+  "legacyEditor": false,
+  "livePreview": true,
+  "promptDelete": false,
+  "readableLineWidth": 700,
+  "showLineNumber": true,
+  "strictLineBreaks": false,
+  "foldHeading": true,
+  "foldIndent": true,
+  "showFrontmatter": true,
+  "alwaysUpdateLinks": true,
+  "useMarkdownLinks": false,
+  "newFileLocation": "folder",
+  "newFileFolderPath": "notes",
+  "attachmentFolderPath": "assets",
+  "userIgnoreFilters": [
+    ".git/",
+    "node_modules/",
+    "__pycache__/",
+    "*.pyc",
+    ".pytest_cache/"
+  ]
+}
