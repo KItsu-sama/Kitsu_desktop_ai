@@ -342,20 +342,25 @@ class EmotionController:
     # =========================================================================
     
     async def _process_responses(self) -> None:
-        """Background task to process queued responses"""
+        """Background task to process queued responses - FIXED VERSION"""
         log.info("Starting response processing loop")
         
         while not self._shutdown_requested:
             try:
-                # Get next response with shorter timeout to allow responsive shutdown
+                # Non-blocking check first
+                if self.response_queue.empty():
+                    # Short sleep instead of blocking wait
+                    await asyncio.sleep(0.1)
+                    continue
+                
+                # Get response with very short timeout
                 try:
-                    log.debug("Waiting for response...")
                     response = await asyncio.wait_for(
                         self.response_queue.get(), 
-                        timeout=1.0  # 1 second timeout for responsive shutdown
+                        timeout=0.1  # Much shorter timeout
                     )
+                    self.response_queue.task_done()
                 except asyncio.TimeoutError:
-                    # No response received in timeout, check shutdown and continue
                     continue
                 
                 # Execute all components simultaneously
@@ -394,6 +399,7 @@ class EmotionController:
                 break
             except Exception as e:
                 log.error(f"Error processing response: {e}")
+                await asyncio.sleep(0.1)  # Prevent log spam
         
         log.info("Response processing loop stopped")
     

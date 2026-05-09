@@ -18,6 +18,7 @@
     │   │       ├── manifest.json
     │   │       └── theme.css
     │   └── workspace.json
+    ├── CRITICAL_SYSTEMS_ARCHITECTURE.md
     ├── LICENSE
     ├── PERSONALITY_ENGINE_FIXES_SUMMARY.md
     ├── PERSONALITY_ENHANCEMENTS.md
@@ -46,6 +47,9 @@
     │   └── sounds
     ├── characters
     │   └── en_nuke_debate.yaml
+    ├── core
+    │   ├── context.py
+    │   └── event_bus.py
     ├── data
     │   ├── config
     │   │   ├── permissions.json
@@ -57,26 +61,30 @@
     │   ├── memory
     │   │   └── backups
     │   ├── profiles
+    │   ├── reflex_cache.json
     │   └── runtime
     │       ├── .first_run_complete
     │       ├── crash.log
     │       ├── feature_manifest.json
     │       └── last_crash.json
     ├── docs
+    │   ├── .obsidian
+    │   │   ├── app.json
+    │   │   ├── appearance.json
+    │   │   └── core-plugins.json
+    │   ├── README.md
     │   ├── SECURITY.md
     │   ├── api
+    │   │   └── README.md
     │   ├── architecture
     │   │   └── system-design.md
     │   ├── guides
     │   │   └── developer-onboarding.md
     │   ├── kitsu
     │   │   ├── 01_system
-    │   │   │   ├── Kitsu.md
     │   │   │   ├── Kitsu_GitNexus_Guide.md
     │   │   │   └── Kitsu_Overview.md
     │   │   ├── 02_core
-    │   │   │   ├── Kitsu_EventBus.md
-    │   │   │   ├── Kitsu_Orchestrator.md
     │   │   │   └── ORCHESTRATOR.md
     │   │   ├── 03_modules
     │   │   │   ├── Kitsu_EmotionEngine.md
@@ -86,45 +94,15 @@
     │   │   │   ├── Emotion_System_Design.md
     │   │   │   └── FastBrain_Architecture.md
     │   │   ├── 90_references
-    │   │   │   ├── Ref_Contributing.md
-    │   │   │   ├── Ref_Kitsu_Architecture_Summary.md
-    │   │   │   ├── legacy_kitsu
-    │   │   │   │   ├── ARCHITECTURE_IMPROVEMENTS.md
-    │   │   │   │   ├── ARCHITECTURE_OVERVIEW.md
-    │   │   │   │   ├── ARCHITECTURE_PROPOSAL.md
-    │   │   │   │   ├── COMPONENT_REFERENCE.md
-    │   │   │   │   ├── EMOTION_SYSTEM.md
-    │   │   │   │   ├── IMPLEMENTATION_STATUS.md
-    │   │   │   │   ├── MINI_LLM_GUIDE.md
-    │   │   │   │   ├── ML_System.md
-    │   │   │   │   ├── PERFORMANCE.md
-    │   │   │   │   ├── PROJECT_RATING.md
-    │   │   │   │   ├── PROJECT_STRUCTURE.md
-    │   │   │   │   ├── QUICK_START.md
-    │   │   │   │   ├── Ref_Legacy_README.md
-    │   │   │   │   ├── SetupSystem.md
-    │   │   │   │   ├── TECHNICAL_DEEP_DIVE.md
-    │   │   │   │   ├── UPGRADE_COMMANDS.md
-    │   │   │   │   ├── _Summary.md
-    │   │   │   │   └── architecture.md
-    │   │   │   ├── llama_cpp
-    │   │   │   │   ├── AGENTS.md
-    │   │   │   │   ├── CLAUDE.md
-    │   │   │   │   ├── CONTRIBUTING.md
-    │   │   │   │   ├── README.md
-    │   │   │   │   ├── SECURITY.md
-    │   │   │   │   └── _Summary.md
-    │   │   │   ├── open_llm_vtuber
-    │   │   │   │   └── _Summary.md
-    │   │   │   └── tauri
-    │   │   │       └── _Summary.md
-    │   │   └── 99_meta
-    │   │       ├── Kitsu_AGENTS.md
-    │   │       ├── Kitsu_CLAUDE.md
-    │   │       ├── Kitsu_Implementation_Tasks.md
-    │   │       ├── Kitsu_Phase1_Summary.md
-    │   │       ├── Kitsu_Runtime_Refactor_Summary.md
-    │   │       └── Kitsu_Vault_Organization_Report.md
+    │   │   │   └── Ref_Contributing.md
+    │   │   ├── 99_meta
+    │   │   │   ├── Kitsu_AGENTS.md
+    │   │   │   ├── Kitsu_CLAUDE.md
+    │   │   │   ├── Kitsu_Implementation_Tasks.md
+    │   │   │   ├── Kitsu_Phase1_Summary.md
+    │   │   │   ├── Kitsu_Runtime_Refactor_Summary.md
+    │   │   │   └── Kitsu_Vault_Organization_Report.md
+    │   │   └── README.md
     │   └── notes
     │       ├── ai-pipeline.md
     │       ├── application-lifecycle.md
@@ -174,13 +152,30 @@
     │   │       ├── provider.py
     │   │       ├── style_processor.py
     │   │       └── templates.py
+    │   ├── attention
+    │   │   ├── __init__.py
+    │   │   └── attention_manager.py
     │   ├── builder.py
+    │   ├── capabilities
+    │   │   ├── __init__.py
+    │   │   └── capability_manager.py
     │   ├── capabilities.py
     │   ├── contracts
     │   │   ├── contracts.py
-    │   │   └── interfaces.py
+    │   │   ├── interfaces.py
+    │   │   └── lifecycle.py
+    │   ├── core
+    │   │   ├── __init__.py
+    │   │   ├── failure_recovery.py
+    │   │   └── kitsu_orchestrator.py
     │   ├── energy.py
+    │   ├── grounding
+    │   │   ├── __init__.py
+    │   │   └── tool_grounding.py
     │   ├── inertia.py
+    │   ├── inference
+    │   │   ├── __init__.py
+    │   │   └── resource_controller.py
     │   ├── interaction
     │   │   ├── input_manager.py
     │   │   ├── input_mux.py
@@ -213,6 +208,9 @@
     │   ├── presets.py
     │   ├── rate_limit.py
     │   ├── rules.py
+    │   ├── state
+    │   │   ├── __init__.py
+    │   │   └── behavior_state_machine.py
     │   ├── triggers.py
     │   ├── unified_events.py
     │   ├── unified_manager.py
@@ -288,6 +286,15 @@
     │       └── dashboard.py
     ├── layout.json
     ├── layout.txt
+    ├── modules
+    │   ├── judge.py
+    │   ├── llm.py
+    │   ├── memory.py
+    │   ├── preprocess.py
+    │   ├── quiz_handler.py
+    │   ├── reflex.py
+    │   ├── router.py
+    │   └── slm.py
     ├── r.py
     ├── requirements.txt
     ├── runtime
@@ -311,14 +318,17 @@
     │   ├── kitsu_identity.py
     │   ├── kitsu_launcher.py
     │   ├── launcher.py
+    │   ├── legacy_compat.py
     │   ├── lifecycle.py
     │   ├── main.py
+    │   ├── modern_launcher.py
     │   ├── module_registry.py
     │   ├── orchestrator.py
     │   ├── performance_manager.py
     │   ├── policy_router.py
     │   ├── profiles.py
     │   ├── runtime_config.py
+    │   ├── runtime_orchestrator.py
     │   ├── strip_controller.py
     │   └── system_monitor.py
     ├── scripts
@@ -1729,306 +1739,307 @@
     │           ├── audits.toml
     │           ├── config.toml
     │           └── imports.lock
-    ├── test_personality_direct.py
-    ├── test_personality_enhancements.py
-    ├── test_personality_standalone.py
-    └── vendor
-        └── Open-LLM-VTuber
-            ├── .cursor
-            │   └── rules
-            │       └── olv-core-rules.mdc
-            ├── .dockerignore
-            ├── .gemini
-            │   ├── GEMINI.md
-            │   └── styleguide.md
-            ├── .gitattributes
-            ├── .github
-            │   ├── FUNDING.yml
-            │   ├── ISSUE_TEMPLATE
-            │   │   ├── bug---question---get-help---bug---提问---求助.md
-            │   │   └── feature-request---功能建议.md
-            │   ├── copilot-instructions.md
-            │   └── workflows
-            │       ├── codeql.yml
-            │       ├── create_release.yml
-            │       ├── docker-blacksmith.yml
-            │       ├── fossa_scan.yml
-            │       ├── ruff.yml
-            │       └── update-requirements.yml
-            ├── .gitignore
-            ├── .gitmodules
-            ├── .pre-commit-config.yaml
-            ├── .python-version
-            ├── CLAUDE.md
-            ├── CONTRIBUTING.md
-            ├── LICENSE
-            ├── LICENSE-Live2D.md
-            ├── README.CN.md
-            ├── README.JP.md
-            ├── README.KR.md
-            ├── README.md
-            ├── assets
-            │   ├── banner.cn.jpg
-            │   ├── banner.jpg
-            │   ├── banner.kr.jpg
-            │   ├── i1.jpg
-            │   ├── i1_app_mode.jpg
-            │   ├── i2.jpg
-            │   ├── i2_pet_vscode.jpg
-            │   ├── i3.jpg
-            │   ├── i3_browser_world_fun.jpg
-            │   ├── i4.jpg
-            │   └── i4_pet_desktop.jpg
-            ├── avatars
-            │   ├── mao.png
-            │   └── shizuku.png
-            ├── backgrounds
-            │   ├── README.md
-            │   ├── cartoon-night-landscape-moon.jpeg
-            │   ├── ceiling-window-room-night.jpeg
-            │   ├── cityscape.jpeg
-            │   ├── computer-room-illustration.jpeg
-            │   ├── congress.jpg
-            │   ├── field-night-painting-moon.jpeg
-            │   ├── lernado-diff-classroom-center.jpeg
-            │   ├── moon-over-mountain.jpeg
-            │   ├── mountain-range-illustration.jpeg
-            │   ├── night-landscape-grass-moon.jpeg
-            │   ├── night-scene-cartoon-moon.jpeg
-            │   ├── painting-valley-night-sky. 2.jpeg
-            │   ├── room-interior-illustration.jpeg
-            │   └── sdxl-classroom-door-view.jpeg
-            ├── characters
-            │   ├── README.md
-            │   ├── en_nuke_debate.yaml
-            │   ├── en_unhelpful_ai.yaml
-            │   ├── zh_米粒.yaml
-            │   └── zh_翻译腔.yaml
-            ├── config_templates
-            │   ├── README.md
-            │   ├── conf.ZH.default.yaml
-            │   └── conf.default.yaml
-            ├── doc
-            │   ├── README.md
-            │   └── sample_conf
-            │       ├── sherpaASRTTS_sense_voice_melo.yaml
-            │       ├── sherpaASRTTS_sense_voice_piper_en.yaml
-            │       ├── sherpaASRTTS_sense_voice_vits_zh.yaml
-            │       ├── sherpaASR_paraformer.yaml
-            │       └── sherpaASR_sense_voice.yaml
-            ├── dockerfile
-            ├── frontend
-            ├── live2d-models
-            │   ├── mao_pro
-            │   │   ├── ReadMe.txt
-            │   │   └── runtime
-            │   │       ├── expressions
-            │   │       │   ├── exp_01.exp3.json
-            │   │       │   ├── exp_02.exp3.json
-            │   │       │   ├── exp_03.exp3.json
-            │   │       │   ├── exp_04.exp3.json
-            │   │       │   ├── exp_05.exp3.json
-            │   │       │   ├── exp_06.exp3.json
-            │   │       │   ├── exp_07.exp3.json
-            │   │       │   └── exp_08.exp3.json
-            │   │       ├── mao_pro.4096
-            │   │       │   └── texture_00.png
-            │   │       ├── mao_pro.cdi3.json
-            │   │       ├── mao_pro.moc3
-            │   │       ├── mao_pro.model3.json
-            │   │       ├── mao_pro.physics3.json
-            │   │       ├── mao_pro.pose3.json
-            │   │       └── motions
-            │   │           ├── mtn_01.motion3.json
-            │   │           ├── mtn_02.motion3.json
-            │   │           ├── mtn_03.motion3.json
-            │   │           ├── mtn_04.motion3.json
-            │   │           ├── special_01.motion3.json
-            │   │           ├── special_02.motion3.json
-            │   │           └── special_03.motion3.json
-            │   └── shizuku
-            │       ├── ReadMe.txt
-            │       └── runtime
-            │           ├── motion
-            │           │   ├── 01.motion3.json
-            │           │   ├── 02.motion3.json
-            │           │   ├── 03.motion3.json
-            │           │   └── 04.motion3.json
-            │           ├── shizuku.1024
-            │           │   ├── texture_00.png
-            │           │   ├── texture_01.png
-            │           │   ├── texture_02.png
-            │           │   ├── texture_03.png
-            │           │   └── texture_04.png
-            │           ├── shizuku.cdi3.json
-            │           ├── shizuku.moc3
-            │           ├── shizuku.model3.json
-            │           ├── shizuku.physics3.json
-            │           └── shizuku.pose3.json
-            ├── model_dict.json
-            ├── pixi.lock
-            ├── prompts
-            │   ├── README.md
-            │   ├── __init__.py
-            │   ├── prompt_loader.py
-            │   └── utils
-            │       ├── concise_style_prompt.txt
-            │       ├── group_conversation_prompt.txt
-            │       ├── live2d_expression_prompt.txt
-            │       ├── live_prompt.txt
-            │       ├── mcp_prompt.txt
-            │       ├── proactive_speak_prompt.txt
-            │       ├── speakable_prompt.txt
-            │       ├── think_tag_prompt.txt
-            │       └── tool_guidance_prompt.txt
-            ├── pyproject.toml
-            ├── requirements-bilibili.txt
-            ├── requirements.txt
-            ├── run_server.py
-            ├── scripts
-            │   └── run_bilibili_live.py
-            ├── src
-            │   └── open_llm_vtuber
-            │       ├── __init__.py
-            │       ├── agent
-            │       │   ├── __init__.py
-            │       │   ├── agent_factory.py
-            │       │   ├── agents
-            │       │   │   ├── __init__.py
-            │       │   │   ├── agent_interface.py
-            │       │   │   ├── basic_memory_agent.py
-            │       │   │   ├── hume_ai.py
-            │       │   │   ├── letta_agent.py
-            │       │   │   └── mem0_llm.py
-            │       │   ├── input_types.py
-            │       │   ├── output_types.py
-            │       │   ├── stateless_llm
-            │       │   │   ├── __init__.py
-            │       │   │   ├── claude_llm.py
-            │       │   │   ├── llama_cpp_llm.py
-            │       │   │   ├── ollama_llm.py
-            │       │   │   ├── openai_compatible_llm.py
-            │       │   │   ├── stateless_llm_interface.py
-            │       │   │   └── stateless_llm_with_template.py
-            │       │   ├── stateless_llm_factory.py
-            │       │   └── transformers.py
-            │       ├── asr
-            │       │   ├── __init__.py
-            │       │   ├── asr_factory.py
-            │       │   ├── asr_interface.py
-            │       │   ├── azure_asr.py
-            │       │   ├── faster_whisper_asr.py
-            │       │   ├── fun_asr.py
-            │       │   ├── groq_whisper_asr.py
-            │       │   ├── openai_whisper_asr.py
-            │       │   ├── sherpa_onnx_asr.py
-            │       │   ├── utils.py
-            │       │   └── whisper_cpp_asr.py
-            │       ├── chat_group.py
-            │       ├── chat_history_manager.py
-            │       ├── config_manager
-            │       │   ├── __init__.py
-            │       │   ├── agent.py
-            │       │   ├── asr.py
-            │       │   ├── character.py
-            │       │   ├── i18n.py
-            │       │   ├── live.py
-            │       │   ├── main.py
-            │       │   ├── stateless_llm.py
-            │       │   ├── system.py
-            │       │   ├── tts.py
-            │       │   ├── tts_preprocessor.py
-            │       │   ├── utils.py
-            │       │   └── vad.py
-            │       ├── conversations
-            │       │   ├── __init__.py
-            │       │   ├── conversation_handler.py
-            │       │   ├── conversation_utils.py
-            │       │   ├── group_conversation.py
-            │       │   ├── single_conversation.py
-            │       │   ├── tts_manager.py
-            │       │   └── types.py
-            │       ├── live
-            │       │   ├── bilibili_live.py
-            │       │   └── live_interface.py
-            │       ├── live2d_model.py
-            │       ├── mcpp
-            │       │   ├── json_detector.py
-            │       │   ├── mcp_client.py
-            │       │   ├── server_registry.py
-            │       │   ├── tool_adapter.py
-            │       │   ├── tool_executor.py
-            │       │   ├── tool_manager.py
-            │       │   ├── types.py
-            │       │   └── utils
-            │       │       └── path.py
-            │       ├── message_handler.py
-            │       ├── proxy_handler.py
-            │       ├── proxy_message_queue.py
-            │       ├── routes.py
-            │       ├── server.py
-            │       ├── service_context.py
-            │       ├── translate
-            │       │   ├── __init__.py
-            │       │   ├── deeplx.py
-            │       │   ├── tencent.py
-            │       │   ├── translate_factory.py
-            │       │   └── translate_interface.py
-            │       ├── tts
-            │       │   ├── __init__.py
-            │       │   ├── azure_tts.py
-            │       │   ├── bark_tts.py
-            │       │   ├── cartesia_tts.py
-            │       │   ├── coqui_tts.py
-            │       │   ├── cosyvoice2_tts.py
-            │       │   ├── cosyvoice_tts.py
-            │       │   ├── edge_tts.py
-            │       │   ├── elevenlabs_tts.py
-            │       │   ├── fish_api_tts.py
-            │       │   ├── gpt_sovits_tts.py
-            │       │   ├── melo_tts.py
-            │       │   ├── minimax_tts.py
-            │       │   ├── openai_tts.py
-            │       │   ├── piper_tts.py
-            │       │   ├── pyttsx3_tts.py
-            │       │   ├── sherpa_onnx_tts.py
-            │       │   ├── siliconflow_tts.py
-            │       │   ├── spark_tts.py
-            │       │   ├── tts_factory.py
-            │       │   ├── tts_interface.py
-            │       │   └── x_tts.py
-            │       ├── utils
-            │       │   ├── __init__.py
-            │       │   ├── install_utils.py
-            │       │   ├── sentence_divider.py
-            │       │   ├── stream_audio.py
-            │       │   └── tts_preprocessor.py
-            │       ├── vad
-            │       │   ├── __init__.py
-            │       │   ├── silero.py
-            │       │   ├── vad_factory.py
-            │       │   └── vad_interface.py
-            │       └── websocket_handler.py
-            ├── upgrade.py
-            ├── upgrade_codes
-            │   ├── __init__.py
-            │   ├── compare_yaml.py
-            │   ├── config_sync.py
-            │   ├── from_version
-            │   │   ├── __init__.py
-            │   │   └── v_1_1_1.py
-            │   ├── upgrade_core
-            │   │   ├── __init__.py
-            │   │   ├── comment_diff_fn.py
-            │   │   ├── comment_sync.py
-            │   │   ├── constants.py
-            │   │   ├── language.py
-            │   │   └── upgrade_utils.py
-            │   ├── upgrade_manager.py
-            │   └── version_manager.py
-            ├── uv.lock
-            └── web_tool
-                ├── README.md
-                ├── index.html
-                ├── main.js
-                └── recorder.js
+    ├── test_modern_launcher.py
+    ├── utils
+    │   └── timing.py
+    ├── vendor
+    │   └── Open-LLM-VTuber
+    │       ├── .cursor
+    │       │   └── rules
+    │       │       └── olv-core-rules.mdc
+    │       ├── .dockerignore
+    │       ├── .gemini
+    │       │   ├── GEMINI.md
+    │       │   └── styleguide.md
+    │       ├── .gitattributes
+    │       ├── .github
+    │       │   ├── FUNDING.yml
+    │       │   ├── ISSUE_TEMPLATE
+    │       │   │   ├── bug---question---get-help---bug---提问---求助.md
+    │       │   │   └── feature-request---功能建议.md
+    │       │   ├── copilot-instructions.md
+    │       │   └── workflows
+    │       │       ├── codeql.yml
+    │       │       ├── create_release.yml
+    │       │       ├── docker-blacksmith.yml
+    │       │       ├── fossa_scan.yml
+    │       │       ├── ruff.yml
+    │       │       └── update-requirements.yml
+    │       ├── .gitignore
+    │       ├── .gitmodules
+    │       ├── .pre-commit-config.yaml
+    │       ├── .python-version
+    │       ├── CLAUDE.md
+    │       ├── CONTRIBUTING.md
+    │       ├── LICENSE
+    │       ├── LICENSE-Live2D.md
+    │       ├── README.CN.md
+    │       ├── README.JP.md
+    │       ├── README.KR.md
+    │       ├── README.md
+    │       ├── assets
+    │       │   ├── banner.cn.jpg
+    │       │   ├── banner.jpg
+    │       │   ├── banner.kr.jpg
+    │       │   ├── i1.jpg
+    │       │   ├── i1_app_mode.jpg
+    │       │   ├── i2.jpg
+    │       │   ├── i2_pet_vscode.jpg
+    │       │   ├── i3.jpg
+    │       │   ├── i3_browser_world_fun.jpg
+    │       │   ├── i4.jpg
+    │       │   └── i4_pet_desktop.jpg
+    │       ├── avatars
+    │       │   ├── mao.png
+    │       │   └── shizuku.png
+    │       ├── backgrounds
+    │       │   ├── README.md
+    │       │   ├── cartoon-night-landscape-moon.jpeg
+    │       │   ├── ceiling-window-room-night.jpeg
+    │       │   ├── cityscape.jpeg
+    │       │   ├── computer-room-illustration.jpeg
+    │       │   ├── congress.jpg
+    │       │   ├── field-night-painting-moon.jpeg
+    │       │   ├── lernado-diff-classroom-center.jpeg
+    │       │   ├── moon-over-mountain.jpeg
+    │       │   ├── mountain-range-illustration.jpeg
+    │       │   ├── night-landscape-grass-moon.jpeg
+    │       │   ├── night-scene-cartoon-moon.jpeg
+    │       │   ├── painting-valley-night-sky. 2.jpeg
+    │       │   ├── room-interior-illustration.jpeg
+    │       │   └── sdxl-classroom-door-view.jpeg
+    │       ├── characters
+    │       │   ├── README.md
+    │       │   ├── en_nuke_debate.yaml
+    │       │   ├── en_unhelpful_ai.yaml
+    │       │   ├── zh_米粒.yaml
+    │       │   └── zh_翻译腔.yaml
+    │       ├── config_templates
+    │       │   ├── README.md
+    │       │   ├── conf.ZH.default.yaml
+    │       │   └── conf.default.yaml
+    │       ├── doc
+    │       │   ├── README.md
+    │       │   └── sample_conf
+    │       │       ├── sherpaASRTTS_sense_voice_melo.yaml
+    │       │       ├── sherpaASRTTS_sense_voice_piper_en.yaml
+    │       │       ├── sherpaASRTTS_sense_voice_vits_zh.yaml
+    │       │       ├── sherpaASR_paraformer.yaml
+    │       │       └── sherpaASR_sense_voice.yaml
+    │       ├── dockerfile
+    │       ├── frontend
+    │       ├── live2d-models
+    │       │   ├── mao_pro
+    │       │   │   ├── ReadMe.txt
+    │       │   │   └── runtime
+    │       │   │       ├── expressions
+    │       │   │       │   ├── exp_01.exp3.json
+    │       │   │       │   ├── exp_02.exp3.json
+    │       │   │       │   ├── exp_03.exp3.json
+    │       │   │       │   ├── exp_04.exp3.json
+    │       │   │       │   ├── exp_05.exp3.json
+    │       │   │       │   ├── exp_06.exp3.json
+    │       │   │       │   ├── exp_07.exp3.json
+    │       │   │       │   └── exp_08.exp3.json
+    │       │   │       ├── mao_pro.4096
+    │       │   │       │   └── texture_00.png
+    │       │   │       ├── mao_pro.cdi3.json
+    │       │   │       ├── mao_pro.moc3
+    │       │   │       ├── mao_pro.model3.json
+    │       │   │       ├── mao_pro.physics3.json
+    │       │   │       ├── mao_pro.pose3.json
+    │       │   │       └── motions
+    │       │   │           ├── mtn_01.motion3.json
+    │       │   │           ├── mtn_02.motion3.json
+    │       │   │           ├── mtn_03.motion3.json
+    │       │   │           ├── mtn_04.motion3.json
+    │       │   │           ├── special_01.motion3.json
+    │       │   │           ├── special_02.motion3.json
+    │       │   │           └── special_03.motion3.json
+    │       │   └── shizuku
+    │       │       ├── ReadMe.txt
+    │       │       └── runtime
+    │       │           ├── motion
+    │       │           │   ├── 01.motion3.json
+    │       │           │   ├── 02.motion3.json
+    │       │           │   ├── 03.motion3.json
+    │       │           │   └── 04.motion3.json
+    │       │           ├── shizuku.1024
+    │       │           │   ├── texture_00.png
+    │       │           │   ├── texture_01.png
+    │       │           │   ├── texture_02.png
+    │       │           │   ├── texture_03.png
+    │       │           │   └── texture_04.png
+    │       │           ├── shizuku.cdi3.json
+    │       │           ├── shizuku.moc3
+    │       │           ├── shizuku.model3.json
+    │       │           ├── shizuku.physics3.json
+    │       │           └── shizuku.pose3.json
+    │       ├── model_dict.json
+    │       ├── pixi.lock
+    │       ├── prompts
+    │       │   ├── README.md
+    │       │   ├── __init__.py
+    │       │   ├── prompt_loader.py
+    │       │   └── utils
+    │       │       ├── concise_style_prompt.txt
+    │       │       ├── group_conversation_prompt.txt
+    │       │       ├── live2d_expression_prompt.txt
+    │       │       ├── live_prompt.txt
+    │       │       ├── mcp_prompt.txt
+    │       │       ├── proactive_speak_prompt.txt
+    │       │       ├── speakable_prompt.txt
+    │       │       ├── think_tag_prompt.txt
+    │       │       └── tool_guidance_prompt.txt
+    │       ├── pyproject.toml
+    │       ├── requirements-bilibili.txt
+    │       ├── requirements.txt
+    │       ├── run_server.py
+    │       ├── scripts
+    │       │   └── run_bilibili_live.py
+    │       ├── src
+    │       │   └── open_llm_vtuber
+    │       │       ├── __init__.py
+    │       │       ├── agent
+    │       │       │   ├── __init__.py
+    │       │       │   ├── agent_factory.py
+    │       │       │   ├── agents
+    │       │       │   │   ├── __init__.py
+    │       │       │   │   ├── agent_interface.py
+    │       │       │   │   ├── basic_memory_agent.py
+    │       │       │   │   ├── hume_ai.py
+    │       │       │   │   ├── letta_agent.py
+    │       │       │   │   └── mem0_llm.py
+    │       │       │   ├── input_types.py
+    │       │       │   ├── output_types.py
+    │       │       │   ├── stateless_llm
+    │       │       │   │   ├── __init__.py
+    │       │       │   │   ├── claude_llm.py
+    │       │       │   │   ├── llama_cpp_llm.py
+    │       │       │   │   ├── ollama_llm.py
+    │       │       │   │   ├── openai_compatible_llm.py
+    │       │       │   │   ├── stateless_llm_interface.py
+    │       │       │   │   └── stateless_llm_with_template.py
+    │       │       │   ├── stateless_llm_factory.py
+    │       │       │   └── transformers.py
+    │       │       ├── asr
+    │       │       │   ├── __init__.py
+    │       │       │   ├── asr_factory.py
+    │       │       │   ├── asr_interface.py
+    │       │       │   ├── azure_asr.py
+    │       │       │   ├── faster_whisper_asr.py
+    │       │       │   ├── fun_asr.py
+    │       │       │   ├── groq_whisper_asr.py
+    │       │       │   ├── openai_whisper_asr.py
+    │       │       │   ├── sherpa_onnx_asr.py
+    │       │       │   ├── utils.py
+    │       │       │   └── whisper_cpp_asr.py
+    │       │       ├── chat_group.py
+    │       │       ├── chat_history_manager.py
+    │       │       ├── config_manager
+    │       │       │   ├── __init__.py
+    │       │       │   ├── agent.py
+    │       │       │   ├── asr.py
+    │       │       │   ├── character.py
+    │       │       │   ├── i18n.py
+    │       │       │   ├── live.py
+    │       │       │   ├── main.py
+    │       │       │   ├── stateless_llm.py
+    │       │       │   ├── system.py
+    │       │       │   ├── tts.py
+    │       │       │   ├── tts_preprocessor.py
+    │       │       │   ├── utils.py
+    │       │       │   └── vad.py
+    │       │       ├── conversations
+    │       │       │   ├── __init__.py
+    │       │       │   ├── conversation_handler.py
+    │       │       │   ├── conversation_utils.py
+    │       │       │   ├── group_conversation.py
+    │       │       │   ├── single_conversation.py
+    │       │       │   ├── tts_manager.py
+    │       │       │   └── types.py
+    │       │       ├── live
+    │       │       │   ├── bilibili_live.py
+    │       │       │   └── live_interface.py
+    │       │       ├── live2d_model.py
+    │       │       ├── mcpp
+    │       │       │   ├── json_detector.py
+    │       │       │   ├── mcp_client.py
+    │       │       │   ├── server_registry.py
+    │       │       │   ├── tool_adapter.py
+    │       │       │   ├── tool_executor.py
+    │       │       │   ├── tool_manager.py
+    │       │       │   ├── types.py
+    │       │       │   └── utils
+    │       │       │       └── path.py
+    │       │       ├── message_handler.py
+    │       │       ├── proxy_handler.py
+    │       │       ├── proxy_message_queue.py
+    │       │       ├── routes.py
+    │       │       ├── server.py
+    │       │       ├── service_context.py
+    │       │       ├── translate
+    │       │       │   ├── __init__.py
+    │       │       │   ├── deeplx.py
+    │       │       │   ├── tencent.py
+    │       │       │   ├── translate_factory.py
+    │       │       │   └── translate_interface.py
+    │       │       ├── tts
+    │       │       │   ├── __init__.py
+    │       │       │   ├── azure_tts.py
+    │       │       │   ├── bark_tts.py
+    │       │       │   ├── cartesia_tts.py
+    │       │       │   ├── coqui_tts.py
+    │       │       │   ├── cosyvoice2_tts.py
+    │       │       │   ├── cosyvoice_tts.py
+    │       │       │   ├── edge_tts.py
+    │       │       │   ├── elevenlabs_tts.py
+    │       │       │   ├── fish_api_tts.py
+    │       │       │   ├── gpt_sovits_tts.py
+    │       │       │   ├── melo_tts.py
+    │       │       │   ├── minimax_tts.py
+    │       │       │   ├── openai_tts.py
+    │       │       │   ├── piper_tts.py
+    │       │       │   ├── pyttsx3_tts.py
+    │       │       │   ├── sherpa_onnx_tts.py
+    │       │       │   ├── siliconflow_tts.py
+    │       │       │   ├── spark_tts.py
+    │       │       │   ├── tts_factory.py
+    │       │       │   ├── tts_interface.py
+    │       │       │   └── x_tts.py
+    │       │       ├── utils
+    │       │       │   ├── __init__.py
+    │       │       │   ├── install_utils.py
+    │       │       │   ├── sentence_divider.py
+    │       │       │   ├── stream_audio.py
+    │       │       │   └── tts_preprocessor.py
+    │       │       ├── vad
+    │       │       │   ├── __init__.py
+    │       │       │   ├── silero.py
+    │       │       │   ├── vad_factory.py
+    │       │       │   └── vad_interface.py
+    │       │       └── websocket_handler.py
+    │       ├── upgrade.py
+    │       ├── upgrade_codes
+    │       │   ├── __init__.py
+    │       │   ├── compare_yaml.py
+    │       │   ├── config_sync.py
+    │       │   ├── from_version
+    │       │   │   ├── __init__.py
+    │       │   │   └── v_1_1_1.py
+    │       │   ├── upgrade_core
+    │       │   │   ├── __init__.py
+    │       │   │   ├── comment_diff_fn.py
+    │       │   │   ├── comment_sync.py
+    │       │   │   ├── constants.py
+    │       │   │   ├── language.py
+    │       │   │   └── upgrade_utils.py
+    │       │   ├── upgrade_manager.py
+    │       │   └── version_manager.py
+    │       ├── uv.lock
+    │       └── web_tool
+    │           ├── README.md
+    │           ├── index.html
+    │           ├── main.js
+    │           └── recorder.js
+    └── wikilinks.md

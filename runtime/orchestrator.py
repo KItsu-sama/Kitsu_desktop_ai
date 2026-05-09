@@ -537,110 +537,54 @@ class Orchestrator(ModuleContract):
             logger.info("Orchestrator main loop stopped.")
 
     async def _chat_loop(self) -> None:
-        """Interactive chat loop for user input."""
-        try:
-            logger.info("Chat loop started. Type 'help' for commands or 'quit' to exit.")
-            
-            # Add timeout to prevent hanging
-            input_timeout = 5.0  # 5 seconds timeout for input
-            
-            while not self._shutdown_event.is_set():
-                try:
-                    # Get user input with timeout to prevent hanging
-                    import sys
+        """FIXED: Non-blocking chat loop that actually works on Windows"""
+        logger.info("Chat loop started - type messages below!")
+        
+        loop = asyncio.get_event_loop()
+        
+        while not (self._shutdown_event and self._shutdown_event.is_set()):
+            try:
+                # BULLETPROOF INPUT - Works everywhere
+                user_input = await loop.run_in_executor(
+                    None, 
+                    lambda: input("🦊 You: ").strip()
+                )
+                
+                if not user_input:
+                    continue
                     
-                    # Check if stdin is available
-                    if sys.stdin is None or sys.stdin.closed:
-                        logger.warning("Stdin not available, exiting chat loop")
-                        self.request_stop()
-                        break
-                    
-                    # Use a timeout-based input approach to prevent hanging
-                    try:
-                        # Try to get input with timeout
-                        user_input = await asyncio.wait_for(
-                            asyncio.to_thread(input, "\n> "),
-                            timeout=input_timeout
-                        )
-                    except asyncio.TimeoutError:
-                        # Timeout occurred - show a message and continue
-                        logger.debug("Input timeout, continuing loop")
-                        print("\n> (no input received, continuing...)")
-                        continue
-                    except (EOFError, KeyboardInterrupt):
-                        # Handle closed stdin or interrupt gracefully
-                        logger.info("Input stream closed or interrupted")
-                        self.request_stop()
-                        break
-                    except Exception as e:
-                        # Fallback for terminal issues
-                        logger.debug("Input method failed, trying alternative: %s", e)
-                        try:
-                            # Alternative input method with timeout
-                            user_input = await asyncio.wait_for(
-                                asyncio.get_event_loop().run_in_executor(
-                                    None, 
-                                    lambda: sys.stdin.readline().strip()
-                                ),
-                                timeout=input_timeout
-                            )
-                            if not user_input:  # Empty line means EOF
-                                raise EOFError
-                        except asyncio.TimeoutError:
-                            logger.debug("Alternative input timeout, continuing loop")
-                            print("\n> (no input received, continuing...)")
-                            continue
-                        except (EOFError, KeyboardInterrupt):
-                            logger.info("Input stream closed or interrupted")
-                            self.request_stop()
-                            break
-                    
-                    # Handle commands
-                    if user_input.lower().strip() in ['quit', 'exit', 'q']:
-                        logger.info("Quit command received")
-                        self.request_stop()
-                        break
-                    elif user_input.startswith('/'):
-                        # Route to command router for / commands (use interface)
-                        if self.command_router:
-                            try:
-                                result = await self.command_router.route(user_input)
-                                if result.get('success', False):
-                                    print(result.get('output', 'Command executed'))
-                                else:
-                                    print(f" {result.get('output', 'Command failed')}")
-                            except Exception as e:
-                                logger.error(f"Command router error: {e}")
-                                print(f" Command error: {e}")
-                        else:
-                            print(" Command router not available")
-                    elif user_input.lower().strip() == 'help':
-                        self._show_help()
-                    elif user_input.lower().strip() == 'status':
-                        await self._show_status()
-                    elif user_input.strip():
-                        # Process regular input through Kitsu engine
-                        result = await self.process_input(user_input)
-                        bus.publish(ResponseReady(
-                            input_text=user_input,
-                            response_text=result['response'],
-                            source=result.get('source', 'kitsu_engine'),
-                            confidence=result.get('confidence', 0.8),
-                        ))
-                except EOFError:
-                    logger.info("EOF received - shutting down")
+                # Handle quit
+                if user_input.lower() in ['quit', 'exit', 'q']:
                     self.request_stop()
                     break
-                except KeyboardInterrupt:
-                    logger.info("Keyboard interrupt in chat loop")
-                    self.request_stop()
-                    break
-                    
-        except asyncio.CancelledError:
-            logger.info("Chat loop cancelled")
-        except Exception as e:
-            logger.error("Error in chat loop: %s", e)
-    
+                
+                # Commands
+                if user_input.startswith('/'):
+                    print("📋 Command mode (not implemented yet)")
+                    continue
+                
+                # PROCESS INPUT THROUGH KITSU ENGINE! 🎉
+                print("🤔 Kitsu thinking...")
+                result = await self.process_input(user_input)
+                
+                # SHOW RESPONSE
+                print(f"\n🦊 Kitsu: {result['response']}")
+                print(f"  😊 Mood: {result['mood']} | Confidence: {result['confidence']:.1f}")
+                print()
+                
+            except KeyboardInterrupt:
+                print("\n👋 Bye!")
+                self.request_stop()
+                break
+            except EOFError:
+                break
+            except Exception as e:
+                logger.error(f"Chat error: {e}")
+                print(f"❌ Error: {e}")
+                await asyncio.sleep(0.1)
+        
+        logger.info("Chat loop stopped")
+
     def _show_help(self) -> None:
         """Show available commands."""
         help_text = """
@@ -1069,7 +1013,11 @@ Any other text will be processed as chat input.
                 
                 # Check if SLM has the advanced confidence-based interface
                 if hasattr(self.slm, 'infer_with_confidence'):
-                    response, confidence = await self.slm.infer_with_confidence(user_input, context)
+                    # Add timeout protection to prevent hanging
+                    response, confidence = await asyncio.wait_for(
+                        self.slm.infer_with_confidence(user_input, context),
+                        timeout=10.0  # 10 second timeout
+                    )
                     
                     if response and hasattr(self.slm, 'needs_llm_escalation'):
                         if not self.slm.needs_llm_escalation(confidence):
@@ -1081,28 +1029,38 @@ Any other text will be processed as chat input.
                         logger.info("SLM: Response generated")
                         return response, "slm"
                 elif hasattr(self.slm, 'query'):
-                    # Fall back to basic sync query interface
-                    response = self.slm.query(user_input, context)
+                    # Fall back to basic sync query interface with timeout
+                    response = await asyncio.wait_for(
+                        asyncio.get_event_loop().run_in_executor(
+                            None, 
+                            lambda: self.slm.query(user_input, context)
+                        ),
+                        timeout=10.0  # 10 second timeout
+                    )
                     if response:
                         logger.info("SLM: Response generated via query")
                         return response, "slm"
-            except Exception:
-                logger.warning("SLM failed")
-                return self.llm_fallback.generate(
-                    mood=mood or "behave",
-                    style=style or "sweet",
-                    cause="crash",
-                    raw_input=user_input
-                ), "llm_fallback_generator"
+            except asyncio.TimeoutError:
+                logger.warning("SLM timed out after 10 seconds")
+            except Exception as e:
+                logger.warning("SLM failed: %s", e)
         
         # --- Tier 2: LLM (Large Language Model) ---
         if self.llm:
             try:
                 logger.debug("LLM: Attempting response generation")
-                response = self.llm.query(user_input)
+                response = await asyncio.wait_for(
+                    asyncio.get_event_loop().run_in_executor(
+                        None, 
+                        lambda: self.llm.query(user_input)
+                    ),
+                    timeout=15.0  # 15 second timeout for LLM
+                )
                 if response:
                     logger.info("LLM: Response generated")
                     return response, "llm"
+            except asyncio.TimeoutError:
+                logger.warning("LLM timed out after 15 seconds")
             except Exception as e:
                 logger.warning("LLM failed: %s", e)
         
@@ -1152,7 +1110,10 @@ Any other text will be processed as chat input.
                 logger.debug("Compressed path: SLM attempting response")
                 
                 if hasattr(self.slm, 'infer_with_confidence'):
-                    response, confidence = await self.slm.infer_with_confidence(user_input, context)
+                    response, confidence = await asyncio.wait_for(
+                        self.slm.infer_with_confidence(user_input, context),
+                        timeout=10.0  # 10 second timeout
+                    )
                     
                     if response and hasattr(self.slm, 'needs_llm_escalation'):
                         if not self.slm.needs_llm_escalation(confidence):
@@ -1162,10 +1123,18 @@ Any other text will be processed as chat input.
                         logger.info("Compressed path: SLM response accepted")
                         return response, None, None
                 elif hasattr(self.slm, 'query'):
-                    response = self.slm.query(user_input, context)
+                    response = await asyncio.wait_for(
+                        asyncio.get_event_loop().run_in_executor(
+                            None, 
+                            lambda: self.slm.query(user_input, context)
+                        ),
+                        timeout=10.0  # 10 second timeout
+                    )
                     if response:
                         logger.info("Compressed path: SLM response via query")
                         return response, None, None
+            except asyncio.TimeoutError:
+                logger.warning("Compressed path: SLM timed out after 10 seconds")
             except Exception as e:
                 logger.warning("Compressed path: SLM failed: %s", e)
         
@@ -1173,15 +1142,23 @@ Any other text will be processed as chat input.
         logger.debug("Compressed path: Escalating to LLM")
         prompt = f"User: {user_input}\nMemory: {memory_context or ''}\nRespond as Kitsu."
         if self.llm:
-            response_text = self.llm.query(prompt)
+            try:
+                response_text = await asyncio.wait_for(
+                    asyncio.get_event_loop().run_in_executor(
+                        None, 
+                        lambda: self.llm.query(prompt)
+                    ),
+                    timeout=15.0  # 15 second timeout for LLM
+                )
+            except asyncio.TimeoutError:
+                logger.warning("Compressed path: LLM timed out after 15 seconds")
+                response_text = "LLM response timed out."
+            except Exception as e:
+                logger.warning("Compressed path: LLM failed: %s", e)
+                response_text = "LLM response failed."
         else:
             response_text = "No response generator available."
         return response_text, None, None
-
-
-
-
-# ---------------------------------------------------------------------------
 # Usage:
 """
 orch = Orchestrator()

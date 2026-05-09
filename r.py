@@ -8,6 +8,23 @@ from pathlib import Path
 # Import the actual launcher
 from runtime.launcher import main
 
+import threading
+
+async def debug_input():
+    """Debug input for testing"""
+    print("\n🦊 DEBUG: Type 'hello' or press Enter to test input...")
+    loop = asyncio.get_event_loop()
+    while True:
+        try:
+            line = await loop.run_in_executor(None, input, ">>> ")
+            if line.strip():
+                print(f"📥 GOT INPUT: {line}")
+                # This would trigger orchestrator input
+        except EOFError:
+            break
+        except KeyboardInterrupt:
+            break
+
 # Force stdin to be line-buffered
 sys.stdin.reconfigure(encoding='utf-8', errors='ignore')
 os.environ['PYTHONUNBUFFERED'] = '1'
@@ -253,4 +270,16 @@ if __name__ == "__main__":
     elif overrides.get("status"):
         sys.exit(asyncio.run(Launcher.show_status()))
     else:
-        sys.exit(asyncio.run(main()))
+        async def main_with_debug():
+            # Start debug input task
+            debug_task = asyncio.create_task(debug_input())
+            try:
+                await main()
+            finally:
+                debug_task.cancel()
+                try:
+                    await debug_task
+                except asyncio.CancelledError:
+                    pass
+        
+        sys.exit(asyncio.run(main_with_debug()))
