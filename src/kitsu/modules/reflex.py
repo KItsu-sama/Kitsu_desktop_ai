@@ -1,8 +1,8 @@
 import json
 import os
 import random
-from core.event_bus import bus
-from core.context import RequestContext
+from kitsu.core.event_bus import bus
+from kitsu.core.context import RequestContext
 
 CACHE_FILE = "data/reflex_cache.json"
 

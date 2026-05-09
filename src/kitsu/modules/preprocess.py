@@ -1,7 +1,7 @@
 import hashlib
 import re
-from core.event_bus import bus
-from core.context import RequestContext
+from kitsu.core.event_bus import bus
+from kitsu.core.context import RequestContext
 
 # Mock emotion engine state
 EMOTION_ENGINE_STATE = {

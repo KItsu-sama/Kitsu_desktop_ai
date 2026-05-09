@@ -3,8 +3,8 @@ import json
 import logging
 import hashlib
 from typing import Dict, Any, Optional
-from core.context import RequestContext
-from modules.slm import slm_instance
+from kitsu.core.context import RequestContext
+from kitsu.modules.slm import slm_instance
 
 logger = logging.getLogger(__name__)
 

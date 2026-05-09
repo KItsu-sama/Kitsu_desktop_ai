@@ -1,7 +1,7 @@
 import os
 import json
-from core.event_bus import bus
-from core.context import RequestContext
+from kitsu.core.event_bus import bus
+from kitsu.core.context import RequestContext
 
 # In a real system, these would be shared or loaded from a common source
 CACHE_FILE = "data/reflex_cache.json"

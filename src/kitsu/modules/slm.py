@@ -1,10 +1,10 @@
 import time
 import logging
 from typing import List, Tuple
-from core.event_bus import bus
-from core.context import RequestContext
-from utils.timing import within_budget
-from modules.judge import judge_response
+from kitsu.core.event_bus import bus
+from kitsu.core.context import RequestContext
+from kitsu.utils.timing import within_budget
+from kitsu.modules.judge import judge_response
 
 logger = logging.getLogger(__name__)
 
