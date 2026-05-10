@@ -1,0 +1,20 @@
+[project]
+name = "kitsu-desktop-ai"
+version = "0.1.0"
+description = "Local Shimeji-style desktop AI fox with emotion system"
+authors = [
+    {name = "Kitsu Team"}
+]
+dependencies = [
+    "psutil",
+    "rich",
+    "numpy",
+]
+requires-python = ">=3.9"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]

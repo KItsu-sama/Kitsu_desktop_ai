@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from core.context import RequestContext
+from kitsu.core.context import RequestContext
 
 @dataclass
 class JudgeResult:

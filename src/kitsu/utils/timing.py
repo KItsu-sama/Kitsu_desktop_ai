@@ -1,5 +1,5 @@
 import time
-from core.context import RequestContext
+from kitsu.core.context import RequestContext
 
 def within_budget(ctx: RequestContext) -> bool:
     """

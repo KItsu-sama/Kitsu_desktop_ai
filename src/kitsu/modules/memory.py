@@ -1,9 +1,9 @@
 import json
 import os
 import logging
-from core.event_bus import bus
-from core.context import RequestContext
-from modules.judge import judge_response
+from kitsu.core.event_bus import bus
+from kitsu.core.context import RequestContext
+from kitsu.modules.judge import judge_response
 
 logger = logging.getLogger(__name__)
 
