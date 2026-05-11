@@ -1,5 +1,5 @@
 """
-core/input_manager.py
+domain/interaction/input_manager.py
 
 Input processing and routing manager.
 Extracted from orchestrator.py to follow Single Responsibility Principle.
@@ -23,12 +23,26 @@ import asyncio
 import logging
 from typing import Optional, Dict, Any
 
-from runtime.bus import bus
-from runtime.events import InputReceived, ResponseReady
+from runtime.communication.bus import bus
+from runtime.communication.events import InputReceived, ResponseReady, EventType, EventPayload
 from domain.contracts.contracts import AIProvider
-from runtime.behavior_engine import BehaviorEngine, AttentionConfig
+from runtime.systems.behavior_engine import BehaviorEngine, AttentionConfig
+from dataclasses import dataclass
+from typing import Optional
 
 logger = logging.getLogger(__name__)
+
+
+@dataclass
+class RequestContext:
+    """Request context for AI pipeline processing."""
+    text: str
+    vibe: list[float] = None
+    mode: str = 'chat'
+    
+    def within_budget(self) -> bool:
+        """Check if request is within processing budget."""
+        return True  # Simplified for now
 
 
 class InputManager:
@@ -39,37 +53,110 @@ class InputManager:
     and response feeding back into learning systems.
     """
     
-    def __init__(self, orchestrator):
-        self.orchestrator = orchestrator
+    def __init__(self, message_bus, emotion_manager=None, core_memory=None, llm_fallback=None, 
+                 slm=None, judge=None, fast_brain=None, core_config=None):
+        # Fix circular dependency: only take what we need, not the whole orchestrator
+        self.bus = message_bus
+        self.emotion_manager = emotion_manager
+        self.core_memory = core_memory
+        self.llm_fallback = llm_fallback
+        self.slm = slm          # New: The Qwen 1.5B instance
+        self.judge = judge        # New: The 3-signal logic
+        self.fast_brain = fast_brain
+        self.core_config = core_config or {}
         self._chat_enabled: bool = True
         
         # Behavior engine for attention gating
-        behavior_config = AttentionConfig(**orchestrator.core_config.get("attention", {}))
+        behavior_config = AttentionConfig(**self.core_config.get("attention", {}))
         self.behavior_engine = BehaviorEngine(behavior_config)
+        
+        # Subscribe to normalized input from InputMux
+        self.bus.subscribe(EventType.USER_INPUT, self.on_user_input)
+    
+    async def on_user_input(self, event: EventPayload) -> None:
+        """
+        Handle normalized input from InputMux via Event Bus.
+        
+        This is the new entry point - replaces direct process_input calls.
+        """
+        try:
+            # Extract content from EventPayload
+            user_input = event.data.get('content', '')
+            if not user_input.strip():
+                return
+            
+            # Process through the multi-tier AI pipeline
+            result = await self.process_input(user_input)
+            
+            # Publish response for UI components
+            bus.publish(ResponseReady(
+                input_text=user_input,
+                response_text=result.get('response', ''),
+                source=result.get('source', 'input_manager'),
+                confidence=result.get('confidence', 0.8),
+            ))
+            
+        except Exception as e:
+            logger.error(f"Error processing USER_INPUT event: {e}")
     
     async def process_input(self, user_input: str) -> Dict[str, Any]:
         """
-        Process user input through the complete AI pipeline.
+        Process user input through the multi-tier AI pipeline.
         
         Args:
             user_input: Raw user input text
             
         Returns:
-            Dict containing response and metadata
+            Dict containing response and metadata compatible with legacy UI
         """
         # Validate input
         if not user_input or not isinstance(user_input, str):
-            raise ValueError("Invalid input")
+            return self._create_error_response("Invalid input")
         
-        # Create input event
-        input_event = InputReceived(text=user_input)
+        # Create request context
+        ctx = RequestContext(
+            text=user_input,
+            vibe=self._get_vibe_vector(),
+            mode='chat'
+        )
         
-        # Process through behavior engine
-        await self._handle_input(input_event)
+        # Process through behavior engine first
+        behavior_result = await self._process_behavior_engine(ctx)
+        if behavior_result is not None:
+            return behavior_result
         
-        # Wait for response (synchronous for now)
-        # In future, this could be made fully async with response events
-        return {"status": "processed", "input": user_input}
+        # Multi-tier AI pipeline: FastBrain → SLM → LLM
+        response_text, source, confidence = await self._process_tiered_pipeline(ctx)
+        
+        # Get emotional state for expression
+        emotion_state = self.emotion_manager.get_current_state() if self.emotion_manager else {}
+        mood = emotion_state.get("mood", "neutral")
+        emotion = emotion_state.get("dominant_emotion", "neutral")
+        
+        return {
+            "response": response_text,
+            "text": response_text,
+            "emotional_state": emotion_state,
+            "mood": mood,
+            "style": emotion_state.get("style", "normal"),
+            "emotion": emotion,
+            "expression": self._determine_expression(emotion_state),
+            "confidence": confidence,
+            "source": source,
+            "generation_metadata": {
+                "pipeline": "fast_brain_slm_llm",
+                "behavior_engine": True,
+                "tier_used": source
+            },
+            "generation_time": 0.1,  # Placeholder
+            "routing": {"intent": "processed"},
+            "binary_features": {},
+            "debug_log": None,
+            "binary_vector": None,
+            "memory_references": [],
+            "avatar_hint": self._get_avatar_hint(emotion_state),
+            "voice_params": self._get_voice_params(emotion_state)
+        }
     
     async def _handle_input(self, event: InputReceived) -> None:
         """
@@ -77,9 +164,9 @@ class InputManager:
         This is extracted from orchestrator._on_input()
         """
         # Get emotional state from EmotionManager (Single Source of Truth)
-        emotion_state = self.orchestrator.emotion_manager.get_current_state() if self.orchestrator.emotion_manager else {}
+        emotion_state = self.emotion_manager.get_current_state() if self.emotion_manager else {}
         context = {
-            "recent_inputs": getattr(self.orchestrator.core_memory, 'recent_memories', []) if self.orchestrator.core_memory else [],
+            "recent_inputs": getattr(self.core_memory, 'recent_memories', []) if self.core_memory else [],
             "boredom_level": emotion_state.get("resistance", 0.0) if emotion_state else 0.0
         }
         
@@ -102,8 +189,7 @@ class InputManager:
         # Handle REACT behavior (subtle acknowledgment)
         if behavior_decision.behavior_type.value == "react" and not behavior_decision.response_required:
             # Trigger subtle reaction without text response
-            if self.orchestrator.avatar and behavior_decision.reaction_type:
-                self.orchestrator.avatar.set_expression("neutral", "subtle", behavior_decision.reaction_type)
+            # Note: Avatar access would need to be passed in if needed
             logger.debug(f"Subtle reaction: {behavior_decision.reaction_type}")
             return
         
@@ -117,19 +203,24 @@ class InputManager:
         Extracted from orchestrator._on_input()
         """
         # FastBrain first - run in executor to prevent blocking
-        if self.orchestrator.fast_brain and self.orchestrator.fast_brain.is_available():
+        # Note: FastBrain access would need to be passed in if needed
+        # For now, skip FastBrain as we don't have direct access
+        fast_brain = None  # Would be passed in constructor if needed
+        if fast_brain and fast_brain.is_available():
             try:
                 response = await asyncio.get_event_loop().run_in_executor(
-                    None, self.orchestrator.fast_brain.query, event.text
+                    None, fast_brain.query, event.text
                 )
             except (RuntimeError, ValueError, TimeoutError, ConnectionError) as exc:
                 logger.warning('FastBrain query failed: %s', exc)
                 response = None
             
             if response is not None:
-                if self.orchestrator.personality and isinstance(response, str):
+                # Note: Personality access would need to be passed in if needed
+                if isinstance(response, str):
                     try:
-                        response = self.orchestrator.personality.decorate_response(response, source='fast_brain')
+                        # response = personality.decorate_response(response, source='fast_brain')
+                        pass  # Skip personality injection for now
                     except Exception as exc:
                         logger.error('Personality injection failed: %s', exc)
 
@@ -142,19 +233,23 @@ class InputManager:
                 return
 
         # SLM fallback - run in executor
-        if self.orchestrator.slm and await self.orchestrator.slm.is_available():
+        # Note: SLM access would need to be passed in if needed
+        slm = None  # Would be passed in constructor if needed
+        if slm and await slm.is_available():
             try:
                 response = await asyncio.get_event_loop().run_in_executor(
-                    None, self.orchestrator.slm.query, event.text
+                    None, slm.query, event.text
                 )
             except Exception as exc:
                 logger.warning('SLM query failed: %s', exc)
                 response = None
             
             if response is not None:
-                if self.orchestrator.personality and isinstance(response, str):
+                # Note: Personality access would need to be passed in if needed
+                if isinstance(response, str):
                     try:
-                        response = self.orchestrator.personality.decorate_response(response, source='slm')
+                        # response = personality.decorate_response(response, source='slm')
+                        pass  # Skip personality injection for now
                     except Exception as exc:
                         logger.warning('Personality injection failed: %s', exc)
 
@@ -167,19 +262,23 @@ class InputManager:
                 return
 
         # LLM fallback - run in executor
-        if self.orchestrator.llm and await self.orchestrator.llm.is_available():
+        # Note: LLM access would need to be passed in if needed
+        llm = None  # Would be passed in constructor if needed
+        if llm and await llm.is_available():
             try:
                 response = await asyncio.get_event_loop().run_in_executor(
-                    None, self.orchestrator.llm.query, event.text
+                    None, llm.query, event.text
                 )
             except Exception as exc:
                 logger.warning('LLM query failed: %s', exc)
                 response = None
             
             if response is not None:
-                if self.orchestrator.personality and isinstance(response, str):
+                # Note: Personality access would need to be passed in if needed
+                if isinstance(response, str):
                     try:
-                        response = self.orchestrator.personality.decorate_response(response, source='llm')
+                        # response = personality.decorate_response(response, source='llm')
+                        pass  # Skip personality injection for now
                     except Exception as exc:
                         logger.warning('Personality injection failed: %s', exc)
 
@@ -200,6 +299,240 @@ class InputManager:
     def disable_chat(self) -> None:
         """Disable interactive chat mode."""
         self._chat_enabled = False
+    
+    def _create_error_response(self, error_message: str) -> Dict[str, Any]:
+        """Create a standardized error response."""
+        return {
+            "response": f"Error: {error_message}",
+            "text": f"Error: {error_message}",
+            "emotional_state": {},
+            "mood": "neutral",
+            "style": "normal",
+            "emotion": "neutral",
+            "expression": "neutral",
+            "confidence": 0.0,
+            "source": "input_manager",
+            "generation_metadata": {"error": error_message},
+            "generation_time": 0.0,
+            "routing": {"intent": "error"},
+            "binary_features": {},
+            "debug_log": None,
+            "binary_vector": None,
+            "memory_references": [],
+            "avatar_hint": None,
+            "voice_params": {}
+        }
+    
+    async def _get_response_sync(self, user_input: str) -> str:
+        """
+        Simplified synchronous response getter.
+        In a full implementation, this would wait for ResponseReady events.
+        """
+        # For now, use a simple fallback response
+        # In the full implementation, this would integrate with the AI pipeline
+        try:
+            # Try to get response from llm_fallback
+            if self.llm_fallback:
+                return self.llm_fallback.generate(
+                    mood="friendly",
+                    style="sweet", 
+                    cause="chat_input",
+                    raw_input=user_input
+                )
+        except Exception as e:
+            logger.warning(f"Failed to get AI response: {e}")
+        
+        # Ultimate fallback
+        return f"I understand you said: {user_input}"
+    
+    def _determine_expression(self, emotion_state: Dict[str, Any]) -> str:
+        """Determine facial expression based on emotional state."""
+        mood = emotion_state.get("mood", "neutral")
+        emotion = emotion_state.get("dominant_emotion", "neutral")
+        
+        # Simple mapping - could be enhanced
+        if mood == "happy" or emotion == "joy":
+            return "smile"
+        elif mood == "sad" or emotion == "sadness":
+            return "sad"
+        elif mood == "angry" or emotion == "anger":
+            return "angry"
+        elif mood == "surprised" or emotion == "surprise":
+            return "surprised"
+        else:
+            return "neutral"
+    
+    def _get_avatar_hint(self, emotion_state: Dict[str, Any]) -> Optional[str]:
+        """Get avatar hint based on emotional state."""
+        mood = emotion_state.get("mood", "neutral")
+        
+        # Simple mood-to-hint mapping
+        hints = {
+            "happy": "tail_wag",
+            "sad": "ears_down",
+            "angry": "growl",
+            "surprised": "perk_ears",
+            "neutral": "idle"
+        }
+        
+        return hints.get(mood, "idle")
+    
+    def _get_voice_params(self, emotion_state: Dict[str, Any]) -> Dict[str, Any]:
+        """Get voice parameters based on emotional state."""
+        mood = emotion_state.get("mood", "neutral")
+        
+        # Simple mood-to-voice mapping
+        params = {
+            "happy": {"pitch": 1.1, "speed": 1.0, "energy": 0.9},
+            "sad": {"pitch": 0.9, "speed": 0.8, "energy": 0.5},
+            "angry": {"pitch": 1.2, "speed": 1.1, "energy": 1.0},
+            "surprised": {"pitch": 1.3, "speed": 1.2, "energy": 0.8},
+            "neutral": {"pitch": 1.0, "speed": 1.0, "energy": 0.7}
+        }
+        
+        return params.get(mood, params["neutral"])
+    
+    def _get_vibe_vector(self) -> list[float]:
+        """Get current vibe vector from emotion state."""
+        if not self.emotion_manager:
+            return [0.5, 0.5, 0.5]  # Default neutral
+        
+        emotion_state = self.emotion_manager.get_current_state()
+        # Simplified vibe vector: [warmth, energy, creativity]
+        warmth = emotion_state.get("warmth", 0.5)
+        energy = emotion_state.get("energy", 0.5) 
+        creativity = emotion_state.get("creativity", 0.5)
+        return [warmth, energy, creativity]
+    
+    async def _process_behavior_engine(self, ctx: RequestContext) -> Optional[Dict[str, Any]]:
+        """
+        Process input through behavior engine for attention gating.
+        
+        Returns None if processing should continue, or response dict if behavior handled it.
+        """
+        # Get emotional state from EmotionManager (Single Source of Truth)
+        emotion_state = self.emotion_manager.get_current_state() if self.emotion_manager else {}
+        context = {
+            "recent_inputs": getattr(self.core_memory, 'recent_memories', []) if self.core_memory else [],
+            "boredom_level": emotion_state.get("resistance", 0.0) if emotion_state else 0.0
+        }
+        
+        # Use behavior engine to decide what to do
+        behavior_decision = self.behavior_engine.decide_behavior(
+            user_input=ctx.text,
+            emotion_state=emotion_state,
+            context=context
+        )
+        
+        # Handle IGNORE behavior - don't process further
+        if behavior_decision.behavior_type.value == "ignore":
+            logger.debug(f"Ignoring input: {ctx.text[:50]}...")
+            return self._create_behavior_response("ignored", "Input ignored due to attention gating")
+        
+        # Handle REACT behavior (subtle acknowledgment)
+        if behavior_decision.behavior_type.value == "react" and not behavior_decision.response_required:
+            logger.debug(f"Subtle reaction: {behavior_decision.reaction_type}")
+            return self._create_behavior_response("react", f"Subtle reaction: {behavior_decision.reaction_type}")
+        
+        # Continue processing for RESPOND and other behaviors
+        return None
+    
+    def _create_behavior_response(self, behavior_type: str, message: str) -> Dict[str, Any]:
+        """Create a response for behavior engine actions."""
+        return {
+            "response": message,
+            "text": message,
+            "emotional_state": {},
+            "mood": "neutral",
+            "style": "normal", 
+            "emotion": "neutral",
+            "expression": "neutral",
+            "confidence": 0.5,
+            "source": "behavior_engine",
+            "generation_metadata": {"behavior_type": behavior_type},
+            "generation_time": 0.01,
+            "routing": {"intent": "behavior_response"},
+            "binary_features": {},
+            "debug_log": None,
+            "binary_vector": None,
+            "memory_references": [],
+            "avatar_hint": None,
+            "voice_params": {}
+        }
+    
+    async def _process_tiered_pipeline(self, ctx: RequestContext) -> tuple[str, str, float]:
+        """
+        Process input through multi-tier AI pipeline: FastBrain → SLM → LLM.
+        
+        Returns:
+            (response_text, source, confidence) tuple
+        """
+        # Tier 1: FastBrain (Reflex)
+        if self.fast_brain and hasattr(self.fast_brain, 'is_available') and self.fast_brain.is_available():
+            try:
+                response = await asyncio.get_event_loop().run_in_executor(
+                    None, self.fast_brain.query, ctx.text
+                )
+                if response and self._judge_response(response, ctx):
+                    logger.debug("FastBrain provided valid response")
+                    return response, "fast_brain", 1.0
+            except Exception as e:
+                logger.warning(f"FastBrain query failed: {e}")
+        
+        # Tier 2: SLM (Local Qwen)
+        if self.slm and ctx.within_budget():
+            try:
+                response = await asyncio.get_event_loop().run_in_executor(
+                    None, self.slm.query, ctx.text
+                )
+                if response and self._judge_response(response, ctx):
+                    logger.debug("SLM provided valid response")
+                    return response, "slm", 0.8
+            except Exception as e:
+                logger.warning(f"SLM query failed: {e}")
+        
+        # Tier 3: LLM Fallback
+        if self.llm_fallback:
+            try:
+                response = self.llm_fallback.generate(
+                    mood="friendly",
+                    style="sweet",
+                    cause="chat_input",
+                    raw_input=ctx.text
+                )
+                if response:
+                    logger.debug("LLM fallback provided response")
+                    return response, "llm_fallback", 0.6
+            except Exception as e:
+                logger.warning(f"LLM fallback failed: {e}")
+        
+        # Ultimate fallback
+        fallback_msg = f"I understand you said: {ctx.text}"
+        logger.warning("All AI tiers failed, using ultimate fallback")
+        return fallback_msg, "fallback", 0.3
+    
+    def _judge_response(self, response: str, ctx: RequestContext) -> bool:
+        """
+        Judge response quality using the Judge module.
+        
+        Returns True if response passes quality threshold.
+        """
+        if not self.judge:
+            return True  # No judge = accept all
+        
+        try:
+            # Import judge if available
+            from src.kitsu.modules.judge import judge_response
+            judge_result = judge_response(ctx, response)
+            confidence = judge_result.confidence(ctx.mode)
+            
+            # Accept if confidence meets threshold
+            threshold = 0.65  # Configurable threshold
+            return confidence >= threshold
+            
+        except Exception as e:
+            logger.warning(f"Judge evaluation failed: {e}")
+            return True  # Accept on judge failure
     
     @property
     def is_chat_enabled(self) -> bool:

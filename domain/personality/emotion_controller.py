@@ -342,70 +342,209 @@ class EmotionController:
     # =========================================================================
     
     async def _process_responses(self) -> None:
-        """Background task to process queued responses - FIXED VERSION"""
+        """Background task to process queued responses"""
         log.info("Starting response processing loop")
         
         while not self._shutdown_requested:
             try:
-                # Non-blocking check first
-                if self.response_queue.empty():
-                    # Short sleep instead of blocking wait
-                    await asyncio.sleep(0.1)
-                    continue
+                # THIS IS THE FIX: This line suspends the task efficiently 
+                # until an item is available. No CPU spinning.
+                response = await self.response_queue.get()
                 
-                # Get response with very short timeout
                 try:
-                    response = await asyncio.wait_for(
-                        self.response_queue.get(), 
-                        timeout=0.1  # Much shorter timeout
-                    )
+                    # Execute all components simultaneously
+                    tasks = []
+                    
+                    # Avatar animation
+                    if self.avatar_system:
+                        tasks.append(self._execute_avatar_animation(response))
+                    
+                    # Voice generation
+                    if self.voice_system:
+                        tasks.append(self._execute_voice_generation(response))
+                    
+                    # Memory storage
+                    if self.memory_manager:
+                        tasks.append(self._store_response_in_memory(response))
+                    
+                    # Wait for all with timeout
+                    try:
+                        await asyncio.gather(*tasks, timeout=response.duration + 1.0)
+                    except asyncio.TimeoutError:
+                        log.warning("Response execution timed out")
+                finally:
+                    # Mark as done so the queue can track task completion
                     self.response_queue.task_done()
-                except asyncio.TimeoutError:
-                    continue
-                
+
+            except asyncio.CancelledError:
+                # Handle graceful shutdown if the task is cancelled
+                break
+            except Exception as e:
+                log.error(f"Error in response loop: {e}")
+        
+        log.info("Response processing loop stopped")
+    
+    async def handle_idle_timeout(self, idle_minutes: int) -> EmotionalResponse:
+        """
+        Handle idle timeout.
+        
+        Args:
+            idle_minutes: Minutes of inactivity
+            
+        Returns:
+            Complete emotional response
+        """
+        log.debug(f"Handling idle timeout: {idle_minutes} minutes")
+        
+        # Get idle reaction
+        reaction = self.reaction_mapper.get_idle_reactions(idle_minutes)
+        
+        if reaction["type"] == "sleep_mode":
+            # Hide avatar and set sleep state
+            if self.avatar_system:
+                self.avatar_system.set_state("sleeping")
+            self.emotion_engine.hide()
+        elif reaction["type"] == "check_in":
+            # Brief check-in animation
+            self.emotion_engine.set_emotion("curious", 0.3, duration=3.0)
+            if self.avatar_system:
+                self.avatar_system.play_animation("peek")
+        
+        # Generate response
+        response = await self._generate_response(reaction, f"idle:{idle_minutes}")
+        
+        return response
+    
+# =========================================================================
+# Response Generation
+# =========================================================================
+    
+async def _generate_response(
+    self,
+    reaction: Dict[str, Any],
+    source: str
+) -> EmotionalResponse:
+    """
+    Generate complete emotional response.
+    
+    Args:
+        reaction: Reaction mapping data
+        source: Source of interaction
+        
+    Returns:
+        Complete emotional response
+    """
+    # Get current emotional state
+    emotional_state = self.emotion_engine.get_emotional_state()
+    
+    # Determine animation
+    animation = reaction.get("animation", "idle")
+    if self.avatar_system:
+        # Map emotion to animation if not specified
+        if not animation or animation == "idle":
+            animation = self.emotion_engine.get_avatar_hint()
+    
+    # Voice modulation
+    voice_modulation = {
+        "pitch": reaction.get("voice_pitch", 1.0),
+        "speed": 1.0,
+        "volume": 1.0
+    }
+    
+    # Adjust voice based on emotion
+    emotion = emotional_state["dominant_emotion"]
+    if emotion == "happy":
+        voice_modulation["pitch"] *= 1.2
+        voice_modulation["speed"] *= 1.1
+    elif emotion == "sad":
+        voice_modulation["pitch"] *= 0.8
+        voice_modulation["speed"] *= 0.9
+    elif emotion == "angry":
+        voice_modulation["pitch"] *= 1.1
+        voice_modulation["volume"] *= 1.2
+    elif emotion == "flirty":
+        voice_modulation["pitch"] *= 1.3
+    
+    # Generate text response if needed
+    text_response = reaction.get("message")
+    if not text_response and source.startswith("emoji:"):
+        text_response = await self._generate_emoji_response(source.split(":")[1])
+    
+    return EmotionalResponse(
+        emotion=emotional_state["dominant_emotion"],
+        intensity=emotional_state["confidence"],
+        mood=self.emotion_engine.mood,
+        style=self.emotion_engine.style,
+        animation=animation,
+        voice_modulation=voice_modulation,
+        text_response=text_response,
+        duration=reaction.get("duration", 5.0)
+    )
+    
+async def _generate_emoji_response(self, emoji: str) -> str:
+    """
+    Generate text response to emoji.
+    
+    Args:
+        emoji: Emoji character
+        
+    Returns:
+        Text response
+    """
+    # This would use the LLM to generate appropriate responses
+    emoji_responses = {
+        "🥰": ["Aww, you're making me blush! 🦊", "Hehe, that's sweet!"],
+        "😡": ["Hey! What did I do? 😤", "Why the angry face?"],
+        "😭": ["Don't cry! I'm here! 🤗", "What's wrong? Let me help!"],
+        "😏": ["What's that look for? 😏", "Planning something mischievous?"]
+    }
+    
+    import random
+    responses = emoji_responses.get(emoji, ["Interesting emoji!"])
+    return random.choice(responses)
+    
+# =========================================================================
+# Response Execution
+# =========================================================================
+    
+async def _process_responses(self) -> None:
+    """Background task to process queued responses"""
+    log.info("Starting response processing loop")
+        
+    while not self._shutdown_requested:
+        try:
+            # THIS IS THE FIX: This line suspends the task efficiently 
+            # until an item is available. No CPU spinning.
+            response = await self.response_queue.get()
+            
+            try:
                 # Execute all components simultaneously
                 tasks = []
                 
                 # Avatar animation
-                if self.avatar_system and response.animation:
-                    tasks.append(asyncio.create_task(
-                        self._execute_avatar_animation(response)
-                    ))
+                if self.avatar_system:
+                    tasks.append(self._execute_avatar_animation(response))
                 
-                # Voice response
-                if self.voice_system and response.text_response:
-                    tasks.append(asyncio.create_task(
-                        self._execute_voice_response(response)
-                    ))
+                # Voice generation
+                if self.voice_system:
+                    tasks.append(self._execute_voice_generation(response))
                 
-                # Memory update
+                # Memory storage
                 if self.memory_manager:
-                    tasks.append(asyncio.create_task(
-                        self._update_memory(response)
-                    ))
+                    tasks.append(self._store_response_in_memory(response))
                 
-                # Wait for all to complete with timeout to prevent hanging
-                if tasks:
-                    try:
-                        await asyncio.wait_for(
-                            asyncio.gather(*tasks, return_exceptions=True),
-                            timeout=response.duration + 1.0  # Add buffer to duration
-                        )
-                    except asyncio.TimeoutError:
-                        log.warning("Response execution timed out")
-                
-            except asyncio.CancelledError:
-                log.debug("Response processing cancelled")
-                break
-            except Exception as e:
-                log.error(f"Error processing response: {e}")
-                await asyncio.sleep(0.1)  # Prevent log spam
-        
-        log.info("Response processing loop stopped")
-    
-    async def _execute_avatar_animation(self, response: EmotionalResponse) -> None:
-        """Execute avatar animation"""
-        try:
+                # Wait for all with timeout
+                try:
+                    await asyncio.gather(*tasks, timeout=response.duration + 1.0)
+                except asyncio.TimeoutError:
+                    log.warning("Response execution timed out")
+            finally:
+                # Mark as done so the queue can track task completion
+                self.response_queue.task_done()
+
+        except asyncio.CancelledError:
+            # Handle graceful shutdown if the task is cancelled
+            break
             if self.avatar_system:
                 self.avatar_system.play_emotion_animation(
                     response.emotion,

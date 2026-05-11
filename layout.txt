@@ -47,9 +47,6 @@
     │   └── sounds
     ├── characters
     │   └── en_nuke_debate.yaml
-    ├── core
-    │   ├── context.py
-    │   └── event_bus.py
     ├── data
     │   ├── config
     │   │   ├── permissions.json
@@ -64,9 +61,7 @@
     │   ├── reflex_cache.json
     │   └── runtime
     │       ├── .first_run_complete
-    │       ├── crash.log
-    │       ├── feature_manifest.json
-    │       └── last_crash.json
+    │       └── feature_manifest.json
     ├── docs
     │   ├── .obsidian
     │   │   ├── app.json
@@ -286,15 +281,7 @@
     │       └── dashboard.py
     ├── layout.json
     ├── layout.txt
-    ├── modules
-    │   ├── judge.py
-    │   ├── llm.py
-    │   ├── memory.py
-    │   ├── preprocess.py
-    │   ├── quiz_handler.py
-    │   ├── reflex.py
-    │   ├── router.py
-    │   └── slm.py
+    ├── pyproject.toml
     ├── r.py
     ├── requirements.txt
     ├── runtime
@@ -344,6 +331,7 @@
     │   ├── capability_flags.py
     │   ├── complexity.py
     │   ├── config
+    │   │   ├── character.yaml
     │   │   ├── permissions.json
     │   │   ├── personality.json
     │   │   ├── system_config.json
@@ -404,6 +392,26 @@
     │       ├── simhash.py
     │       ├── tracing.py
     │       └── validation.py
+    ├── src
+    │   └── kitsu
+    │       ├── __init__.py
+    │       ├── core
+    │       │   ├── __init__.py
+    │       │   ├── context.py
+    │       │   └── event_bus.py
+    │       ├── modules
+    │       │   ├── __init__.py
+    │       │   ├── judge.py
+    │       │   ├── llm.py
+    │       │   ├── memory.py
+    │       │   ├── preprocess.py
+    │       │   ├── quiz_handler.py
+    │       │   ├── reflex.py
+    │       │   ├── router.py
+    │       │   └── slm.py
+    │       └── utils
+    │           ├── __init__.py
+    │           └── timing.py
     ├── src-tauri
     │   ├── frontend
     │   │   ├── assets
@@ -1740,8 +1748,6 @@
     │           ├── config.toml
     │           └── imports.lock
     ├── test_modern_launcher.py
-    ├── utils
-    │   └── timing.py
     ├── vendor
     │   └── Open-LLM-VTuber
     │       ├── .cursor

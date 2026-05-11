@@ -1,5 +1,5 @@
 """
-personality/emotion_config.py
+domain/personality/emotion_config.py
 
 Canonical personality system configuration for Kitsu.
 This file defines the authoritative mood, style, state, and role values used across the system.
@@ -687,7 +687,7 @@ def validate_config() -> bool:
     invalid_states = set(EMOTION_TO_STATE.values()) - VALID_STATES
     assert not invalid_states, f"Invalid states in EMOTION_TO_STATE: {invalid_states}"
     
-    print("✅ Personality configuration validated successfully")
+    print("[OK] Personality configuration validated successfully")
     return True
 
 # ============================================================================

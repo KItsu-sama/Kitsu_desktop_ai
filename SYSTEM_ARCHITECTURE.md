@@ -547,9 +547,23 @@ if emotion.resistant:
 ---
 
 ### 📂 `shared/` - Shared Utilities
-**Purpose:** Cross-cutting concerns and shared utilities.
+**Purpose:** Cross-cutting concerns and shared utilities with organized subdirectories.
 
-| File | Purpose |
+#### Subdirectories
+
+| Directory | Purpose |
+|-----------|---------|
+| `config/` | Configuration management (ConfigLoader, UnifiedConfig) |
+| `flags/` | Feature flags and capability management (CapabilityFlags, Budgets, Tiers) |
+| `logging/` | Logging utilities (SessionLogger, Logger) |
+| `security/` | Security and validation (FileSecurity, Validation) |
+| `personality/` | Personality configuration (PersonalityConfig, triggers) |
+| `models/` | AI model configuration (model_dict.json, ollama.yaml) |
+| `utils/` | General utilities (LayoutMapper, Metrics, Tracing) |
+| `data/` | Data structures and schemas (Mappings, Retention) |
+| `config_files/` | Static configuration files (character.yaml, permissions.json) |
+
+#### Key Files
 |------|---------|
 | **`config.py`** | **Standardized config loading** - ConfigMerger class with priority order |
 | **`unified_config.py`** | Central configuration management (legacy) |
@@ -919,27 +933,26 @@ Next time user is mentioned:
 
 ---
 
-### 6. Configuration System (`shared/config.py`)
+### 6. Configuration System (`shared/config/`)
 
 **Standardized Config Loading with ConfigMerger:**
 
 ```python
-# shared/config.py - Single source of truth
-class Config:
+# shared/config/config_loader.py - Single source of truth
+class ConfigLoader:
     @classmethod
     def load(cls, cli_overrides: Dict[str, Any] = None) -> Dict[str, Any]:
         return ConfigMerger([
-            "shared/defaults.yaml",           # 1. Defaults
-            "data/config/system_config.json", # 2. User settings  
-            "data/config/profile.json",       # 3. Hardware profile
-            CLI_ARGS                          # 4. CLI overrides (highest)
-        ]).merge()
+            "shared/config/defaults.yaml",     # 1. Defaults
+            "data/config/system_config.json",   # 2. User settings  
+            "data/config/profile.json",         # 3. Hardware profile
+            CLI_ARGS                            # 4. CLI overrides (highest)
 ```
 
 **Config Merge Priority:**
 
 ```
-1. Default Values (shared/defaults.yaml)
+1. Default Values (shared/config/defaults.yaml)
    ↓ OVERRIDE
 2. User System Config (data/config/system_config.json)
    ↓ OVERRIDE
@@ -998,7 +1011,7 @@ RuntimeConfig.merged (final configuration)
     "ai_tier": "SLM (4GB VRAM used)",
     "memory_usage": "6.2/16GB (39%)",
     "modules": "18/20 running",
-    "resources": "CPU: 23% │ GPU: 67%",
+    "resources": "CPU: 69% │ GPU: 67%",
     "module_details": {
         "orchestrator": {"ok": True, "latency_ms": 2.1},
         "emotion_engine": {"ok": True, "latency_ms": 1.8},
@@ -1013,7 +1026,7 @@ RuntimeConfig.merged (final configuration)
 │ 🟢 Personality: playful/happy (0.8)           │
 │ 🟡 AI Tier: SLM (4GB VRAM used)              │
 │ 🟢 Modules: 18/20 running                    │
-│ Memory: 6.2/16GB (39%) │ CPU: 23% │ GPU: 67% │
+│ Memory: 6.2/16GB (39%) │ CPU: 69% │ GPU: 67% │
 ├─ Module Status ────────────────────────────┤
 │ 🟢 orchestrator: running (2.1ms)            │
 │ 🟢 emotion_engine: running (1.8ms)          │
@@ -1110,7 +1123,7 @@ Kitsu includes comprehensive safety and stability systems that ensure reliable o
 - Comprehensive logging and analytics
 - Automatic degradation and escalation
 
-### 6. Energy Budget System (`shared/budgets.py`)
+### 6. Energy Budget System (`shared/flags/budgets.py`)
 
 **Purpose**: Balances performance with battery life for mobile efficiency.
 
@@ -1242,7 +1255,7 @@ The `KitsuOrchestrator` (`domain/core/`) coordinates all critical systems:
 ### File Locations
 - **Entry Point**: `r.py` → `runtime/launcher.py`
 - **First Run**: `scripts/first_run.py` (called if needed)
-- **Configuration**: `data/config/` + `shared/defaults.yaml`
+- **Configuration**: `data/config/` + `shared/config/defaults.yaml`
 - **Main Loop**: `runtime/orchestrator.py`
 - **Personality**: `domain/personality/emotion_engine.py`
 - **Memory**: `domain/memory/` (episodic, semantic, short-term, long-term)

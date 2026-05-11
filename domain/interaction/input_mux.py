@@ -20,7 +20,7 @@ from pathlib import Path
 from typing import Optional
 
 from domain.contracts.contracts import ModuleContract
-from runtime.events import EventBus, EventType, EventPayload
+from runtime.communication.events import EventBus, EventType, EventPayload
 
 logger = logging.getLogger('kitsu.multimodal.input_mux')
 

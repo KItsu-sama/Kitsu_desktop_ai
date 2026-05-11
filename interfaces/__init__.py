@@ -2,6 +2,35 @@
 RULE: THE TOUCHPOINTS.
 - Handles communication between the Python backend and the Tauri/Rust frontend.
 - Contains CLI commands and bridge controllers.
+
+ARCHITECTURE OWNERSHIP:
+=====================
+
+What owns this?
+- AvatarController (visual rendering)
+- PermissionedSystemGateway (system access)
+- TerminalInterface (CLI interface)
+- TauriBridge (Rust-Python bridge)
+
+What can import this?
+- runtime/ (for UI integration)
+- domain/ (for personality expression)
+- app/ (for command handling)
+
+What imports it?
+- runtime/core/runtime_orchestrator.py
+- domain/personality/emotion_engine.py
+- app/commands/command_router.py
+
+Is it active or deprecated?
+- ACTIVE: All interface systems
+- DEPRECATED: None
+
+Is it runtime-critical?
+- CRITICAL: AvatarController, TerminalInterface
+- SEMI-CRITICAL: PermissionedSystemGateway
+- NON-CRITICAL: TauriBridge (optional)
+- Failure here = no UI or system interaction
 """
 
 __version__ = "0.0.1"

@@ -653,16 +653,14 @@ class EmotionEngine:
         else:
             self.current_mode = "Hide"
 
-    async def run(self):
-        """
-        Background loop for continuous emotion decay.
-
-        Only runs if continuous_decay is True.
-        Otherwise, decay is handled by external tick() calls.
-        """
-        log.info("Emotion engine loop started")
-
-        while True:
+    async def run(self) -> None:
+        """Background loop for continuous emotion decay."""
+        log.info("Emotion engine background loop started")
+        
+        # Add shutdown flag
+        self._shutdown_requested = False
+        
+        while not self._shutdown_requested:
             if not self.continuous_decay:
                 await asyncio.sleep(1)
                 continue

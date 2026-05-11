@@ -3,6 +3,34 @@ RULE: MODULAR SKILLS.
 - Contains self-contained abilities like 'quiz_solver' or 'voice'.
 - Features should be easy to toggle on/off for the "Strip System."
 - Can depend on Domain and Shared.
+
+ARCHITECTURE OWNERSHIP:
+=====================
+
+What owns this?
+- QuizEngine (educational assistance)
+- BrowserController (web integration)
+- CommunityManager (user content)
+- PluginAPI (feature development)
+
+What can import this?
+- runtime/ (for feature loading)
+- app/ (for command integration)
+- interfaces/ (for UI integration)
+
+What imports it?
+- runtime/core/runtime_orchestrator.py
+- app/commands/command_router.py
+- interfaces/ (feature UI)
+
+Is it active or deprecated?
+- ACTIVE: All feature systems
+- DEPRECATED: None
+
+Is it runtime-critical?
+- NON-CRITICAL: All features are optional
+- SEMI-CRITICAL: BrowserController (web features)
+- Failure here = core system runs without features
 """
 
 __version__ = "0.0.1"

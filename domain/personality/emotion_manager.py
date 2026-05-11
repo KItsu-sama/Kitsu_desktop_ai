@@ -29,7 +29,7 @@ import logging
 from typing import Any, Dict, List, Optional, TYPE_CHECKING
 
 from domain.personality.emotion_model import EmotionState, EmotionEntry, EmotionStack
-from shared.personality_config import (
+from domain.personality.emotion_config import (
     VALID_MOODS, VALID_STYLES,
     EMOTION_TO_MOOD, EMOTION_TO_STYLE,
     get_legacy_mode, validate_mood, validate_style
@@ -421,13 +421,21 @@ class EmotionManager:
         """
         log.info("Emotion manager background loop started")
         
-        while True:
+        # Add shutdown flag
+        self._shutdown_requested = False
+        
+        while not self._shutdown_requested:
             if not self.continuous_decay:
                 await asyncio.sleep(1)
                 continue
             
             await self.tick()
             await asyncio.sleep(1)
+    
+    def stop(self) -> None:
+        """Stop the background loop."""
+        self._shutdown_requested = True
+        log.info("Emotion manager background loop stop requested")
     
     def _calculate_emotional_resistance(self) -> float:
         """

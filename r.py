@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 
 # Import the actual launcher
-from runtime.launcher import main
+from runtime.legacy.launcher import main
 
 import threading
 
@@ -29,16 +29,16 @@ async def debug_input():
 sys.stdin.reconfigure(encoding='utf-8', errors='ignore')
 os.environ['PYTHONUNBUFFERED'] = '1'
 
-LOGO = r"""
+LOGO = r""" 
 =============================||=============================
 
 
                 ░\                        /░
-              /░/ ░\                    /░ \░\
-          /░/    \░\                /░/    \░\
-          ░/        \░\            /░/        \░
-        /░░          \░\          /░/          ░░\
-        /░░            \░\        /░/            ░░\
+             /░/  ░\                    /░  \░\
+           /░/      \░\              /░/      \░\
+           ░/         \░\          /░/         \░
+         /░░           \░\        /░/           ░░\
+        /░░             \░\      /░/             ░░\
         ░░     /░░░░\    ░░\____/░░    /░░░░\     ░░
         ░░    |░░░░░░░ /░░/░░||░░\░░\ ░░░░░░░|    ░░
         ░░   /░░░░░░░░░░░░░_=┘└=_░░░░░░░░░░░░░\   ░░
@@ -260,7 +260,7 @@ if __name__ == "__main__":
         sys.exit(0)
 
     # Import launcher for feature flag routing
-    from runtime.launcher import Launcher
+    from runtime.legacy.launcher import Launcher
     
     # Handle feature flags
     if overrides.get("bootstrap_only"):

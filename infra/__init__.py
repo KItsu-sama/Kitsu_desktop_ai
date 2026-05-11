@@ -3,6 +3,36 @@ RULE: EXTERNAL IMPLEMENTATIONS.
 - Contains the "heavy lifting": LLM connectors, TTS engines, and File System access.
 - All hardware-specific code (CPU/GPU detection) lives here.
 - Wraps external APIs so the rest of the project stays clean.
+
+ARCHITECTURE OWNERSHIP:
+=====================
+
+What owns this?
+- LLMFallback (LLM integration)
+- BackgroundManager (task management)
+- PreferenceStore (data persistence)
+- Logger (logging infrastructure)
+- Hardware detection (system requirements)
+
+What can import this?
+- runtime/ (for infrastructure services)
+- domain/ (for external integrations)
+- interfaces/ (for hardware access)
+
+What imports it?
+- runtime/core/runtime_orchestrator.py
+- runtime/infrastructure/container.py
+- domain/ai/ (LLM providers)
+
+Is it active or deprecated?
+- ACTIVE: All infrastructure systems
+- DEPRECATED: None
+
+Is it runtime-critical?
+- CRITICAL: Logger, BackgroundManager
+- SEMI-CRITICAL: LLMFallback, PreferenceStore
+- NON-CRITICAL: Hardware detection (startup only)
+- Failure here = no external integrations or logging
 """
 
 __version__ = "0.0.1"

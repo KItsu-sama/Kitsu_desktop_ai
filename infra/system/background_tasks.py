@@ -13,8 +13,8 @@ from dataclasses import dataclass
 from typing import List, Optional, Any
 
 from domain.contracts.contracts import ModuleContract
-from runtime.events import EventBus, EventType, EventPayload
-from shared.utils.validation import sanitize_text
+from runtime.communication.events import EventBus, EventType, EventPayload
+from shared.security.validation import sanitize_text
 
 log = logging.getLogger(__name__)
 

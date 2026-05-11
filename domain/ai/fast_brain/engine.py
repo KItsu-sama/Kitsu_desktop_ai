@@ -25,9 +25,9 @@ from dataclasses import dataclass
 from typing import Dict, Any, Optional, Tuple
 from shared.utils.logger import logging
 
-from runtime.bus import MessageBus
+from runtime.communication.bus import MessageBus
 from domain.contracts.contracts import ModuleContract
-from runtime.events import EventBus, EventType, EventPayload
+from runtime.communication.events import EventBus, EventType, EventPayload
 from domain.ai.fast_brain.patterns import get_pattern_detector, PatternIntentType
 from domain.ai.fast_brain.intent_classifier import get_intent_classifier, Intent
 from .cache_store import get_cached_response, add_to_cache, get_spam_response , conversation_cache

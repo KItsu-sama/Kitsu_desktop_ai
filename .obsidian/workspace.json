@@ -11,14 +11,17 @@
             "id": "5a9e626b61375046",
             "type": "leaf",
             "state": {
-              "type": "markdown",
+              "type": "canvas",
               "state": {
-                "file": "SYSTEM_ARCHITECTURE.md",
-                "mode": "source",
-                "source": false
+                "file": "Full layout.canvas",
+                "viewState": {
+                  "x": -887.3026767372428,
+                  "y": 6488.1638824285355,
+                  "zoom": -0.9999999999999996
+                }
               },
-              "icon": "lucide-file",
-              "title": "SYSTEM_ARCHITECTURE"
+              "icon": "lucide-layout-dashboard",
+              "title": "Full layout"
             }
           }
         ]
@@ -156,13 +159,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "SYSTEM_ARCHITECTURE.md",
+                "file": "Full layout.canvas",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of SYSTEM_ARCHITECTURE"
+              "title": "Outline of Full layout"
             }
           }
         ],
@@ -185,17 +188,26 @@
   },
   "active": "5a9e626b61375046",
   "lastOpenFiles": [
-    "domain/contracts/__pycache__/lifecycle.cpython-314.pyc",
-    "domain/contracts/lifecycle.py",
-    "shared/__pycache__/budgets.cpython-314.pyc",
-    "domain/grounding/__pycache__/__init__.cpython-314.pyc",
-    "domain/grounding/__pycache__/tool_grounding.cpython-314.pyc",
-    "domain/grounding/__pycache__",
-    "domain/inference/__pycache__/__init__.cpython-314.pyc",
-    "domain/inference/__pycache__/resource_controller.cpython-314.pyc",
-    "domain/inference/__pycache__",
-    "domain/state/__pycache__/__init__.cpython-314.pyc",
-    "domain/state/__pycache__/behavior_state_machine.cpython-314.pyc",
+    "domain/interaction/__pycache__/input_mux.cpython-313.pyc",
+    "domain/interaction/__pycache__/input_mux.cpython-314.pyc",
+    "domain/interaction/__pycache__/input_mux.cpython-314.pyc.2400763742656",
+    "domain/interaction/__pycache__/input_manager.cpython-314.pyc.2400763745104",
+    "test_inputmux_integration.py",
+    "data/runtime/memory.json",
+    "test_integration.py",
+    "domain/personality/__pycache__/emotion_manager.cpython-313.pyc.2230198664432",
+    "domain/personality/__pycache__/emotion_controller.cpython-313.pyc.2051542309824",
+    "app/commands/__pycache__/command_router.cpython-313.pyc",
+    "app/commands/__pycache__/__init__.cpython-313.pyc",
+    "docs/architecture/shared-reorganization.md",
+    "runtime/docs/VECTOR_SYSTEM_README.md",
+    "runtime/docs/SLM_CHAT_INTEGRATION.md",
+    "runtime/docs/README_REFACTORING.md",
+    "runtime/docs/MODULE_SUMMARY.md",
+    "kitsu_desktop_ai.md",
+    "Full layout.canvas",
+    "SYSTEM_ARCHITECTURE.md",
+    "2026-05-09.md",
     "src-tauri/tauri/ARCHITECTURE.md",
     "docs/README.md",
     "README.md",
@@ -213,16 +225,7 @@
     "src/VECTOR_SYSTEM_README.md",
     "docs/notes/application-lifecycle.md",
     "docs/guides/developer-onboarding.md",
-    "docs/architecture/system-design.md",
-    "docs/notes/ai-pipeline.md",
-    "docs/notes/system-architecture.md",
-    "docs/notes/project-overview.md",
-    "personality/SLM_CHAT_INTEGRATION.md",
-    "docs/kitsu/90_references/open_llm_vtuber/_Summary.md",
-    "docs/kitsu/99_meta/Kitsu_Legacy_Refactor_Summary.md",
-    "docs/kitsu/01_system/Kitsu.md",
     "legacy/llama.cpp/tools/server/themes/buttons-top/buttons_top.png",
-    "Untitled 1.canvas",
-    "Untitled.canvas"
+    "Untitled 1.canvas"
   ]
 }

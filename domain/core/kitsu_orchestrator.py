@@ -26,7 +26,7 @@ from domain.attention import ATTENTION_MANAGER, AttentionType, UrgencyLevel
 from domain.state import BEHAVIOR_STATE_MACHINE, BehaviorState
 from domain.inference import RESOURCE_CONTROLLER, InferenceTier, RenderTier
 from domain.grounding import TOOL_GROUNDING_SYSTEM, GroundingType
-from shared.budgets import BUDGET_MANAGER, BudgetType
+from shared.flags.budgets import BUDGET_MANAGER, BudgetType
 
 log = logging.getLogger(__name__)
 
