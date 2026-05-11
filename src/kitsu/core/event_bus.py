@@ -16,6 +16,14 @@ class EventBus:
         self.subscribers[event_name].append(handler)
         logger.debug(f"Subscribed to {event_name}: {handler.__name__}")
 
+    def unsubscribe(self, event_name: str, handler: Callable):
+        if event_name in self.subscribers:
+            try:
+                self.subscribers[event_name].remove(handler)
+                logger.debug(f"Unsubscribed from {event_name}: {handler.__name__}")
+            except ValueError:
+                pass
+
     async def emit(self, event_name: str, ctx: RequestContext):
         """
         Emits an event to all subscribers.
@@ -25,12 +33,12 @@ class EventBus:
 
         if event_name == "RESPONSE_READY":
             if ctx.responded:
-                logger.warning(f"Blocked duplicate RESPONSE_READY for request {ctx.id}")
+                logger.debug(f"Blocked duplicate RESPONSE_READY for request {ctx.id}")
                 return
             ctx.responded = True
 
         if event_name in self.subscribers:
-            handlers = self.subscribers[event_name]
+            handlers = list(self.subscribers[event_name]) # Snapshot to avoid modification during iteration
 
             # Execute handlers and catch exceptions to prevent system-wide crash
             tasks = []
@@ -41,11 +49,13 @@ class EventBus:
 
     async def _invoke_handler(self, handler: Callable, event_name: str, ctx: RequestContext):
         try:
-            # Check if it's a coroutine function or regular function
+            # Check if it's a coroutine function
             if asyncio.iscoroutinefunction(handler):
                 await handler(ctx)
             else:
-                handler(ctx)
+                # Run synchronous handlers in a threadpool to avoid blocking the event loop
+                loop = asyncio.get_running_loop()
+                await loop.run_in_executor(None, handler, ctx)
         except Exception as e:
             logger.error(f"Error in handler {handler.__name__} for event {event_name}: {e}", exc_info=True)
 

@@ -1,6 +1,6 @@
 import logging
 from kitsu.core.event_bus import bus
-from kitsu.core.context import RequestContext
+from kitsu.core.context import RequestContext, can_respond
 from kitsu.utils.timing import within_budget
 from kitsu.modules.judge import judge_response
 
@@ -17,6 +17,8 @@ async def on_llm_path(ctx: RequestContext):
     Each iteration: generate → judge all 3 signals → if score ≥ θ break.
     On exit, emit RESPONSE_READY.
     """
+    if not can_respond(ctx): return
+
     theta = 0.65
     best_response = None
     max_score = -1.0

@@ -1,7 +1,7 @@
 import os
 import json
 from kitsu.core.event_bus import bus
-from kitsu.core.context import RequestContext
+from kitsu.core.context import RequestContext, can_respond
 
 # In a real system, these would be shared or loaded from a common source
 CACHE_FILE = "data/reflex_cache.json"
@@ -40,6 +40,8 @@ async def on_preprocess_done(ctx: RequestContext):
     Complexity < 0.3 → SLM_PATH.
     Else → LLM_PATH.
     """
+    if not can_respond(ctx): return
+
     if check_reflex_cache(ctx):
         ctx.route = "reflex"
         await bus.emit("REFLEX_PATH", ctx)
