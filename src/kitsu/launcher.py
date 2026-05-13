@@ -28,6 +28,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent))
 from kitsu.main import ChatApp
 from kitsu.first_run import check_modern_setup_complete
 from kitsu.splash import ModernSplash
+from kitsu.core.event_bus import bus
 
 LOGO = r"""
 ╭────────────────────────────────────────────────────────── 🦊 KITSU AI - Modern Edition ──────────────────────────────────────────────────────────╮
@@ -80,6 +81,7 @@ class ModernLauncher:
                     return
             
             # Initialize the chat application
+            await bus.start()
             self.app = ChatApp()
             self._running = True
             
@@ -96,6 +98,7 @@ class ModernLauncher:
             print(f"\n❌ Error: {e}")
         finally:
             self._running = False
+            await bus.stop()
             logger.info("Modern Kitsu system stopped")
     
     async def stop(self):

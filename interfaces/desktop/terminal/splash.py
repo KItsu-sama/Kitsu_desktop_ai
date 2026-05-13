@@ -1,4 +1,6 @@
 """
+interfaces/desktop/terminal/splash.py
+
 Terminal splash screen components.
 
 Extracted from legacy/runtime/app.py for reuse in the main application.

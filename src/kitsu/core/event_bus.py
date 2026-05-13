@@ -17,12 +17,10 @@ import asyncio
 import logging
 import time
 from collections import defaultdict
-from typing import Any, Callable, Coroutine, Dict, List, Optional
 from dataclasses import dataclass
+from typing import Any, Callable, Dict, List, Optional
 
-from kitsu.core.context import RequestContext, can_respond
-from domain.contracts.lifecycle import Monitorable
-
+from kitsu.core.context import RequestContext
 
 # Configure logger for core
 logger = logging.getLogger("kitsu.event_bus")
@@ -60,12 +58,18 @@ class EventBus:
     
     async def start(self) -> None:
         """Start the event bus."""
+        if self._started:
+            logger.debug("EventBus already started")
+            return
         self._started = True
         self._monitoring = True
         logger.info("EventBus started")
 
     async def stop(self) -> None:
         """Stop the event bus."""
+        if not self._started:
+            logger.debug("EventBus already stopped")
+            return
         self._started = False
         self._monitoring = False
         logger.info("EventBus stopped")
@@ -117,12 +121,6 @@ class EventBus:
         if not handlers:
             logger.debug("emit: %s (no handlers)", event)
             return
-
-        # Special handling for RESPONSE_READY
-        if event == "RESPONSE_READY" and isinstance(payload, RequestContext):
-            if not can_respond(payload):
-                logger.debug("RESPONSE_READY blocked: already responded for request %s", payload.id)
-                return
 
         logger.debug("emit: %s → %d handler(s)", event, len(handlers))
         

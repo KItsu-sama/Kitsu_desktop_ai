@@ -75,6 +75,9 @@ class ChatApp:
     async def run(self) -> None:
         self._loop = asyncio.get_running_loop()
 
+        if not bus.is_running():
+            await bus.start()
+
         if _SPLASH_AVAILABLE:
             ModernSplash().display_splash()
         else:
@@ -83,21 +86,25 @@ class ChatApp:
         # Subscribe once
         bus.subscribe("RESPONSE_READY", self._on_response_ready)
 
-        while True:
-            try:
-                raw = await self._loop.run_in_executor(None, sys.stdin.readline)
-                raw = raw.rstrip("\n")
-            except (EOFError, KeyboardInterrupt):
-                break
+        try:
+            while True:
+                try:
+                    raw = await self._loop.run_in_executor(None, sys.stdin.readline)
+                    raw = raw.rstrip("\n")
+                except (EOFError, KeyboardInterrupt):
+                    break
 
-            if not raw.strip():
-                continue
+                if not raw.strip():
+                    continue
 
-            if raw.strip().lower() in ("exit", "quit", "q"):
-                print("Goodbye! 🦊")
-                break
+                if raw.strip().lower() in ("exit", "quit", "q"):
+                    print("Goodbye! 🦊")
+                    break
 
-            await self._handle(raw)
+                await self._handle(raw)
+        finally:
+            if bus.is_running():
+                await bus.stop()
 
     async def _handle(self, raw: str) -> None:
         # Reserve a Future for this request.
@@ -148,12 +155,5 @@ async def _main() -> None:
 if __name__ == "__main__":
     try:
         asyncio.run(_main())
-    except KeyboardInterrupt:
-        pass
-
-if __name__ == "__main__":
-    app = ChatApp()
-    try:
-        asyncio.run(app.run())
     except KeyboardInterrupt:
         pass

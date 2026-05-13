@@ -46,7 +46,6 @@ models/piper_voice/*
 
 
 # Legacy and specific directories
-legacy/
 chat_history/
 knowledge_base/
 submodules/MeloTTS
