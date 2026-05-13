@@ -1,4 +1,6 @@
 """
+interfaces/desktop/terminal/interface.py
+
 Terminal interface management.
 
 Handles application mode selection and terminal interface setup.

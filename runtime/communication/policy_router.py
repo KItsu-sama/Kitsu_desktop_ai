@@ -18,7 +18,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
-import re
+import time
 from dataclasses import dataclass
 from enum import Enum
 from typing import Any, Optional
@@ -124,6 +124,8 @@ class PolicyRouter(ModuleContract):
         - Vocabulary (rare words → more complex)
         - Sentence structure (nested → more complex)
         """
+        start_time = time.perf_counter()
+        
         length_score = min(1.0, len(content.split()) / 30.0)  # 30 words = moderately complex
         
         # Rough vocabulary check: presence of uncommon words
@@ -139,7 +141,12 @@ class PolicyRouter(ModuleContract):
         
         # Average the three factors
         complexity = (length_score * 0.4 + vocab_score * 0.3 + structure_score * 0.3)
-        return min(1.0, complexity)
+        complexity = min(1.0, complexity)
+        
+        analysis_time = (time.perf_counter() - start_time) * 1000
+        logger.debug(f"[POLICY] Complexity analysis: length={length_score:.2f}, vocab={vocab_score:.2f}, structure={structure_score:.2f} -> {complexity:.2f} in {analysis_time:.1f}ms")
+        
+        return complexity
 
     async def analyze(self, content: str, input_type: str = 'text') -> RoutingDecision:
         """
@@ -152,8 +159,13 @@ class PolicyRouter(ModuleContract):
         Returns:
             RoutingDecision with target and reasoning
         """
+        start_time = time.perf_counter()
+        logger.debug(f"[POLICY] Analyzing input: '{content[:50]}{'...' if len(content) > 50 else ''}' (type={input_type})")
+        
         # Early exit: empty input
         if not content or not content.strip():
+            analysis_time = (time.perf_counter() - start_time) * 1000
+            logger.debug(f"[POLICY] Empty input detected in {analysis_time:.1f}ms")
             return RoutingDecision(
                 target=RoutingTarget.TEMPLATE,
                 confidence=0.5,
@@ -164,6 +176,8 @@ class PolicyRouter(ModuleContract):
 
         # Pattern matching layer: FastBrain candidates
         if self._match_patterns(content, self._greeting_patterns):
+            analysis_time = (time.perf_counter() - start_time) * 1000
+            logger.debug(f"[POLICY] Greeting pattern matched in {analysis_time:.1f}ms")
             return RoutingDecision(
                 target=await self.strip.enforce(RoutingTarget.FASTBRAIN),
                 confidence=0.95,
@@ -173,6 +187,8 @@ class PolicyRouter(ModuleContract):
             )
 
         if self._match_patterns(content, self._command_patterns):
+            analysis_time = (time.perf_counter() - start_time) * 1000
+            logger.debug(f"[POLICY] Command pattern matched in {analysis_time:.1f}ms")
             return RoutingDecision(
                 target=await self.strip.enforce(RoutingTarget.FASTBRAIN),
                 confidence=0.9,
@@ -186,6 +202,8 @@ class PolicyRouter(ModuleContract):
 
         # Low complexity → FastBrain
         if complexity < 0.3:
+            analysis_time = (time.perf_counter() - start_time) * 1000
+            logger.debug(f"[POLICY] Low complexity ({complexity:.2f}) -> FastBrain in {analysis_time:.1f}ms")
             return RoutingDecision(
                 target=await self.strip.enforce(RoutingTarget.FASTBRAIN),
                 confidence=0.8,
@@ -205,6 +223,8 @@ class PolicyRouter(ModuleContract):
             else:
                 reason = f'Medium complexity (score={complexity:.2f})'
             
+            analysis_time = (time.perf_counter() - start_time) * 1000
+            logger.debug(f"[POLICY] Medium complexity ({complexity:.2f}) -> {enforced.value} in {analysis_time:.1f}ms")
             return RoutingDecision(
                 target=enforced,
                 confidence=0.7,
@@ -222,6 +242,8 @@ class PolicyRouter(ModuleContract):
         else:
             reason = f'High complexity (score={complexity:.2f})'
         
+        analysis_time = (time.perf_counter() - start_time) * 1000
+        logger.debug(f"[POLICY] High complexity ({complexity:.2f}) -> {enforced.value} in {analysis_time:.1f}ms")
         return RoutingDecision(
             target=enforced,
             confidence=0.6,
@@ -244,10 +266,13 @@ class PolicyRouter(ModuleContract):
         Returns:
             RoutingDecision if successful, None on error
         """
+        start_time = time.perf_counter()
+        
         try:
             decision = await self.analyze(content, input_type)
             
             # Emit routing decision through Event Bus
+            emit_start = time.perf_counter()
             await self.event_bus.emit(
                 EventType.ROUTING_DECISION,
                 EventPayload(
@@ -263,18 +288,15 @@ class PolicyRouter(ModuleContract):
                     }
                 )
             )
+            emit_time = (time.perf_counter() - emit_start) * 1000
             
-            logger.debug(
-                'Routed to %s (conf=%.2f, complexity=%.2f): %s',
-                decision.target.value,
-                decision.confidence,
-                decision.complexity_score,
-                decision.reason
-            )
+            total_time = (time.perf_counter() - start_time) * 1000
+            logger.debug(f"[POLICY] Route completed: analyze={total_time-emit_time:.1f}ms, emit={emit_time:.1f}ms, total={total_time:.1f}ms")
             
             return decision
         except Exception:
-            logger.exception('Routing analysis failed')
+            total_time = (time.perf_counter() - start_time) * 1000
+            logger.exception(f'[POLICY] Routing analysis failed after {total_time:.1f}ms')
             return None
 
 

@@ -21,28 +21,17 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import time
 from typing import Optional, Dict, Any
 
-from runtime.communication.bus import bus
-from runtime.communication.events import InputReceived, ResponseReady, EventType, EventPayload
+from typing import TYPE_CHECKING
 from domain.contracts.contracts import AIProvider
-from runtime.systems.behavior_engine import BehaviorEngine, AttentionConfig
-from dataclasses import dataclass
-from typing import Optional
+
+if TYPE_CHECKING:
+    from kitsu.core.context import RequestContext
+    from runtime.systems.behavior_engine import BehaviorEngine, AttentionConfig
 
 logger = logging.getLogger(__name__)
-
-
-@dataclass
-class RequestContext:
-    """Request context for AI pipeline processing."""
-    text: str
-    vibe: list[float] = None
-    mode: str = 'chat'
-    
-    def within_budget(self) -> bool:
-        """Check if request is within processing budget."""
-        return True  # Simplified for now
 
 
 class InputManager:
@@ -55,46 +44,69 @@ class InputManager:
     
     def __init__(self, message_bus, emotion_manager=None, core_memory=None, llm_fallback=None, 
                  slm=None, judge=None, fast_brain=None, core_config=None):
-        # Fix circular dependency: only take what we need, not the whole orchestrator
-        self.bus = message_bus
+        self.message_bus = message_bus
         self.emotion_manager = emotion_manager
         self.core_memory = core_memory
         self.llm_fallback = llm_fallback
-        self.slm = slm          # New: The Qwen 1.5B instance
-        self.judge = judge        # New: The 3-signal logic
+        self.slm = slm
+        self.judge = judge
         self.fast_brain = fast_brain
         self.core_config = core_config or {}
-        self._chat_enabled: bool = True
         
-        # Behavior engine for attention gating
-        behavior_config = AttentionConfig(**self.core_config.get("attention", {}))
-        self.behavior_engine = BehaviorEngine(behavior_config)
-        
-        # Subscribe to normalized input from InputMux
-        self.bus.subscribe(EventType.USER_INPUT, self.on_user_input)
+        # Lazy imports to avoid circular imports
+        self._bus = None
+        self._behavior_engine = None
     
-    async def on_user_input(self, event: EventPayload) -> None:
+    @property
+    def bus(self):
+        """Lazy import of event bus to avoid circular imports."""
+        if self._bus is None:
+            from kitsu.core.event_bus import bus
+            self._bus = bus
+        return self._bus
+    
+    @property
+    def behavior_engine(self):
+        """Lazy import of behavior engine to avoid circular imports."""
+        if self._behavior_engine is None:
+            from runtime.systems.behavior_engine import BehaviorEngine, AttentionConfig
+            behavior_config = AttentionConfig(
+                max_attention=100.0,
+                decay_rate=0.1,
+                boost_factor=1.5
+            )
+            self._behavior_engine = BehaviorEngine(behavior_config)
+        return self._behavior_engine
+    
+    async def on_user_input(self, ctx) -> None:
         """
         Handle normalized input from InputMux via Event Bus.
         
         This is the new entry point - replaces direct process_input calls.
         """
+        start_time = time.perf_counter()
+        
         try:
-            # Extract content from EventPayload
-            user_input = event.data.get('content', '')
+            # Extract content from RequestContext
+            user_input = ctx.text
             if not user_input.strip():
                 return
+            
+            logger.debug(f"[INPUT_MANAGER] Processing input: '{user_input}' (len={len(user_input)})")
             
             # Process through the multi-tier AI pipeline
             result = await self.process_input(user_input)
             
             # Publish response for UI components
-            bus.publish(ResponseReady(
-                input_text=user_input,
-                response_text=result.get('response', ''),
-                source=result.get('source', 'input_manager'),
-                confidence=result.get('confidence', 0.8),
-            ))
+            await self.bus.emit("RESPONSE_READY", {
+                'input_text': user_input,
+                'response_text': result.get('response', ''),
+                'source': result.get('source', 'input_manager'),
+                'confidence': result.get('confidence', 0.8),
+            })
+            
+            processing_time = (time.perf_counter() - start_time) * 1000
+            logger.debug(f"[INPUT_MANAGER] Processing completed in {processing_time:.1f}ms")
             
         except Exception as e:
             logger.error(f"Error processing USER_INPUT event: {e}")
@@ -109,6 +121,9 @@ class InputManager:
         Returns:
             Dict containing response and metadata compatible with legacy UI
         """
+        start_time = time.perf_counter()
+        logger.debug(f"[INPUT_MANAGER] Starting pipeline for: '{user_input[:50]}{'...' if len(user_input) > 50 else ''}'")
+        
         # Validate input
         if not user_input or not isinstance(user_input, str):
             return self._create_error_response("Invalid input")
@@ -119,19 +134,33 @@ class InputManager:
             vibe=self._get_vibe_vector(),
             mode='chat'
         )
+        logger.debug(f"[INPUT_MANAGER] Context created: mode={ctx.mode}, vibe={ctx.vibe}")
         
         # Process through behavior engine first
+        behavior_start = time.perf_counter()
         behavior_result = await self._process_behavior_engine(ctx)
+        behavior_time = (time.perf_counter() - behavior_start) * 1000
+        logger.debug(f"[INPUT_MANAGER] Behavior engine: {behavior_time:.1f}ms")
+        
         if behavior_result is not None:
+            total_time = (time.perf_counter() - start_time) * 1000
+            logger.debug(f"[INPUT_MANAGER] Pipeline completed (behavior handled): {total_time:.1f}ms")
             return behavior_result
         
         # Multi-tier AI pipeline: FastBrain → SLM → LLM
+        pipeline_start = time.perf_counter()
         response_text, source, confidence = await self._process_tiered_pipeline(ctx)
+        pipeline_time = (time.perf_counter() - pipeline_start) * 1000
+        logger.debug(f"[INPUT_MANAGER] AI pipeline: {pipeline_time:.1f}ms, source={source}, confidence={confidence:.2f}")
         
         # Get emotional state for expression
         emotion_state = self.emotion_manager.get_current_state() if self.emotion_manager else {}
         mood = emotion_state.get("mood", "neutral")
         emotion = emotion_state.get("dominant_emotion", "neutral")
+        logger.debug(f"[INPUT_MANAGER] Emotional state: mood={mood}, emotion={emotion}")
+        
+        total_time = (time.perf_counter() - start_time) * 1000
+        logger.debug(f"[INPUT_MANAGER] Total pipeline time: {total_time:.1f}ms")
         
         return {
             "response": response_text,
@@ -148,7 +177,7 @@ class InputManager:
                 "behavior_engine": True,
                 "tier_used": source
             },
-            "generation_time": 0.1,  # Placeholder
+            "generation_time": total_time / 1000,
             "routing": {"intent": "processed"},
             "binary_features": {},
             "debug_log": None,
@@ -224,12 +253,12 @@ class InputManager:
                     except Exception as exc:
                         logger.error('Personality injection failed: %s', exc)
 
-                bus.publish(ResponseReady(
-                    input_text=event.text,
-                    response_text=response,
-                    source="fast_brain",
-                    confidence=1.0,
-                ))
+                await self.bus.emit("RESPONSE_READY", {
+                    'input_text': event.text,
+                    'response_text': response,
+                    'source': "fast_brain",
+                    'confidence': 1.0,
+                })
                 return
 
         # SLM fallback - run in executor
@@ -253,12 +282,12 @@ class InputManager:
                     except Exception as exc:
                         logger.warning('Personality injection failed: %s', exc)
 
-                bus.publish(ResponseReady(
-                    input_text=event.text,
-                    response_text=response,
-                    source="slm",
-                    confidence=0.75,
-                ))
+                await self.bus.emit("RESPONSE_READY", {
+                    'input_text': event.text,
+                    'response_text': response,
+                    'source': "slm",
+                    'confidence': 0.75,
+                })
                 return
 
         # LLM fallback - run in executor
@@ -282,12 +311,12 @@ class InputManager:
                     except Exception as exc:
                         logger.warning('Personality injection failed: %s', exc)
 
-                bus.publish(ResponseReady(
-                    input_text=event.text,
-                    response_text=response,
-                    source="llm",
-                    confidence=0.9,
-                ))
+                await self.bus.emit("RESPONSE_READY", {
+                    'input_text': event.text,
+                    'response_text': response,
+                    'source': "llm",
+                    'confidence': 0.5,
+                })
                 return
 
         logger.warning("No AI provider could handle input: %r", event.text)
@@ -467,48 +496,65 @@ class InputManager:
         Returns:
             (response_text, source, confidence) tuple
         """
+        logger.debug(f"[INPUT_MANAGER] Starting tiered pipeline for: '{ctx.text}'")
+        
         # Tier 1: FastBrain (Reflex)
         if self.fast_brain and hasattr(self.fast_brain, 'is_available') and self.fast_brain.is_available():
             try:
+                fastbrain_start = time.perf_counter()
                 response = await asyncio.get_event_loop().run_in_executor(
                     None, self.fast_brain.query, ctx.text
                 )
+                fastbrain_time = (time.perf_counter() - fastbrain_start) * 1000
+                
                 if response and self._judge_response(response, ctx):
-                    logger.debug("FastBrain provided valid response")
+                    logger.debug(f"[INPUT_MANAGER] FastBrain success: {fastbrain_time:.1f}ms")
                     return response, "fast_brain", 1.0
+                else:
+                    logger.debug(f"[INPUT_MANAGER] FastBrain rejected: {fastbrain_time:.1f}ms")
             except Exception as e:
                 logger.warning(f"FastBrain query failed: {e}")
         
         # Tier 2: SLM (Local Qwen)
         if self.slm and ctx.within_budget():
             try:
+                slm_start = time.perf_counter()
                 response = await asyncio.get_event_loop().run_in_executor(
                     None, self.slm.query, ctx.text
                 )
+                slm_time = (time.perf_counter() - slm_start) * 1000
+                
                 if response and self._judge_response(response, ctx):
-                    logger.debug("SLM provided valid response")
+                    logger.debug(f"[INPUT_MANAGER] SLM success: {slm_time:.1f}ms")
                     return response, "slm", 0.8
+                else:
+                    logger.debug(f"[INPUT_MANAGER] SLM rejected: {slm_time:.1f}ms")
             except Exception as e:
                 logger.warning(f"SLM query failed: {e}")
         
         # Tier 3: LLM Fallback
         if self.llm_fallback:
             try:
+                llm_start = time.perf_counter()
                 response = self.llm_fallback.generate(
                     mood="friendly",
                     style="sweet",
                     cause="chat_input",
                     raw_input=ctx.text
                 )
+                llm_time = (time.perf_counter() - llm_start) * 1000
+                
                 if response:
-                    logger.debug("LLM fallback provided response")
+                    logger.debug(f"[INPUT_MANAGER] LLM fallback success: {llm_time:.1f}ms")
                     return response, "llm_fallback", 0.6
+                else:
+                    logger.debug(f"[INPUT_MANAGER] LLM fallback failed: {llm_time:.1f}ms")
             except Exception as e:
                 logger.warning(f"LLM fallback failed: {e}")
         
         # Ultimate fallback
         fallback_msg = f"I understand you said: {ctx.text}"
-        logger.warning("All AI tiers failed, using ultimate fallback")
+        logger.warning("[INPUT_MANAGER] All AI tiers failed, using ultimate fallback")
         return fallback_msg, "fallback", 0.3
     
     def _judge_response(self, response: str, ctx: RequestContext) -> bool:

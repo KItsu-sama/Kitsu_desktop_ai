@@ -159,11 +159,11 @@ def is_debug_output_enabled() -> bool:
 # usage;
 """
 # launcher.py (unchanged)
-from shared.utils.logger import setup
+from shared.logging.logger import setup
 setup(level=logging.DEBUG, log_dir="logs")
 
 # New code
-from shared.utils.logger import setup_logger, get_logger, set_debug_output
+from shared.logging.logger import setup_logger, get_logger, set_debug_output
 logger = setup_logger("kitsu.app.profiles")
 set_debug_output(True)
 logger = get_logger("kitsu")

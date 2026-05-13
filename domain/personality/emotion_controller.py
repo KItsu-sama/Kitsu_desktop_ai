@@ -114,10 +114,13 @@ class EmotionController:
         Returns:
             Complete emotional response
         """
-        log.debug(f"Handling gesture: {gesture_type.value} at ({x}, {y})")
+        start_time = time.perf_counter()
+        log.debug(f"[EMOTION_CONTROLLER] Mouse gesture: {gesture_type.value} at ({x:.1f}, {y:.1f}) intensity={intensity:.2f}")
         
         # Map gesture to emotional reaction
         reaction = self.reaction_mapper.map_gesture(gesture_type)
+        mapping_time = (time.perf_counter() - start_time) * 1000
+        log.debug(f"[EMOTION_CONTROLLER] Gesture mapped: {reaction['emotion']}({reaction['intensity']}) in {mapping_time:.1f}ms")
         
         # Plan reaction sequence
         sequence = self.reaction_mapper.plan_reaction_sequence(
@@ -127,12 +130,15 @@ class EmotionController:
         )
         
         # Apply emotions to engine
+        apply_start = time.perf_counter()
         for step in sequence:
             self.emotion_engine.set_emotion(
                 step["emotion"],
                 intensity * reaction["intensity"],
                 step["duration"]
             )
+        apply_time = (time.perf_counter() - apply_start) * 1000
+        log.debug(f"[EMOTION_CONTROLLER] Emotion applied in {apply_time:.1f}ms")
         
         # Fire triggers
         for trigger in reaction["triggers"]:
@@ -150,6 +156,9 @@ class EmotionController:
         # Queue for coordinated execution
         await self.response_queue.put(response)
         
+        total_time = (time.perf_counter() - start_time) * 1000
+        log.debug(f"[EMOTION_CONTROLLER] Mouse gesture completed in {total_time:.1f}ms")
+        
         return response
     
     async def handle_emoji(self, emoji: str, intensity: float = 0.5) -> EmotionalResponse:
@@ -163,23 +172,32 @@ class EmotionController:
         Returns:
             Complete emotional response
         """
-        log.debug(f"Handling emoji: {emoji}")
+        start_time = time.perf_counter()
+        log.debug(f"[EMOTION_CONTROLLER] Emoji received: '{emoji}' intensity={intensity:.2f}")
         
         # Map emoji to reaction
         reaction = self.reaction_mapper.map_emoji(emoji)
+        mapping_time = (time.perf_counter() - start_time) * 1000
+        log.debug(f"[EMOTION_CONTROLLER] Emoji mapped: {reaction['emotion']}({reaction['intensity']}) in {mapping_time:.1f}ms")
         
         # Set emotion
+        apply_start = time.perf_counter()
         self.emotion_engine.set_emotion(
             reaction["emotion"],
-            intensity * reaction["intensity"],
-            duration=5.0
+            reaction["intensity"] * intensity,  # Scale by interaction intensity
+            reaction.get("duration", 5.0)
         )
+        apply_time = (time.perf_counter() - apply_start) * 1000
+        log.debug(f"[EMOTION_CONTROLLER] Emotion applied in {apply_time:.1f}ms")
         
         # Generate response
         response = await self._generate_response(reaction, f"emoji:{emoji}")
         
         # Queue for execution
         await self.response_queue.put(response)
+        
+        total_time = (time.perf_counter() - start_time) * 1000
+        log.debug(f"[EMOTION_CONTROLLER] Emoji handling completed in {total_time:.1f}ms")
         
         return response
     
@@ -384,167 +402,13 @@ class EmotionController:
         
         log.info("Response processing loop stopped")
     
-    async def handle_idle_timeout(self, idle_minutes: int) -> EmotionalResponse:
-        """
-        Handle idle timeout.
-        
-        Args:
-            idle_minutes: Minutes of inactivity
-            
-        Returns:
-            Complete emotional response
-        """
-        log.debug(f"Handling idle timeout: {idle_minutes} minutes")
-        
-        # Get idle reaction
-        reaction = self.reaction_mapper.get_idle_reactions(idle_minutes)
-        
-        if reaction["type"] == "sleep_mode":
-            # Hide avatar and set sleep state
-            if self.avatar_system:
-                self.avatar_system.set_state("sleeping")
-            self.emotion_engine.hide()
-        elif reaction["type"] == "check_in":
-            # Brief check-in animation
-            self.emotion_engine.set_emotion("curious", 0.3, duration=3.0)
-            if self.avatar_system:
-                self.avatar_system.play_animation("peek")
-        
-        # Generate response
-        response = await self._generate_response(reaction, f"idle:{idle_minutes}")
-        
-        return response
+    # =========================================================================
+    # Helper Methods for Response Execution
+    # =========================================================================
     
-# =========================================================================
-# Response Generation
-# =========================================================================
-    
-async def _generate_response(
-    self,
-    reaction: Dict[str, Any],
-    source: str
-) -> EmotionalResponse:
-    """
-    Generate complete emotional response.
-    
-    Args:
-        reaction: Reaction mapping data
-        source: Source of interaction
-        
-    Returns:
-        Complete emotional response
-    """
-    # Get current emotional state
-    emotional_state = self.emotion_engine.get_emotional_state()
-    
-    # Determine animation
-    animation = reaction.get("animation", "idle")
-    if self.avatar_system:
-        # Map emotion to animation if not specified
-        if not animation or animation == "idle":
-            animation = self.emotion_engine.get_avatar_hint()
-    
-    # Voice modulation
-    voice_modulation = {
-        "pitch": reaction.get("voice_pitch", 1.0),
-        "speed": 1.0,
-        "volume": 1.0
-    }
-    
-    # Adjust voice based on emotion
-    emotion = emotional_state["dominant_emotion"]
-    if emotion == "happy":
-        voice_modulation["pitch"] *= 1.2
-        voice_modulation["speed"] *= 1.1
-    elif emotion == "sad":
-        voice_modulation["pitch"] *= 0.8
-        voice_modulation["speed"] *= 0.9
-    elif emotion == "angry":
-        voice_modulation["pitch"] *= 1.1
-        voice_modulation["volume"] *= 1.2
-    elif emotion == "flirty":
-        voice_modulation["pitch"] *= 1.3
-    
-    # Generate text response if needed
-    text_response = reaction.get("message")
-    if not text_response and source.startswith("emoji:"):
-        text_response = await self._generate_emoji_response(source.split(":")[1])
-    
-    return EmotionalResponse(
-        emotion=emotional_state["dominant_emotion"],
-        intensity=emotional_state["confidence"],
-        mood=self.emotion_engine.mood,
-        style=self.emotion_engine.style,
-        animation=animation,
-        voice_modulation=voice_modulation,
-        text_response=text_response,
-        duration=reaction.get("duration", 5.0)
-    )
-    
-async def _generate_emoji_response(self, emoji: str) -> str:
-    """
-    Generate text response to emoji.
-    
-    Args:
-        emoji: Emoji character
-        
-    Returns:
-        Text response
-    """
-    # This would use the LLM to generate appropriate responses
-    emoji_responses = {
-        "🥰": ["Aww, you're making me blush! 🦊", "Hehe, that's sweet!"],
-        "😡": ["Hey! What did I do? 😤", "Why the angry face?"],
-        "😭": ["Don't cry! I'm here! 🤗", "What's wrong? Let me help!"],
-        "😏": ["What's that look for? 😏", "Planning something mischievous?"]
-    }
-    
-    import random
-    responses = emoji_responses.get(emoji, ["Interesting emoji!"])
-    return random.choice(responses)
-    
-# =========================================================================
-# Response Execution
-# =========================================================================
-    
-async def _process_responses(self) -> None:
-    """Background task to process queued responses"""
-    log.info("Starting response processing loop")
-        
-    while not self._shutdown_requested:
+    async def _execute_avatar_animation(self, response: EmotionalResponse) -> None:
+        """Execute avatar animation"""
         try:
-            # THIS IS THE FIX: This line suspends the task efficiently 
-            # until an item is available. No CPU spinning.
-            response = await self.response_queue.get()
-            
-            try:
-                # Execute all components simultaneously
-                tasks = []
-                
-                # Avatar animation
-                if self.avatar_system:
-                    tasks.append(self._execute_avatar_animation(response))
-                
-                # Voice generation
-                if self.voice_system:
-                    tasks.append(self._execute_voice_generation(response))
-                
-                # Memory storage
-                if self.memory_manager:
-                    tasks.append(self._store_response_in_memory(response))
-                
-                # Wait for all with timeout
-                try:
-                    await asyncio.gather(*tasks, timeout=response.duration + 1.0)
-                except asyncio.TimeoutError:
-                    log.warning("Response execution timed out")
-            finally:
-                # Mark as done so the queue can track task completion
-                self.response_queue.task_done()
-
-        except asyncio.CancelledError:
-            # Handle graceful shutdown if the task is cancelled
-            break
             if self.avatar_system:
                 self.avatar_system.play_emotion_animation(
                     response.emotion,
@@ -553,8 +417,8 @@ async def _process_responses(self) -> None:
         except Exception as e:
             log.error(f"Avatar animation error: {e}")
     
-    async def _execute_voice_response(self, response: EmotionalResponse) -> None:
-        """Execute voice response"""
+    async def _execute_voice_generation(self, response: EmotionalResponse) -> None:
+        """Execute voice generation"""
         try:
             if self.voice_system and response.text_response:
                 await self.voice_system.speak(
@@ -564,10 +428,10 @@ async def _process_responses(self) -> None:
                     volume=response.voice_modulation["volume"]
                 )
         except Exception as e:
-            log.error(f"Voice response error: {e}")
+            log.error(f"Voice generation error: {e}")
     
-    async def _update_memory(self, response: EmotionalResponse) -> None:
-        """Update memory with interaction"""
+    async def _store_response_in_memory(self, response: EmotionalResponse) -> None:
+        """Store response in memory"""
         try:
             if self.memory_manager:
                 # Store interaction in memory
@@ -583,7 +447,7 @@ async def _process_responses(self) -> None:
                 # This would use the memory manager's API
                 # await self.memory_manager.store_interaction(interaction_data)
         except Exception as e:
-            log.error(f"Memory update error: {e}")
+            log.error(f"Memory storage error: {e}")
     
     # =========================================================================
     # Manual Controls

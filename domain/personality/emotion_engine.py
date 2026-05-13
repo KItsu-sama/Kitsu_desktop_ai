@@ -228,6 +228,8 @@ class EmotionEngine:
         Returns:
             Dominant emotion name (e.g., "happy", "angry", "neutral")
         """
+        start_time = time.perf_counter()
+        
         # Get personality modifiers from interface
         personality_modifiers = {}
         if self.kitsu_self_interface:
@@ -244,7 +246,11 @@ class EmotionEngine:
             except Exception as e:
                 log.debug(f"Personality modifier failed: {e}")
         
-        return self.stack_manager.get_dominant_emotion(personality_modifiers)
+        result = self.stack_manager.get_dominant_emotion(personality_modifiers)
+        processing_time = (time.perf_counter() - start_time) * 1000
+        
+        log.debug(f"[EMOTION_ENGINE] Got dominant emotion: {result} in {processing_time:.1f}ms")
+        return result
 
     def get_current_intensity(self) -> float:
         """
@@ -270,7 +276,10 @@ class EmotionEngine:
             intensity: Emotion strength (0.0 - 1.0)
             duration: How long emotion lasts (seconds)
         """
+        start_time = time.perf_counter()
         self.stack_manager.add_emotion(name, intensity, duration)
+        processing_time = (time.perf_counter() - start_time) * 1000
+        log.debug(f"[EMOTION_ENGINE] Set emotion: {name}({intensity}) for {duration}s in {processing_time:.1f}ms")
 
     def add_emotion(self, name: str, intensity: float = 0.5, duration: float = 5.0):
         """Public API alias for set_emotion"""
@@ -498,12 +507,17 @@ class EmotionEngine:
         Args:
             emotion: Dominant emotion name
         """
+        start_time = time.perf_counter()
         intensity = self.get_current_intensity()
+        
+        log.debug(f"[EMOTION_ENGINE] Updating personality for emotion: {emotion}({intensity:.2f})")
         
         if self.is_hidden:
             self.style = "direct"
             self.state = "normal"
             self._update_legacy_mode()
+            processing_time = (time.perf_counter() - start_time) * 1000
+            log.debug(f"[EMOTION_ENGINE] Personality updated (hidden mode): {self.mood}/{self.style}/{self.state} in {processing_time:.1f}ms")
             return
         
         # Get current role from interface
@@ -522,6 +536,8 @@ class EmotionEngine:
             role=role
         )
         
+        old_personality = f"{self.mood}/{self.style}/{self.state}"
+        
         # Update personality dimensions
         self.mood = new_mood
         self.style = new_style
@@ -529,7 +545,7 @@ class EmotionEngine:
         # Update state with persistence
         current_state = self.get_current_state()
         if current_state != self.state:
-            log.debug(f"State shift: {self.state} -> {current_state}")
+            log.debug(f"[EMOTION_ENGINE] State shift: {self.state} -> {current_state}")
             self.state = current_state
         
         # Apply personality-based modifiers
@@ -538,6 +554,11 @@ class EmotionEngine:
         )
         
         self._update_legacy_mode()
+        
+        new_personality = f"{self.mood}/{self.style}/{self.state}"
+        processing_time = (time.perf_counter() - start_time) * 1000
+        
+        log.debug(f"[EMOTION_ENGINE] Personality updated: {old_personality} -> {new_personality} in {processing_time:.1f}ms")
 
     def _update_legacy_mode(self):
         """Map (mood, style) to legacy current_mode for backward compatibility"""
@@ -643,15 +664,24 @@ class EmotionEngine:
         - Applies decay to active emotions
         - Updates personality from dominant emotion
         """
+        start_time = time.perf_counter()
+        
         # Apply decay using stack manager
+        decay_start = time.perf_counter()
         self.stack_manager.apply_decay()
-
+        decay_time = (time.perf_counter() - decay_start) * 1000
+        
         # Update personality
+        personality_start = time.perf_counter()
         if not self.is_hidden:
             dominant = self.get_current_emotion()
             self.update_personality(dominant)
         else:
             self.current_mode = "Hide"
+        personality_time = (time.perf_counter() - personality_start) * 1000
+        
+        total_time = (time.perf_counter() - start_time) * 1000
+        log.debug(f"[EMOTION_ENGINE] Tick completed: decay={decay_time:.1f}ms, personality={personality_time:.1f}ms, total={total_time:.1f}ms")
 
     async def run(self) -> None:
         """Background loop for continuous emotion decay."""

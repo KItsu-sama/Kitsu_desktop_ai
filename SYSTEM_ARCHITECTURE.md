@@ -1,11 +1,40 @@
-# Kitsu System Architecture Documentation
+# Kitsu System Architecture Documentation (Production Grade)
 
 ## Overview
+Kitsu is a local-first desktop AI companion built on a production-grade, event-driven architecture. The system utilizes an asynchronous internal message bus to decouple specialized modules, ensuring low latency, high reliability, and predictable performance on varying hardware profiles.
 Kitsu is a local-first desktop AI companion with a **modern 4-layer architecture** that provides robust startup, lifecycle management, and resource-aware operation. The system has evolved from a simple AI assistant into a sophisticated cognitive runtime with comprehensive safety and stability systems.
 
 ---
 
 ## Table of Contents
+1. [Core Architectural Principles](#core-architectural-principles)
+2. [Folder Structure & Package Layout](#folder-structure--package-layout)
+3. [AI Processing Pipeline](#ai-processing-pipeline)
+4. [Event-Driven Communication](#event-driven-communication)
+
+---
+
+## Core Architectural Principles
+
+- **State via Context**: Every request is encapsulated in a `RequestContext` object. No module maintains external state for a request; all data (tokens, vibe, route, response) is carried through the pipeline.
+- **Asynchronous Decoupling**: Modules never call each other directly. They subscribe to specific events and emit result events via a central `EventBus`.
+- **Latency Budgets**: Strict nanosecond-precision tracking ensures the system remains responsive. If a module exceeds its budget, the system gracefully falls back to faster processing tiers.
+- **Response Locking**: A strict `responded` lock in the context ensures that only one module provides the final answer to the user, preventing race conditions in multi-path routing.
+
+---
+
+## Folder Structure & Package Layout
+
+The project follows the standard `src` layout for Python packaging, ensuring a clean separation between source code and metadata.
+
+### 📂 `src/kitsu/` - Package Root
+| Directory | Purpose |
+|-----------|---------|
+| `core/` | **Infrastructure backbone** - Contains the `EventBus` and `RequestContext`. |
+| `modules/`| **Logic Components** - Specialized modules for AI processing, quality control, and features. |
+| `utils/` | **Helpers** - Cross-cutting utilities like timing and budget tracking. |
+
+### 📂 `src/kitsu/core/`
 1. [Modern 4-Layer Architecture](#modern-4-layer-architecture)
 2. [Startup Flow](#startup-flow)
 3. [Folder Structure & Systems](#folder-structure--systems)
@@ -204,265 +233,68 @@ else:
 
 | File | Purpose |
 |------|---------|
-| **`launcher.py`** | **Phase 0: Main entry point** - Handles CLI parsing, first-run check, config loading, hardware detection, builds DI container |
-| **`main.py`** | Alternative/legacy entry point - Duplicates launcher.py logic |
-| **`kitsu_launcher.py`** | Modern launcher variant with module registry integration |
-| **`bootstrap.py`** | **Phase 1: Container setup** - Creates AppContainer with all services, registers singletons (MessageBus, HealthMonitor, etc.) |
-| **`orchestrator.py`** | **Phase 3: Main event loop** - Receives events, routes to personality engine, manages module lifecycle |
-| **`container.py`** | Dependency injection container (DIContainer) - Manages service registration, resolution, and lifetime |
-| **`bus.py`** | MessageBus/EventBus - Unified pub/sub system for events and request/response messaging |
-| **`application.py`** | High-level application facade - Coordinates between modules |
-| **`engine.py`** | KitsuEngine - AI inference pipeline coordinator (FastBrain → SLM → LLM) |
-| **`behavior_engine.py`** | Attention & behavior state machine |
-| **`clocks.py`** | ClockService - Time tracking and tick management for all systems |
-| **`health.py`** | HealthMonitor - Tracks module health, detects failures, triggers recovery |
-| **`performance_manager.py`** | Resource manager - Monitors memory/CPU, unloads models, manages tier degradation |
-| **`system_monitor.py`** | System metrics - Tracks OS-level resource usage |
-| **`module_registry.py`** | Registry of all loadable modules - Tracks startup order and dependencies |
-| **`runtime_config.py`** | Configuration merger - Combines defaults.yaml + system_config.json + profile overrides |
-| **`profiles.py`** | Hardware profiles (ultra_low, balanced, full) - Maps hardware → capability flags |
-| **`lifecycle.py`** | Module lifecycle state machine (stopped → starting → running → stopping) |
-| **`policy_router.py`** | Intent classification router - Determines which AI model to use |
-| **`events.py`** | Event definitions - InputReceived, ResponseReady, EmotionChanged, etc. |
-| **`strip_controller.py`** | LED strip animation controller |
-| **`idle_manager.py`** | Handles idle state detection and transitions |
-| **`kitsu_identity.py`** | Kitsu self-model and identity management |
+| `event_bus.py` | Asynchronous pub/sub system with support for both sync and async handlers. Includes error isolation and response locking. |
+| `context.py` | Defines `RequestContext`, the single source of truth for any given user interaction. |
 
-**Key Files Explained:**
-
-**`r.py` - SINGLE ENTRY POINT**
-
-```python
-# Feature flag routing
-if "--bootstrap-only" in sys.argv:
-    launcher.bootstrap()
-elif "--test-mode" in sys.argv:
-    launcher.quick_start()
-elif "--status" in sys.argv:
-    launcher.show_status()
-else:
-    launcher.full_startup()  # default
-```
-
-**`launcher.py` - Core Launcher Methods**
-```python
-# Phase 0 Startup (with feature flags)
-1. parse_args() → Get CLI flags + feature routing
-2. _setup_logging() → Initialize logger + start timer
-3. _check_crash_recovery() → Load last_crash.json
-4. _check_first_run() → Need setup?
-   └─ YES: run_first_run() (from scripts/)
-5. load_config() → ConfigMerger.load() (shared/config.py)
-   ├─ defaults.yaml (base)
-   ├─ system_config.json (user)
-   ├─ profile.json (hardware)
-   └─ CLI overrides (highest)
-6. select_profile() → Choose hardware profile
-7. validate_config() → Check config validity
-8. build_runtime_config() → Merge all configs
-9. build_app_container() → DI setup (→ bootstrap.py)
-10. orchestrator.startup() → Start modules
-11. kitsu_engine.startup() → Start AI system
-12. orchestrator.run() → Main loop + health monitoring
-```
-
-**`bootstrap.py` - Dependency Injection**
-```python
-# Phase 1: Create container with:
-- MessageBus (event routing)
-- ClockService (time coordination)
-- HealthMonitor (failure detection)
-- PerformanceManager (resource management)
-- AI Providers (FastBrain, SLM, LLM)
-- EmotionEngine (personality system)
-- MemoryManager (learning system)
-- AvatarController (visual rendering)
-```
-
-**`orchestrator.py` - Main Event Loop**
-```python
-# Phase 3: Runtime loop
-While running:
-  1. Wait for event (InputReceived, IdleStateChanged, etc.)
-  2. Route to ReactionMapper
-  3. EmotionEngine processes → emotion state change
-  4. GenerateResponse (FastBrain → SLM → LLM as needed)
-  5. EmotionController modulates output
-  6. Send to avatar/UI
-  7. Update MemoryManager (learning)
-```
+### 📂 `src/kitsu/modules/`
+| File | Purpose |
+|------|---------|
+| `preprocess.py` | Computes SimHash from input and extracts emotional vibe vectors. |
+| `router.py` | Analyzes complexity and cache hits to determine the optimal inference path. |
+| `reflex.py` | Handles O(1) responses using a learned SimHash cache and Markov templates. |
+| `slm.py` | Interface for the Small Language Model (Qwen2.5-1.5B Q4) for fast, personality-rich responses. |
+| `llm.py` | Orchestrates deep reasoning loops with the Large Language Model. |
+| `judge.py` | Inline quality assurance for character consistency, coherence, and factual safety. |
+| `memory.py` | Updates the persistent reflex cache with high-quality LLM responses. |
+| `quiz_handler.py` | Specialized handler for browser-based quizzes, bypassing the main bus for maximum performance. |
 
 ---
 
-### 📂 `domain/` - Core Business Logic
-**Purpose:** Domain models and business rules for personality, emotions, memory, and AI reasoning.
+## AI Processing Pipeline
 
-| File | Purpose |
-|------|---------|
-| **`unified_manager.py`** | Facade coordinating all domain subsystems |
-| **`unified_events.py`** | Domain-level event definitions |
-| **`policy.py`** | Policy engine - Rules for when to use different AI models |
-| **`capabilities.py`** | Tracks system capabilities (GPU available, audio support, etc.) |
-| **`triggers.py`** | Trigger system - Keyword-based emotional responses |
-| **`rules.py`** | Business rules engine - Constraints and guardrails |
-| **`builder.py`** | Builder pattern for complex domain objects |
-| **`rate_limit.py`** | Rate limiter - Prevents response flooding |
-| **`loop_guard.py`** | Prevents infinite loops in reasoning |
-| **`energy.py`** | Energy/fatigue system - Limits inference activity |
-| **`inertia.py`** | Momentum system - Personality stability over time |
-| **`vector.py`** | Vector operations for embeddings/similarity |
-| **`presets.py`** | Preset emotion configurations |
+The pipeline implements a "Cascading Tier" approach to minimize latency while maximizing response depth.
 
-**Subdirectories:**
+```mermaid
+graph TD
+    Input[INPUT_RECEIVED] --> Pre[Preprocess Module]
+    Pre --> Done[PREPROCESS_DONE]
+    Done --> Router{Router Module}
 
-#### `domain/personality/` - Emotion & Personality System
-```
-Core emotion processing pipeline
-User Input → ReactionMapper → EmotionEngine → PersonalityMapper → Output
+    Router -- Cache Hit / Template --> Reflex[Reflex Module]
+    Router -- Complexity < 0.3 --> SLM[SLM Module]
+    Router -- Complexity >= 0.3 --> LLM[LLM Module]
+
+    Reflex --> Final[RESPONSE_READY]
+    SLM --> Judge{Judge}
+    LLM --> Judge
+
+    Judge -- Pass --> Final
+    Judge -- Fail / Low Confidence --> LLM
+
+    Final --> User[User Display]
+    Final --> Learning[Memory Module]
 ```
 
-| File | Purpose |
-|------|---------|
-| **`emotion_engine.py`** | Main emotion coordinator - Stack management, decay, intensity |
-| **`emotion_controller.py`** | High-level API for emotion manipulation |
-| **`emotion_stack_manager.py`** | Stack operations (push, pop, decay, resist) |
-| **`personality_mapper.py`** | Emotion state → personality traits mapping |
-| **`kitsu_self.py`** | Core personality identity and traits |
-| **`reaction_mapper.py`** | User interaction → emotion mapping |
-| **`emotional_triggers.py`** | Configuration-based trigger detection |
-| **`trigger_manager.py`** | Trigger lifecycle and cooldown |
-| **`memory_manager.py`** | Long-term learning and pattern storage |
-
-**Personality Model (3-Layer):**
-```
-1. mood (4 states): behave, mean, flirty, protective
-2. style (7 states): chaotic, sweet, cold, direct, sarcastic, playful, eerie
-3. state (6 states): normal, tsundere, yandere, kuudere, dere, chaotic
-   → 4 × 7 × 6 = 1,260 personality combinations
-```
-
-**Emotion Stack Example:**
-```python
-# User does something
-event = UserInteraction(action="headpat")
-
-# Maps to emotion
-reaction = ReactionMapper.map(event)  # → EmotionReaction(emotion="happy", intensity=0.8)
-
-# Pushed to stack
-emotion_engine.push(reaction)  # Stack: [happy(0.8), ...]
-
-# Over time, decays
-emotion_engine.decay()  # happy(0.8) → happy(0.7) → happy(0.6) → ...
-
-# Can be resistant (sticky emotions)
-if emotion.resistant:
-    decay_rate *= 0.5  # Decays slower
-```
-
-#### `domain/ai/` - AI Provider System
-| File | Purpose |
-|------|---------|
-| `fast_brain/provider.py` | FastBrain provider (Markov + Huffman tree) - instant responses |
-| `slm/provider.py` | Small Language Model provider - personality + reasoning |
-| `llm/provider.py` | Large Language Model provider - complex queries |
-
-#### `domain/memory/` - Learning System
-| File | Purpose |
-|------|---------|
-| `short_term.py` | Session-only memory (cleared on restart) |
-| `long_term.py` | Persistent learning (stored in data/learning/) |
-| `episodic.py` | Event-based memory (what happened when) |
-| `semantic.py` | Knowledge memory (facts, preferences) |
-
-#### `domain/interaction/` - User Input
-| File | Purpose |
-|------|---------|
-| `input_manager.py` | Central input handler - Routes user inputs to emotion system |
-| `gesture_parser.py` | Parses mouse gestures (headpat, poke, etc.) |
-| `text_parser.py` | NLP preprocessing for text input |
-
-#### `domain/contracts/` - Interface Definitions
-| File | Purpose |
-|------|---------|
-| `contracts.py` | Abstract base classes - AIProvider, MemoryStore, SystemGateway, etc. |
-| `interfaces.py` | Modern interface definitions with dependency inversion |
+### Path Selection Logic
+1. **Reflex Path**: Triggered if the SimHash of the input exists in the learned cache or matches a known pattern template.
+2. **SLM Path**: Selected for low-complexity inputs (casual chat, simple greetings). Personality injection is handled via vibe-based system prompts.
+3. **LLM Path**: Engaged for reasoning-heavy queries, web search, or when the SLM fails to pass the Quality Judge.
 
 ---
 
-### 📂 `app/` - Application Layer
-**Purpose:** CLI commands, user management, and adapter patterns.
+## Event-Driven Communication
 
-| File | Purpose |
-|------|---------|
-| `__init__.py` | Package initialization |
-| `user_manager.py` | User profile management (multiple Kitsu instances per system) |
-| `adapters.py` | Adapter patterns for external systems |
+### The Request Lifecycle
+1. **Emit**: An `INPUT_RECEIVED` event is emitted with a fresh `RequestContext`.
+2. **Process**: Modules transform the context (adding SimHash, scores, or draft text) and emit downstream events.
+3. **Lock**: The first module to produce a valid response calls `bus.emit("RESPONSE_READY", ctx)`.
+4. **Finalize**: The `EventBus` locks the context, preventing further modifications and triggering the UI display and learning loop.
 
-#### `app/adapters/` - System Integrations
-| File | Purpose |
-|------|---------|
-| `browser_adapter.py` | Browser integration (read web context) |
-| `system_adapter.py` | OS-level integrations |
-| `ollama_adapter.py` | Ollama local LLM integration |
+### Error Isolation
+The `EventBus` wraps every handler in a try-except block. A failure in the `memory.py` module, for instance, will log a traceback but will **not** prevent the user from receiving their response.
 
-#### `app/commands/` - CLI Commands
-| File | Purpose |
-|------|---------|
-| `start.py` | Start Kitsu desktop |
-| `config.py` | Configuration management CLI |
-| `reset.py` | Reset to defaults |
-
----
-
-### 📂 `interfaces/` - UI & Display Layers
-**Purpose:** Rendering, user-facing input/output, and desktop integration.
-
-#### `interfaces/desktop/` - Desktop Application
-| File | Purpose |
-|------|---------|
-| `gateway.py` | Permission/security gateway for system access |
-| `permission_manager.py` | RBAC and permission checking |
-
-#### `interfaces/desktop/avatar/` - Visual Rendering
-| File | Purpose |
-|------|---------|
-| `controller.py` | Main avatar controller - Directs animation/expression |
-| `animator.py` | Animation state machine |
-| `expression_set.py` | Available facial expressions |
-| `gesture.py` | Body gestures and poses |
-
-#### `interfaces/overlay/` - Always-On Display
-| File | Purpose |
-|------|---------|
-| `overlay_window.py` | Persistent overlay rendering |
-| `hotspot_manager.py` | Interactive regions on screen |
-
-#### `interfaces/tauri/` - Desktop Framework
-| File | Purpose |
-|------|---------|
-| `command_bridge.py` | Rust ↔ Python communication layer |
-| `event_bridge.py` | Event forwarding to Tauri |
-
-#### `interfaces/ui/` - Web UI & Dashboard
-| File               | Purpose                                                                        |
-|--------------------|--------------------------------------------------------------------------------|
-| **`dashboard.py`** | **Health monitoring dashboard** - Terminal UI with module status, personality, AI tier, memory usage |
-| `api_server.py`    | REST API for UI communication                                                  |
-
-#### `interfaces/api/` - External APIs
-| File | Purpose |
-|------|---------|
-| `rest_api.py` | HTTP endpoints for integration |
-| `websocket_api.py` | Real-time WebSocket communication |
-
-#### `interfaces/learning/` - Analytics UI
-| File | Purpose |
-|------|---------|
-| `stats_panel.py` | Display learning statistics |
-
----
-
+### Latency Budgeting
+The `within_budget(ctx)` helper is called at every major decision point. If the 5000ms (default) budget is nearing exhaustion, modules are instructed to terminate early and return the best available response.
 ### 📂 `infra/` - Infrastructure & Services
 **Purpose:** Low-level utilities, LLM integration, storage, and system operations.
 
@@ -1159,94 +991,156 @@ The `KitsuOrchestrator` (`domain/core/`) coordinates all critical systems:
 
 ## Data Flow
 
-### Complete Request → Response Flow
+### Complete Request → Response Flow (With Debug Logging & Timing)
+
+```python
+# Timer starts at input
+start_time = time.perf_counter()
+log.debug("=== INPUT PIPELINE STARTED ===")
+```
 
 ```
 ┌────────────────────────────────────────────────────────────┐
 │ 1. INPUT                                                   │
 │    User types: "Hello Kitsu!"                              │
+│    log.debug(f"[INPUT] Received: '{text}' (len={len(text)})")│
+│    input_time = time.perf_counter()                        │
 └────────────────────────────────────────────────────────────┘
-           ↓
+           ↓ (+2ms)
 ┌────────────────────────────────────────────────────────────┐
 │ 2. MESSAGE BUS                                             │
 │    bus.publish(InputReceived(text="Hello Kitsu!"))         │
+│    log.debug(f"[BUS] Published InputReceived event")       │
+│    bus_time = time.perf_counter()                          │
 └────────────────────────────────────────────────────────────┘
-           ↓
+           ↓ (+1ms)
 ┌────────────────────────────────────────────────────────────┐
 │ 3. INPUT MANAGER                                           │
 │    InputManager.handle(event)                              │
+│    log.debug("[INPUT_MANAGER] Processing input")            │
 │    ├─ Parse text ("Hello" = greeting)                      │
+│    │  log.debug(f"[PARSER] Detected intent: greeting")      │
 │    └─ Detect intent (greeting, question, complaint, etc.)  │
+│       log.debug(f"[INTENT] Classification: greeting (0.9)")│
+│    input_mgr_time = time.perf_counter()                    │
 └────────────────────────────────────────────────────────────┘
-           ↓
+           ↓ (+5ms)
 ┌────────────────────────────────────────────────────────────┐
 │ 4. REACTION MAPPER                                         │
 │    ReactionMapper.map(intent)                              │
+│    log.debug("[REACTION_MAPPER] Mapping intent to emotion") │
 │    ├─ Look up data/triggers.json                           │
-│    └─ Return: EmotionReaction(emotion="happy", intensity=0.6)
+│    │  log.debug(f"[TRIGERS] Loaded {len(triggers)} rules")  │
+│    └─ Return: EmotionReaction(emotion="happy", intensity=0.6)│
+│       log.debug(f"[REACTION] Mapped: happy(0.6)")          │
+│    reaction_time = time.perf_counter()                     │
 └────────────────────────────────────────────────────────────┘
-           ↓
+           ↓ (+3ms)
 ┌────────────────────────────────────────────────────────────┐
 │ 5. EMOTION ENGINE                                          │
 │    EmotionEngine.process_reaction(reaction)                │
+│    log.debug("[EMOTION_ENGINE] Processing reaction")       │
 │    ├─ Push to emotion_stack                                │
+│    │  log.debug(f"[STACK] Pushed: happy(0.6)")             │
 │    ├─ Apply decay_rate                                     │
+│    │  log.debug(f"[DECAY] Applied rate: 0.95")              │
 │    └─ Update current_emotion = happy(0.6)                  │
+│       log.debug(f"[EMOTION] Current: happy(0.6)")           │
+│    emotion_time = time.perf_counter()                      │
 └────────────────────────────────────────────────────────────┘
-           ↓
+           ↓ (+4ms)
 ┌────────────────────────────────────────────────────────────┐
 │ 6. PERSONALITY MAPPER                                      │
 │    PersonalityMapper.map(emotion_state)                    │
+│    log.debug("[PERSONALITY] Mapping emotion to behavior")   │
 │    ├─ happy(0.6) + history → mood="behave"                 │
+│    │  log.debug(f"[MOOD] Calculated: behave")               │
 │    ├─ + context → style="sweet"                            │
+│    │  log.debug(f"[STYLE] Selected: sweet")                 │
 │    └─ + time_of_day → state="normal"                       │
+│       log.debug(f"[STATE] Set: normal")                     │
+│    personality_time = time.perf_counter()                   │
 └────────────────────────────────────────────────────────────┘
-           ↓
+           ↓ (+2ms)
 ┌────────────────────────────────────────────────────────────┐
 │ 7. POLICY ROUTER                                           │
 │    PolicyRouter.classify(input="Hello")                    │
+│    log.debug("[POLICY] Classifying input complexity")       │
 │    ├─ Is input simple? YES                                 │
+│    │  log.debug("[POLICY] Simple input detected")           │
 │    └─ → Use FastBrain first                                │
+│       log.debug("[POLICY] Route: FastBrain")               │
+│    policy_time = time.perf_counter()                       │
 └────────────────────────────────────────────────────────────┘
-           ↓
+           ↓ (+15ms)
 ┌────────────────────────────────────────────────────────────┐
 │ 8. INFERENCE TIER 1: FASTBRAIN                             │
 │    FastBrain.generate(input)                               │
+│    log.debug("[FASTBRAIN] Generating response")             │
 │    ├─ Lookup: "Hello" → Markov chain                       │
+│    │  log.debug(f"[MARKOV] Chain lookup: 'hello'")          │
 │    ├─ Found: {response: "Hey there!", prob: 0.9}           │
+│    │  log.debug(f"[MARKOV] Found match: 0.9 confidence")   │
 │    └─ Return response                                      │
+│       log.debug(f"[FASTBRAIN] Response: 'Hey there!'")      │
+│    inference_time = time.perf_counter()                    │
 └────────────────────────────────────────────────────────────┘
-           ↓
+           ↓ (+6ms)
 ┌────────────────────────────────────────────────────────────┐
 │ 9. EMOTION MODULATION                                      │
 │    EmotionController.modulate(response, emotion_state)     │
+│    log.debug("[MODULATION] Applying emotion to response")    │
 │    ├─ Current emotion: happy(0.6), behave, sweet           │
+│    │  log.debug(f"[MOD] Base emotion: happy(0.6)")          │
 │    ├─ Adjust tone: capitalize, add emoji                   │
+│    │  log.debug(f"[MOD] Applied: capitalize + emoji")       │
 │    └─ Result: "Hey there! 😊"                              │
+│       log.debug(f"[MOD] Final: 'Hey there! 😊'")            │
+│    modulation_time = time.perf_counter()                  │
 └────────────────────────────────────────────────────────────┘
-           ↓
+           ↓ (+8ms)
 ┌────────────────────────────────────────────────────────────┐
 │ 10. MEMORY UPDATE                                          │
 │    MemoryManager.learn(input, response, emotion_state)     │
+│    log.debug("[MEMORY] Storing interaction")                │
 │    ├─ Add to episodic: timestamp + interaction             │
+│    │  log.debug(f"[EPISODIC] Stored: {timestamp}")         │
 │    ├─ Update semantic: "User greets at $TIME_OF_DAY"       │
+│    │  log.debug(f"[SEMANTIC] Updated greeting pattern")    │
 │    └─ Feed to FastBrain: train new Markov transition       │
+│       log.debug(f"[TRAINING] Updated Markov chain")         │
+│    memory_time = time.perf_counter()                       │
 └────────────────────────────────────────────────────────────┘
-           ↓
+           ↓ (+12ms)
 ┌────────────────────────────────────────────────────────────┐
 │ 11. RENDERING                                              │
 │    AvatarController.render(response, emotion_state)        │
+│    log.debug("[RENDER] Starting avatar rendering")          │
 │    ├─ Set expression: happy_smile                          │
+│    │  log.debug("[FACE] Expression: happy_smile")           │
 │    ├─ Play animation: wave hand                            │
+│    │  log.debug("[ANIM] Animation: wave_hand")              │
 │    ├─ Text-to-speech: "Hey there! 😊"                      │
+│    │  log.debug("[TTS] Queued: 'Hey there! 😊'")            │
 │    └─ Display in overlay                                   │
+│       log.debug("[OVERLAY] Response displayed")             │
+│    render_time = time.perf_counter()                        │
 └────────────────────────────────────────────────────────────┘
-           ↓
+           ↓ (+25ms)
 ┌────────────────────────────────────────────────────────────┐
 │ 12. OUTPUT                                                 │
 │    User sees: Kitsu waves + says "Hey there! 😊"            │
+│    total_time = time.perf_counter() - start_time           │
+│    log.debug(f"=== PIPELINE COMPLETE: {total_time:.0f}ms ===")│
+│    log.debug(f"[TIMING] Bus:1ms Input:5ms Reaction:3ms "     │
+│              f"Emotion:4ms Personality:2ms Policy:2ms "     │
+│              f"Inference:15ms Modulation:6ms Memory:8ms "    │
+│              f"Render:12ms Other:25ms")                     │
 └────────────────────────────────────────────────────────────┘
 ```
+
+**Total Pipeline Time: ~83ms**
+**Bottleneck**: Inference (15ms) + Rendering (12ms) + Memory (8ms)
 
 ---
 

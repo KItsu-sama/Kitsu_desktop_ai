@@ -5,6 +5,7 @@ Maps user interactions, emojis, and system events to emotional reactions.
 """
 
 import logging
+import time
 from typing import Dict, Any, List, Optional, Tuple
 from enum import Enum
 
@@ -199,7 +200,8 @@ class ReactionMapper:
         Returns:
             Dict with emotion, intensity, mood/style shifts, and triggers
         """
-        return self.gesture_emotions.get(gesture_type, {
+        start_time = time.perf_counter()
+        result = self.gesture_emotions.get(gesture_type, {
             "primary_emotion": "surprised",
             "intensity": 0.3,
             "duration": 2.0,
@@ -207,6 +209,11 @@ class ReactionMapper:
             "style_shift": None,
             "triggers": ["surprised"]
         })
+        
+        mapping_time = (time.perf_counter() - start_time) * 1000
+        log.debug(f"[REACTION_MAPPER] Gesture {gesture_type.value} -> {result['primary_emotion']}({result['intensity']}) in {mapping_time:.1f}ms")
+        
+        return result
     
     def map_emoji(self, emoji: str) -> Dict[str, Any]:
         """
@@ -218,13 +225,19 @@ class ReactionMapper:
         Returns:
             Dict with emotion, animation, voice modifications
         """
-        return self.emoji_reactions.get(emoji, {
+        start_time = time.perf_counter()
+        result = self.emoji_reactions.get(emoji, {
             "emotion": "curious",
             "intensity": 0.3,
             "animation": "head_tilt",
             "voice_pitch": 1.0,
             "response_type": "neutral"
         })
+        
+        mapping_time = (time.perf_counter() - start_time) * 1000
+        log.debug(f"[REACTION_MAPPER] Emoji '{emoji}' -> {result['emotion']}({result['intensity']}) in {mapping_time:.1f}ms")
+        
+        return result
     
     def map_system_event(self, event_type: str) -> Dict[str, Any]:
         """
@@ -236,12 +249,18 @@ class ReactionMapper:
         Returns:
             Dict with emotion, animation, duration
         """
-        return self.system_reactions.get(event_type, {
+        start_time = time.perf_counter()
+        result = self.system_reactions.get(event_type, {
             "emotion": "neutral",
             "intensity": 0.2,
             "animation": "glance",
             "duration": 2.0
         })
+        
+        mapping_time = (time.perf_counter() - start_time) * 1000
+        log.debug(f"[REACTION_MAPPER] System event '{event_type}' -> {result['emotion']}({result['intensity']}) in {mapping_time:.1f}ms")
+        
+        return result
     
     def get_visual_reaction(self, reaction_name: str) -> Dict[str, Any]:
         """
@@ -276,7 +295,10 @@ class ReactionMapper:
         Returns:
             List of reaction steps in sequence
         """
+        start_time = time.perf_counter()
         sequence = []
+        
+        log.debug(f"[REACTION_MAPPER] Planning sequence for {interaction_type.value} (mood={current_mood}, style={current_style})")
         
         if interaction_type == InteractionType.HEADPAT:
             # Initial surprise → happiness → affection
@@ -310,6 +332,9 @@ class ReactionMapper:
                 "emotion": reaction["primary_emotion"],
                 "duration": reaction["duration"]
             })
+        
+        planning_time = (time.perf_counter() - start_time) * 1000
+        log.debug(f"[REACTION_MAPPER] Sequence planned: {len(sequence)} phases in {planning_time:.1f}ms")
         
         return sequence
     

@@ -21,6 +21,7 @@ from __future__ import annotations
 
 import asyncio
 import logging
+import time
 from collections import defaultdict
 from typing import Any, Callable, Coroutine, Dict, List, Type, Union
 
@@ -60,40 +61,63 @@ class MessageBus:
         Publish an event synchronously to all handlers.
         Exceptions are logged but do not stop other handlers.
         """
+        start_time = time.perf_counter()
         event_type = type(event)
         handlers = list(self._event_subscribers.get(event_type, []))
         
-        for handler in handlers:
+        logger.debug(f"[BUS] Publishing {event_type.__name__} to {len(handlers)} handlers")
+        
+        for i, handler in enumerate(handlers):
             try:
+                handler_start = time.perf_counter()
                 result = handler(event)
+                handler_time = (time.perf_counter() - handler_start) * 1000
+                
                 if asyncio.iscoroutine(result):
                     # Fire async handlers in background tasks
+                    logger.debug(f"[BUS] Handler {i+1}/{len(handlers)}: async, {handler_time:.1f}ms")
                     asyncio.create_task(self._safe_async_invoke(result, handler, event_type, event))
+                else:
+                    # Sync handler completed
+                    logger.debug(f"[BUS] Handler {i+1}/{len(handlers)}: sync, {handler_time:.1f}ms")
             except Exception as exc:
                 self._log_handler_error(handler, event_type, exc)
+        
+        total_time = (time.perf_counter() - start_time) * 1000
+        logger.debug(f"[BUS] Published {event_type.__name__} in {total_time:.1f}ms")
 
     async def publish_async(self, event: Any) -> None:
         """
         Publish an event asynchronously, awaiting all handlers.
         Use for critical events where you need confirmation all handlers completed.
         """
+        start_time = time.perf_counter()
         event_type = type(event)
         handlers = list(self._event_subscribers.get(event_type, []))
         
+        logger.debug(f"[BUS] Async publishing {event_type.__name__} to {len(handlers)} handlers")
+        
         tasks = []
-        for handler in handlers:
+        for i, handler in enumerate(handlers):
             try:
+                handler_start = time.perf_counter()
                 result = handler(event)
+                handler_time = (time.perf_counter() - handler_start) * 1000
+                
                 if asyncio.iscoroutine(result):
+                    logger.debug(f"[BUS] Async handler {i+1}/{len(handlers)}: {handler_time:.1f}ms")
                     tasks.append(self._safe_async_invoke(result, handler, event_type, event))
                 else:
                     # Sync handlers run immediately
-                    pass
+                    logger.debug(f"[BUS] Sync handler {i+1}/{len(handlers)}: {handler_time:.1f}ms")
             except Exception as exc:
                 self._log_handler_error(handler, event_type, exc)
         
         if tasks:
             await asyncio.gather(*tasks, return_exceptions=True)
+        
+        total_time = (time.perf_counter() - start_time) * 1000
+        logger.debug(f"[BUS] Async published {event_type.__name__} in {total_time:.1f}ms")
 
     # --- Request/Response (RPC) ---
 
@@ -109,27 +133,41 @@ class MessageBus:
         Send a request to a channel and await response.
         Supports both sync and async handlers.
         """
+        start_time = time.perf_counter()
+        
         if channel not in self._request_handlers:
-            logger.warning('No handler registered for channel: %s', channel)
+            logger.warning(f"[BUS] No handler registered for channel: {channel}")
             raise BusTimeout(f'No handler for channel {channel}')
 
         handler = self._request_handlers[channel]
+        logger.debug(f"[BUS] Requesting on channel '{channel}' (timeout: {timeout_ms}ms)")
+        
         try:
+            handler_start = time.perf_counter()
             if asyncio.iscoroutinefunction(handler):
                 # Native async handler
+                logger.debug(f"[BUS] Using async handler for '{channel}'")
                 coro = handler(payload)
             else:
                 # Sync handler → run in threadpool
+                logger.debug(f"[BUS] Using sync handler for '{channel}'")
                 loop = asyncio.get_running_loop()
                 coro = loop.run_in_executor(None, handler, payload)
 
-            return await asyncio.wait_for(coro, timeout=timeout_ms / 1000.0)
+            result = await asyncio.wait_for(coro, timeout=timeout_ms / 1000.0)
+            handler_time = (time.perf_counter() - handler_start) * 1000
+            total_time = (time.perf_counter() - start_time) * 1000
+            
+            logger.debug(f"[BUS] Request on '{channel}' completed: handler={handler_time:.1f}ms, total={total_time:.1f}ms")
+            return result
             
         except asyncio.TimeoutError as exc:
-            logger.warning('Request timeout on channel %s (%.1fs)', channel, timeout_ms/1000)
+            total_time = (time.perf_counter() - start_time) * 1000
+            logger.warning(f'[BUS] Request timeout on channel {channel} ({total_time:.1f}ms > {timeout_ms}ms)')
             raise BusTimeout(f'Timeout waiting for {channel}') from exc
         except Exception as exc:
-            logger.error('Request handler failed on channel %s: %s', channel, exc)
+            total_time = (time.perf_counter() - start_time) * 1000
+            logger.error(f'[BUS] Request handler failed on channel {channel} after {total_time:.1f}ms: {exc}')
             raise
 
     # --- Lifecycle (ModuleContract compliance) ---

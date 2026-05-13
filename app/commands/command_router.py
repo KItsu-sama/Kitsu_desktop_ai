@@ -20,7 +20,7 @@ import time
 from typing import Dict, Any
 from pathlib import Path
 from rich.console import Console
-from shared.utils.logger import set_debug_output, is_debug_output_enabled
+from shared.logging.logger import set_debug_output, is_debug_output_enabled
 
 log = logging.getLogger(__name__)
 

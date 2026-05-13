@@ -13,15 +13,15 @@
             "state": {
               "type": "canvas",
               "state": {
-                "file": "Full layout.canvas",
+                "file": "run layout.canvas",
                 "viewState": {
-                  "x": -887.3026767372428,
-                  "y": 6488.1638824285355,
-                  "zoom": -0.9999999999999996
+                  "x": -614.2830128899161,
+                  "y": 2172.9912509147216,
+                  "zoom": -1.487668229438297
                 }
               },
               "icon": "lucide-layout-dashboard",
-              "title": "Full layout"
+              "title": "run layout"
             }
           }
         ]
@@ -81,7 +81,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 200
   },
   "right": {
     "id": "91ac2275dce560f5",
@@ -159,13 +159,13 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "Full layout.canvas",
+                "file": "run layout.canvas",
                 "followCursor": false,
                 "showSearch": false,
                 "searchQuery": ""
               },
               "icon": "lucide-list",
-              "title": "Outline of Full layout"
+              "title": "Outline of run layout"
             }
           }
         ],
@@ -173,7 +173,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 200
   },
   "left-ribbon": {
     "hiddenItems": {
@@ -188,24 +188,31 @@
   },
   "active": "5a9e626b61375046",
   "lastOpenFiles": [
-    "domain/interaction/__pycache__/input_mux.cpython-313.pyc",
-    "domain/interaction/__pycache__/input_mux.cpython-314.pyc",
-    "domain/interaction/__pycache__/input_mux.cpython-314.pyc.2400763742656",
-    "domain/interaction/__pycache__/input_manager.cpython-314.pyc.2400763745104",
-    "test_inputmux_integration.py",
-    "data/runtime/memory.json",
-    "test_integration.py",
-    "domain/personality/__pycache__/emotion_manager.cpython-313.pyc.2230198664432",
-    "domain/personality/__pycache__/emotion_controller.cpython-313.pyc.2051542309824",
-    "app/commands/__pycache__/command_router.cpython-313.pyc",
-    "app/commands/__pycache__/__init__.cpython-313.pyc",
+    "src/kitsu/__pycache__/main.cpython-314.pyc.1897975834288",
+    "src/kitsu/__pycache__/first_run.cpython-314.pyc",
+    "Full layout.canvas",
+    "run layout.canvas",
+    "src/kitsu/__pycache__/splash.cpython-314.pyc",
+    "src/kitsu/splash.py",
+    "docs/CHANGELOG.md",
+    "docs/DEVELOPMENT.md",
+    "docs/USER_GUIDE.md",
+    "docs/MODERN_ARCHITECTURE.md",
+    "data/config/modern_config.json",
+    "src/kitsu/first_run.py",
+    "src/kitsu/modules/__pycache__/input_manager.cpython-314.pyc.1880734965104",
+    "src/kitsu/modules/__pycache__/input_manager.cpython-314.pyc",
+    "src/kitsu/modules/__pycache__/input_mux.cpython-314.pyc",
+    "src/kitsu/modules/__pycache__/memory.cpython-314.pyc",
+    "src/kitsu/modules/__pycache__/llm.cpython-314.pyc",
+    "docs/kitsu/02_core/Kitsu_Orchestrator.md",
+    "docs/kitsu/02_core/Kitsu_EventBus.md",
     "docs/architecture/shared-reorganization.md",
     "runtime/docs/VECTOR_SYSTEM_README.md",
     "runtime/docs/SLM_CHAT_INTEGRATION.md",
     "runtime/docs/README_REFACTORING.md",
     "runtime/docs/MODULE_SUMMARY.md",
     "kitsu_desktop_ai.md",
-    "Full layout.canvas",
     "SYSTEM_ARCHITECTURE.md",
     "2026-05-09.md",
     "src-tauri/tauri/ARCHITECTURE.md",
@@ -219,12 +226,6 @@
     "docs/kitsu/01_system/Kitsu_Overview.md",
     "docs/kitsu/01_system/Kitsu_GitNexus_Guide.md",
     "docs/kitsu/99_meta/Kitsu_Phase1_Summary.md",
-    "src/MODULE_SUMMARY.md",
-    "src/README_REFACTORING.md",
-    "src/SLM_CHAT_INTEGRATION.md",
-    "src/VECTOR_SYSTEM_README.md",
-    "docs/notes/application-lifecycle.md",
-    "docs/guides/developer-onboarding.md",
     "legacy/llama.cpp/tools/server/themes/buttons-top/buttons_top.png",
     "Untitled 1.canvas"
   ]

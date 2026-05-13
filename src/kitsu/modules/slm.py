@@ -2,7 +2,7 @@ import time
 import logging
 from typing import List, Tuple
 from kitsu.core.event_bus import bus
-from kitsu.core.context import RequestContext
+from kitsu.core.context import RequestContext, can_respond
 from kitsu.utils.timing import within_budget
 from kitsu.modules.judge import judge_response
 
@@ -37,6 +37,8 @@ async def on_slm_path(ctx: RequestContext):
     Otherwise emit RESPONSE_READY.
     Budget: 500ms hard cap.
     """
+    if not can_respond(ctx): return
+
     theta = 0.65
 
     # Check budget before starting

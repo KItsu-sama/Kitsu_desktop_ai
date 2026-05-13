@@ -23,7 +23,6 @@ import logging
 import time
 from dataclasses import dataclass
 from typing import Dict, Any, Optional, Tuple
-from shared.utils.logger import logging
 
 from runtime.communication.bus import MessageBus
 from domain.contracts.contracts import ModuleContract
@@ -143,6 +142,7 @@ class FastBrainEngine(ModuleContract):
         """
         context = context or {}
         start_time = time.time()
+        logger.debug(f"[FASTBRAIN] Processing input: '{user_input[:50]}{'...' if len(user_input) > 50 else ''}'")
         
         # Update timers
         current_time = time.time()
@@ -155,9 +155,15 @@ class FastBrainEngine(ModuleContract):
         else:
             self.boredom_timer += time_since_last
         
+        logger.debug(f"[FASTBRAIN] Timers: boredom={self.boredom_timer:.1f}s, spam={self.spam_timer:.1f}s")
+        
         # Step 1: Check cache for exact matches (0ms response)
+        cache_start = time.time()
         cached_response = get_cached_response(user_input)
+        cache_time = (time.time() - cache_start) * 1000
+        
         if cached_response:
+            logger.debug(f"[FASTBRAIN] Cache hit in {cache_time:.1f}ms")
             return self._create_response(
                 cached_response,
                 "cache_hit",
@@ -166,10 +172,15 @@ class FastBrainEngine(ModuleContract):
             )
         
         # Step 2: Check for spam
+        spam_start = time.time()
         is_spam, spam_prob = self._check_spam(user_input)
+        spam_time = (time.time() - spam_start) * 1000
+        
         if is_spam:
             spam_response = get_spam_response(user_input)
             self.spam_timer += 1.0
+            
+            logger.debug(f"[FASTBRAIN] Spam detected ({spam_prob:.2f}) in {spam_time:.1f}ms")
             
             # Signal emotion engine for spam detection
             self._signal_emotion_engine("spam_detected", {"spam_probability": spam_prob})
@@ -185,8 +196,13 @@ class FastBrainEngine(ModuleContract):
         self.spam_timer = max(0.0, self.spam_timer - 0.5)
         
         # Step 3: Try pattern matching (fast hardcoded responses)
+        pattern_start = time.time()
         pattern_response = get_fast_response(user_input)
+        pattern_time = (time.time() - pattern_start) * 1000
+        
         if pattern_response:
+            logger.debug(f"[FASTBRAIN] Pattern match in {pattern_time:.1f}ms")
+            
             response = self._create_response(
                 pattern_response,
                 "pattern_match",
@@ -203,7 +219,10 @@ class FastBrainEngine(ModuleContract):
             return response
         
         # Step 4: Intent classification
+        intent_start = time.time()
         intent, confidence = classify_intent(user_input)
+        intent_time = (time.time() - intent_start) * 1000
+        logger.debug(f"[FASTBRAIN] Intent classification: {intent.value} ({confidence:.2f}) in {intent_time:.1f}ms")
         
         # If system control, route to gateway
         if intent == Intent.SYSTEM_CONTROL:
@@ -211,8 +230,13 @@ class FastBrainEngine(ModuleContract):
         
         # Step 5: Try Markov generation for conversational intents
         if intent in {Intent.CONVERSATIONAL, Intent.EMOTIONAL, Intent.GREETING} and confidence > 0.6:
+            markov_start = time.time()
             markov_response = generate_markov_response(user_input)
+            markov_time = (time.time() - markov_start) * 1000
+            
             if markov_response:
+                logger.debug(f"[FASTBRAIN] Markov generation in {markov_time:.1f}ms")
+                
                 response = self._create_response(
                     markov_response,
                     "markov_generated",
@@ -295,6 +319,8 @@ class FastBrainEngine(ModuleContract):
         
         if metadata:
             response.update(metadata)
+        
+        logger.debug(f"[FASTBRAIN] Response created: {generation_mode} in {processing_time*1000:.1f}ms")
         
         return response
     

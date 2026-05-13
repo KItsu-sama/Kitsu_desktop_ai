@@ -1,4 +1,6 @@
 """
+interfaces/desktop/terminal/banner.py
+
 Banner components for terminal display.
 
 Provides reusable banner components extracted from legacy runtime.

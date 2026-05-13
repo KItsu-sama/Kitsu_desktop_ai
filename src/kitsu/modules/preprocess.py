@@ -1,7 +1,7 @@
 import hashlib
 import re
 from kitsu.core.event_bus import bus
-from kitsu.core.context import RequestContext
+from kitsu.core.context import RequestContext, can_respond
 
 # Mock emotion engine state
 EMOTION_ENGINE_STATE = {
@@ -33,6 +33,8 @@ async def on_input_received(ctx: RequestContext):
     Emits PREPROCESS_DONE.
     Budget: 10ms.
     """
+    if not can_respond(ctx): return
+
     ctx.simhash = compute_simhash(ctx.text)
 
     # Extracts vibe floats from emotion engine state

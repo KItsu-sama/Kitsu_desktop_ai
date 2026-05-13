@@ -76,6 +76,13 @@
           "children": []
         },
         {
+          "name": "canvas.json",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\.obsidian\\canvas.json",
+          "type": "file",
+          "size": 49,
+          "children": []
+        },
+        {
           "name": "core-plugins.json",
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\.obsidian\\core-plugins.json",
           "type": "file",
@@ -130,7 +137,7 @@
           "name": "workspace.json",
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\.obsidian\\workspace.json",
           "type": "file",
-          "size": 6540,
+          "size": 6846,
           "children": []
         }
       ]
@@ -140,6 +147,13 @@
       "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\CRITICAL_SYSTEMS_ARCHITECTURE.md",
       "type": "file",
       "size": 15891,
+      "children": []
+    },
+    {
+      "name": "Full layout.canvas",
+      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\Full layout.canvas",
+      "type": "file",
+      "size": 45101,
       "children": []
     },
     {
@@ -167,14 +181,14 @@
       "name": "README.md",
       "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\README.md",
       "type": "file",
-      "size": 23030,
+      "size": 22089,
       "children": []
     },
     {
       "name": "SYSTEM_ARCHITECTURE.md",
       "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\SYSTEM_ARCHITECTURE.md",
       "type": "file",
-      "size": 54560,
+      "size": 49323,
       "children": []
     },
     {
@@ -187,7 +201,7 @@
           "name": "__init__.py",
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\app\\__init__.py",
           "type": "file",
-          "size": 422,
+          "size": 1105,
           "children": []
         },
         {
@@ -272,7 +286,7 @@
               "name": "command_router.py",
               "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\app\\commands\\command_router.py",
               "type": "file",
-              "size": 70197,
+              "size": 70199,
               "children": []
             }
           ]
@@ -443,10 +457,31 @@
               "children": []
             },
             {
+              "name": "crash.log",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\data\\runtime\\crash.log",
+              "type": "file",
+              "size": 772,
+              "children": []
+            },
+            {
               "name": "feature_manifest.json",
               "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\data\\runtime\\feature_manifest.json",
               "type": "file",
               "size": 107,
+              "children": []
+            },
+            {
+              "name": "last_crash.json",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\data\\runtime\\last_crash.json",
+              "type": "file",
+              "size": 167,
+              "children": []
+            },
+            {
+              "name": "memory.json",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\data\\runtime\\memory.json",
+              "type": "file",
+              "size": 922,
               "children": []
             }
           ]
@@ -503,6 +538,13 @@
           "children": []
         },
         {
+          "name": "__init__.py",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\docs\\__init__.py",
+          "type": "file",
+          "size": 621,
+          "children": []
+        },
+        {
           "name": "api",
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\docs\\api",
           "type": "directory",
@@ -524,10 +566,17 @@
           "size": null,
           "children": [
             {
+              "name": "shared-reorganization.md",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\docs\\architecture\\shared-reorganization.md",
+              "type": "file",
+              "size": 6485,
+              "children": []
+            },
+            {
               "name": "system-design.md",
               "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\docs\\architecture\\system-design.md",
               "type": "file",
-              "size": 6986,
+              "size": 2833,
               "children": []
             }
           ]
@@ -542,7 +591,7 @@
               "name": "developer-onboarding.md",
               "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\docs\\guides\\developer-onboarding.md",
               "type": "file",
-              "size": 18752,
+              "size": 20569,
               "children": []
             }
           ]
@@ -585,7 +634,7 @@
                   "name": "ORCHESTRATOR.md",
                   "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\docs\\kitsu\\02_core\\ORCHESTRATOR.md",
                   "type": "file",
-                  "size": 14470,
+                  "size": 800,
                   "children": []
                 }
               ]
@@ -607,7 +656,7 @@
                   "name": "Kitsu_QuizSystem.md",
                   "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\docs\\kitsu\\03_modules\\Kitsu_QuizSystem.md",
                   "type": "file",
-                  "size": 167,
+                  "size": 1815,
                   "children": []
                 }
               ]
@@ -725,14 +774,14 @@
               "name": "ai-pipeline.md",
               "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\docs\\notes\\ai-pipeline.md",
               "type": "file",
-              "size": 5722,
+              "size": 2727,
               "children": []
             },
             {
               "name": "application-lifecycle.md",
               "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\docs\\notes\\application-lifecycle.md",
               "type": "file",
-              "size": 6581,
+              "size": 2618,
               "children": []
             },
             {
@@ -746,7 +795,7 @@
               "name": "system-architecture.md",
               "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\docs\\notes\\system-architecture.md",
               "type": "file",
-              "size": 3575,
+              "size": 2808,
               "children": []
             }
           ]
@@ -763,7 +812,7 @@
           "name": "__init__.py",
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\domain\\__init__.py",
           "type": "file",
-          "size": 715,
+          "size": 1623,
           "children": []
         },
         {
@@ -811,7 +860,7 @@
                   "name": "engine.py",
                   "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\domain\\ai\\fast_brain\\engine.py",
                   "type": "file",
-                  "size": 12043,
+                  "size": 12030,
                   "children": []
                 },
                 {
@@ -1178,7 +1227,7 @@
               "name": "kitsu_orchestrator.py",
               "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\domain\\core\\kitsu_orchestrator.py",
               "type": "file",
-              "size": 17743,
+              "size": 17749,
               "children": []
             }
           ]
@@ -1251,14 +1300,14 @@
               "name": "input_manager.py",
               "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\domain\\interaction\\input_manager.py",
               "type": "file",
-              "size": 8506,
+              "size": 22417,
               "children": []
             },
             {
               "name": "input_mux.py",
               "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\domain\\interaction\\input_mux.py",
               "type": "file",
-              "size": 8454,
+              "size": 8468,
               "children": []
             },
             {
@@ -1345,28 +1394,28 @@
               "name": "emotion_config.py",
               "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\domain\\personality\\emotion_config.py",
               "type": "file",
-              "size": 26395,
+              "size": 26403,
               "children": []
             },
             {
               "name": "emotion_controller.py",
               "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\domain\\personality\\emotion_controller.py",
               "type": "file",
-              "size": 17378,
+              "size": 16857,
               "children": []
             },
             {
               "name": "emotion_engine.py",
               "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\domain\\personality\\emotion_engine.py",
               "type": "file",
-              "size": 42610,
+              "size": 42609,
               "children": []
             },
             {
               "name": "emotion_manager.py",
               "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\domain\\personality\\emotion_manager.py",
               "type": "file",
-              "size": 20580,
+              "size": 20878,
               "children": []
             },
             {
@@ -1531,7 +1580,7 @@
           "name": "__init__.py",
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\features\\__init__.py",
           "type": "file",
-          "size": 3560,
+          "size": 4283,
           "children": []
         },
         {
@@ -1617,7 +1666,7 @@
           "name": "__init__.py",
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\infra\\__init__.py",
           "type": "file",
-          "size": 1827,
+          "size": 2634,
           "children": []
         },
         {
@@ -1645,7 +1694,7 @@
               "name": "logger.py",
               "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\infra\\logging\\logger.py",
               "type": "file",
-              "size": 5459,
+              "size": 5463,
               "children": []
             }
           ]
@@ -1747,7 +1796,7 @@
               "name": "background_tasks.py",
               "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\infra\\system\\background_tasks.py",
               "type": "file",
-              "size": 12948,
+              "size": 12965,
               "children": []
             },
             {
@@ -1778,7 +1827,7 @@
           "name": "__init__.py",
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\interfaces\\__init__.py",
           "type": "file",
-          "size": 2201,
+          "size": 2951,
           "children": []
         },
         {
@@ -2023,17 +2072,24 @@
       ]
     },
     {
+      "name": "kitsu_desktop_ai.md",
+      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\kitsu_desktop_ai.md",
+      "type": "file",
+      "size": 0,
+      "children": []
+    },
+    {
       "name": "layout.json",
       "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\layout.json",
       "type": "file",
-      "size": 748697,
+      "size": 751066,
       "children": []
     },
     {
       "name": "layout.txt",
       "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\layout.txt",
       "type": "file",
-      "size": 110654,
+      "size": 110998,
       "children": []
     },
     {
@@ -2047,7 +2103,7 @@
       "name": "r.py",
       "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\r.py",
       "type": "file",
-      "size": 9583,
+      "size": 9604,
       "children": []
     },
     {
@@ -2064,235 +2120,327 @@
       "size": null,
       "children": [
         {
-          "name": "MODULE_SUMMARY.md",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\MODULE_SUMMARY.md",
-          "type": "file",
-          "size": 10481,
-          "children": []
-        },
-        {
-          "name": "README_REFACTORING.md",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\README_REFACTORING.md",
-          "type": "file",
-          "size": 6596,
-          "children": []
-        },
-        {
-          "name": "SLM_CHAT_INTEGRATION.md",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\SLM_CHAT_INTEGRATION.md",
-          "type": "file",
-          "size": 5763,
-          "children": []
-        },
-        {
-          "name": "VECTOR_SYSTEM_README.md",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\VECTOR_SYSTEM_README.md",
-          "type": "file",
-          "size": 9720,
-          "children": []
-        },
-        {
           "name": "__init__.py",
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\__init__.py",
           "type": "file",
-          "size": 522,
+          "size": 1298,
           "children": []
         },
         {
-          "name": "application.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\application.py",
-          "type": "file",
-          "size": 4207,
-          "children": []
+          "name": "communication",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\communication",
+          "type": "directory",
+          "size": null,
+          "children": [
+            {
+              "name": "__init__.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\communication\\__init__.py",
+              "type": "file",
+              "size": 672,
+              "children": []
+            },
+            {
+              "name": "bus.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\communication\\bus.py",
+              "type": "file",
+              "size": 8036,
+              "children": []
+            },
+            {
+              "name": "events.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\communication\\events.py",
+              "type": "file",
+              "size": 8047,
+              "children": []
+            },
+            {
+              "name": "policy_router.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\communication\\policy_router.py",
+              "type": "file",
+              "size": 10422,
+              "children": []
+            }
+          ]
         },
         {
-          "name": "behavior_engine.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\behavior_engine.py",
-          "type": "file",
-          "size": 24819,
-          "children": []
+          "name": "config",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\config",
+          "type": "directory",
+          "size": null,
+          "children": [
+            {
+              "name": "__init__.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\config\\__init__.py",
+              "type": "file",
+              "size": 671,
+              "children": []
+            },
+            {
+              "name": "capability_gateway.rs",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\config\\capability_gateway.rs",
+              "type": "file",
+              "size": 0,
+              "children": []
+            },
+            {
+              "name": "profiles.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\config\\profiles.py",
+              "type": "file",
+              "size": 7302,
+              "children": []
+            },
+            {
+              "name": "runtime_config.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\config\\runtime_config.py",
+              "type": "file",
+              "size": 3559,
+              "children": []
+            }
+          ]
         },
         {
-          "name": "bootstrap.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\bootstrap.py",
-          "type": "file",
-          "size": 20170,
-          "children": []
+          "name": "core",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\core",
+          "type": "directory",
+          "size": null,
+          "children": [
+            {
+              "name": "__init__.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\core\\__init__.py",
+              "type": "file",
+              "size": 732,
+              "children": []
+            },
+            {
+              "name": "lifecycle.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\core\\lifecycle.py",
+              "type": "file",
+              "size": 9422,
+              "children": []
+            },
+            {
+              "name": "module_registry.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\core\\module_registry.py",
+              "type": "file",
+              "size": 13925,
+              "children": []
+            },
+            {
+              "name": "runtime_orchestrator.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\core\\runtime_orchestrator.py",
+              "type": "file",
+              "size": 18782,
+              "children": []
+            }
+          ]
         },
         {
-          "name": "bus.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\bus.py",
-          "type": "file",
-          "size": 7986,
-          "children": []
+          "name": "docs",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\docs",
+          "type": "directory",
+          "size": null,
+          "children": [
+            {
+              "name": "MODULE_SUMMARY.md",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\docs\\MODULE_SUMMARY.md",
+              "type": "file",
+              "size": 10481,
+              "children": []
+            },
+            {
+              "name": "README_REFACTORING.md",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\docs\\README_REFACTORING.md",
+              "type": "file",
+              "size": 6596,
+              "children": []
+            },
+            {
+              "name": "SLM_CHAT_INTEGRATION.md",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\docs\\SLM_CHAT_INTEGRATION.md",
+              "type": "file",
+              "size": 5763,
+              "children": []
+            },
+            {
+              "name": "VECTOR_SYSTEM_README.md",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\docs\\VECTOR_SYSTEM_README.md",
+              "type": "file",
+              "size": 9720,
+              "children": []
+            },
+            {
+              "name": "__init__.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\docs\\__init__.py",
+              "type": "file",
+              "size": 629,
+              "children": []
+            }
+          ]
         },
         {
-          "name": "capability_gateway.rs",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\capability_gateway.rs",
-          "type": "file",
-          "size": 0,
-          "children": []
+          "name": "identity",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\identity",
+          "type": "directory",
+          "size": null,
+          "children": [
+            {
+              "name": "__init__.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\identity\\__init__.py",
+              "type": "file",
+              "size": 639,
+              "children": []
+            },
+            {
+              "name": "kitsu_identity.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\identity\\kitsu_identity.py",
+              "type": "file",
+              "size": 10192,
+              "children": []
+            }
+          ]
         },
         {
-          "name": "clocks.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\clocks.py",
-          "type": "file",
-          "size": 2718,
-          "children": []
+          "name": "infrastructure",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\infrastructure",
+          "type": "directory",
+          "size": null,
+          "children": [
+            {
+              "name": "__init__.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\infrastructure\\__init__.py",
+              "type": "file",
+              "size": 781,
+              "children": []
+            },
+            {
+              "name": "clocks.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\infrastructure\\clocks.py",
+              "type": "file",
+              "size": 2718,
+              "children": []
+            },
+            {
+              "name": "container.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\infrastructure\\container.py",
+              "type": "file",
+              "size": 9104,
+              "children": []
+            },
+            {
+              "name": "engine.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\infrastructure\\engine.py",
+              "type": "file",
+              "size": 2787,
+              "children": []
+            },
+            {
+              "name": "performance_manager.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\infrastructure\\performance_manager.py",
+              "type": "file",
+              "size": 2458,
+              "children": []
+            },
+            {
+              "name": "strip_controller.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\infrastructure\\strip_controller.py",
+              "type": "file",
+              "size": 6429,
+              "children": []
+            }
+          ]
         },
         {
-          "name": "container.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\container.py",
-          "type": "file",
-          "size": 9104,
-          "children": []
+          "name": "launchers",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\launchers",
+          "type": "directory",
+          "size": null,
+          "children": [
+            {
+              "name": "__init__.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\launchers\\__init__.py",
+              "type": "file",
+              "size": 629,
+              "children": []
+            },
+            {
+              "name": "bootstrap.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\launchers\\bootstrap.py",
+              "type": "file",
+              "size": 20310,
+              "children": []
+            },
+            {
+              "name": "kitsu_launcher.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\launchers\\kitsu_launcher.py",
+              "type": "file",
+              "size": 1142,
+              "children": []
+            },
+            {
+              "name": "legacy_compat.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\launchers\\legacy_compat.py",
+              "type": "file",
+              "size": 10132,
+              "children": []
+            },
+            {
+              "name": "modern_launcher.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\launchers\\modern_launcher.py",
+              "type": "file",
+              "size": 9138,
+              "children": []
+            }
+          ]
         },
         {
-          "name": "desktop_controller.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\desktop_controller.py",
-          "type": "file",
-          "size": 24522,
-          "children": []
-        },
-        {
-          "name": "engine.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\engine.py",
-          "type": "file",
-          "size": 2787,
-          "children": []
-        },
-        {
-          "name": "events.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\events.py",
-          "type": "file",
-          "size": 8016,
-          "children": []
-        },
-        {
-          "name": "health.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\health.py",
-          "type": "file",
-          "size": 6233,
-          "children": []
-        },
-        {
-          "name": "idle_manager.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\idle_manager.py",
-          "type": "file",
-          "size": 13428,
-          "children": []
-        },
-        {
-          "name": "kitsu_identity.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\kitsu_identity.py",
-          "type": "file",
-          "size": 10192,
-          "children": []
-        },
-        {
-          "name": "kitsu_launcher.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\kitsu_launcher.py",
-          "type": "file",
-          "size": 1121,
-          "children": []
-        },
-        {
-          "name": "launcher.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\launcher.py",
-          "type": "file",
-          "size": 18617,
-          "children": []
-        },
-        {
-          "name": "legacy_compat.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\legacy_compat.py",
-          "type": "file",
-          "size": 10132,
-          "children": []
-        },
-        {
-          "name": "lifecycle.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\lifecycle.py",
-          "type": "file",
-          "size": 9408,
-          "children": []
-        },
-        {
-          "name": "main.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\main.py",
-          "type": "file",
-          "size": 6756,
-          "children": []
-        },
-        {
-          "name": "modern_launcher.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\modern_launcher.py",
-          "type": "file",
-          "size": 9131,
-          "children": []
-        },
-        {
-          "name": "module_registry.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\module_registry.py",
-          "type": "file",
-          "size": 13888,
-          "children": []
-        },
-        {
-          "name": "orchestrator.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\orchestrator.py",
-          "type": "file",
-          "size": 50548,
-          "children": []
-        },
-        {
-          "name": "performance_manager.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\performance_manager.py",
-          "type": "file",
-          "size": 2364,
-          "children": []
-        },
-        {
-          "name": "policy_router.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\policy_router.py",
-          "type": "file",
-          "size": 10422,
-          "children": []
-        },
-        {
-          "name": "profiles.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\profiles.py",
-          "type": "file",
-          "size": 7302,
-          "children": []
-        },
-        {
-          "name": "runtime_config.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\runtime_config.py",
-          "type": "file",
-          "size": 3559,
-          "children": []
-        },
-        {
-          "name": "runtime_orchestrator.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\runtime_orchestrator.py",
-          "type": "file",
-          "size": 18743,
-          "children": []
-        },
-        {
-          "name": "strip_controller.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\strip_controller.py",
-          "type": "file",
-          "size": 6429,
-          "children": []
-        },
-        {
-          "name": "system_monitor.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\system_monitor.py",
-          "type": "file",
-          "size": 12092,
-          "children": []
+          "name": "systems",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\systems",
+          "type": "directory",
+          "size": null,
+          "children": [
+            {
+              "name": "__init__.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\systems\\__init__.py",
+              "type": "file",
+              "size": 800,
+              "children": []
+            },
+            {
+              "name": "behavior_engine.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\systems\\behavior_engine.py",
+              "type": "file",
+              "size": 24819,
+              "children": []
+            },
+            {
+              "name": "desktop_controller.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\systems\\desktop_controller.py",
+              "type": "file",
+              "size": 24522,
+              "children": []
+            },
+            {
+              "name": "health.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\systems\\health.py",
+              "type": "file",
+              "size": 9041,
+              "children": []
+            },
+            {
+              "name": "idle_manager.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\systems\\idle_manager.py",
+              "type": "file",
+              "size": 13467,
+              "children": []
+            },
+            {
+              "name": "system_monitor.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\systems\\system_monitor.py",
+              "type": "file",
+              "size": 12106,
+              "children": []
+            }
+          ]
         }
       ]
     },
@@ -2302,6 +2450,13 @@
       "type": "directory",
       "size": null,
       "children": [
+        {
+          "name": "__init__.py",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\scripts\\__init__.py",
+          "type": "file",
+          "size": 745,
+          "children": []
+        },
         {
           "name": "fast_brain_trainer.py",
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\scripts\\fast_brain_trainer.py",
@@ -2356,28 +2511,7 @@
           "name": "__init__.py",
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\__init__.py",
           "type": "file",
-          "size": 642,
-          "children": []
-        },
-        {
-          "name": "budgets.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\budgets.py",
-          "type": "file",
-          "size": 15642,
-          "children": []
-        },
-        {
-          "name": "capability_flags.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\capability_flags.py",
-          "type": "file",
-          "size": 3805,
-          "children": []
-        },
-        {
-          "name": "complexity.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\complexity.py",
-          "type": "file",
-          "size": 0,
+          "size": 2281,
           "children": []
         },
         {
@@ -2387,38 +2521,31 @@
           "size": null,
           "children": [
             {
-              "name": "character.yaml",
-              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\config\\character.yaml",
+              "name": "__init__.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\config\\__init__.py",
               "type": "file",
-              "size": 96,
+              "size": 588,
               "children": []
             },
             {
-              "name": "permissions.json",
-              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\config\\permissions.json",
+              "name": "config_loader.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\config\\config_loader.py",
               "type": "file",
-              "size": 156,
+              "size": 9059,
               "children": []
             },
             {
-              "name": "personality.json",
-              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\config\\personality.json",
+              "name": "defaults.yaml",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\config\\defaults.yaml",
               "type": "file",
-              "size": 243,
+              "size": 4264,
               "children": []
             },
             {
-              "name": "system_config.json",
-              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\config\\system_config.json",
+              "name": "unified_config.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\config\\unified_config.py",
               "type": "file",
-              "size": 407,
-              "children": []
-            },
-            {
-              "name": "user_profile.json",
-              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\config\\user_profile.json",
-              "type": "file",
-              "size": 315,
+              "size": 13205,
               "children": []
             }
           ]
@@ -2431,11 +2558,54 @@
           "children": []
         },
         {
-          "name": "config_loader.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\config_loader.py",
-          "type": "file",
-          "size": 9059,
-          "children": []
+          "name": "config_files",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\config_files",
+          "type": "directory",
+          "size": null,
+          "children": [
+            {
+              "name": "__init__.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\config_files\\__init__.py",
+              "type": "file",
+              "size": 62,
+              "children": []
+            },
+            {
+              "name": "character.yaml",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\config_files\\character.yaml",
+              "type": "file",
+              "size": 96,
+              "children": []
+            },
+            {
+              "name": "permissions.json",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\config_files\\permissions.json",
+              "type": "file",
+              "size": 156,
+              "children": []
+            },
+            {
+              "name": "personality.json",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\config_files\\personality.json",
+              "type": "file",
+              "size": 243,
+              "children": []
+            },
+            {
+              "name": "system_config.json",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\config_files\\system_config.json",
+              "type": "file",
+              "size": 407,
+              "children": []
+            },
+            {
+              "name": "user_profile.json",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\config_files\\user_profile.json",
+              "type": "file",
+              "size": 315,
+              "children": []
+            }
+          ]
         },
         {
           "name": "constants",
@@ -2451,10 +2621,38 @@
           "size": null,
           "children": [
             {
+              "name": "__init__.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\data\\__init__.py",
+              "type": "file",
+              "size": 64,
+              "children": []
+            },
+            {
               "name": "brain",
               "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\data\\brain",
               "type": "directory",
               "size": null,
+              "children": []
+            },
+            {
+              "name": "factual_exceptions.json",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\data\\factual_exceptions.json",
+              "type": "file",
+              "size": 0,
+              "children": []
+            },
+            {
+              "name": "mappings.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\data\\mappings.py",
+              "type": "file",
+              "size": 0,
+              "children": []
+            },
+            {
+              "name": "retention.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\data\\retention.py",
+              "type": "file",
+              "size": 0,
               "children": []
             },
             {
@@ -2475,25 +2673,40 @@
           ]
         },
         {
-          "name": "defaults.yaml",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\defaults.yaml",
-          "type": "file",
-          "size": 4264,
-          "children": []
-        },
-        {
-          "name": "factual_exceptions.json",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\factual_exceptions.json",
-          "type": "file",
-          "size": 0,
-          "children": []
-        },
-        {
-          "name": "file_security.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\file_security.py",
-          "type": "file",
-          "size": 3246,
-          "children": []
+          "name": "flags",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\flags",
+          "type": "directory",
+          "size": null,
+          "children": [
+            {
+              "name": "__init__.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\flags\\__init__.py",
+              "type": "file",
+              "size": 554,
+              "children": []
+            },
+            {
+              "name": "budgets.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\flags\\budgets.py",
+              "type": "file",
+              "size": 15642,
+              "children": []
+            },
+            {
+              "name": "capability_flags.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\flags\\capability_flags.py",
+              "type": "file",
+              "size": 3805,
+              "children": []
+            },
+            {
+              "name": "tiers.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\flags\\tiers.py",
+              "type": "file",
+              "size": 0,
+              "children": []
+            }
+          ]
         },
         {
           "name": "learning",
@@ -2510,24 +2723,39 @@
           "children": []
         },
         {
-          "name": "logging.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\logging.py",
-          "type": "file",
-          "size": 0,
-          "children": []
+          "name": "logging",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\logging",
+          "type": "directory",
+          "size": null,
+          "children": [
+            {
+              "name": "__init__.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\logging\\__init__.py",
+              "type": "file",
+              "size": 530,
+              "children": []
+            },
+            {
+              "name": "logger.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\logging\\logger.py",
+              "type": "file",
+              "size": 1132,
+              "children": []
+            },
+            {
+              "name": "session_logger.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\logging\\session_logger.py",
+              "type": "file",
+              "size": 8055,
+              "children": []
+            }
+          ]
         },
         {
           "name": "lora",
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\lora",
           "type": "directory",
           "size": null,
-          "children": []
-        },
-        {
-          "name": "mappings.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\mappings.py",
-          "type": "file",
-          "size": 0,
           "children": []
         },
         {
@@ -2546,18 +2774,33 @@
           ]
         },
         {
-          "name": "model_dict.json",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\model_dict.json",
-          "type": "file",
-          "size": 1082,
-          "children": []
-        },
-        {
           "name": "models",
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\models",
           "type": "directory",
           "size": null,
-          "children": []
+          "children": [
+            {
+              "name": "__init__.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\models\\__init__.py",
+              "type": "file",
+              "size": 571,
+              "children": []
+            },
+            {
+              "name": "model_dict.json",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\models\\model_dict.json",
+              "type": "file",
+              "size": 1082,
+              "children": []
+            },
+            {
+              "name": "ollama.yaml",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\models\\ollama.yaml",
+              "type": "file",
+              "size": 1920,
+              "children": []
+            }
+          ]
         },
         {
           "name": "mods",
@@ -2567,25 +2810,40 @@
           "children": []
         },
         {
-          "name": "mood_tracker.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\mood_tracker.py",
-          "type": "file",
-          "size": 0,
-          "children": []
-        },
-        {
-          "name": "ollama.yaml",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\ollama.yaml",
-          "type": "file",
-          "size": 1920,
-          "children": []
-        },
-        {
-          "name": "personality_config.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\personality_config.py",
-          "type": "file",
-          "size": 15222,
-          "children": []
+          "name": "personality",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\personality",
+          "type": "directory",
+          "size": null,
+          "children": [
+            {
+              "name": "__init__.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\personality\\__init__.py",
+              "type": "file",
+              "size": 712,
+              "children": []
+            },
+            {
+              "name": "personality_config.py.backup",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\personality\\personality_config.py.backup",
+              "type": "file",
+              "size": 15222,
+              "children": []
+            },
+            {
+              "name": "triggers.json",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\personality\\triggers.json",
+              "type": "file",
+              "size": 7228,
+              "children": []
+            },
+            {
+              "name": "ul_templates.json",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\personality\\ul_templates.json",
+              "type": "file",
+              "size": 0,
+              "children": []
+            }
+          ]
         },
         {
           "name": "profiles",
@@ -2617,13 +2875,6 @@
           ]
         },
         {
-          "name": "retention.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\retention.py",
-          "type": "file",
-          "size": 0,
-          "children": []
-        },
-        {
           "name": "runtime",
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\runtime",
           "type": "directory",
@@ -2651,13 +2902,6 @@
               "children": []
             }
           ]
-        },
-        {
-          "name": "sass_generator.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\sass_generator.py",
-          "type": "file",
-          "size": 0,
-          "children": []
         },
         {
           "name": "schemas",
@@ -2689,67 +2933,33 @@
           ]
         },
         {
-          "name": "self_model.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\self_model.py",
-          "type": "file",
-          "size": 0,
-          "children": []
-        },
-        {
-          "name": "session_logger.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\session_logger.py",
-          "type": "file",
-          "size": 8055,
-          "children": []
-        },
-        {
-          "name": "signals.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\signals.py",
-          "type": "file",
-          "size": 0,
-          "children": []
-        },
-        {
-          "name": "snapshot.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\snapshot.py",
-          "type": "file",
-          "size": 0,
-          "children": []
-        },
-        {
-          "name": "tiers.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\tiers.py",
-          "type": "file",
-          "size": 0,
-          "children": []
-        },
-        {
-          "name": "transitions.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\transitions.py",
-          "type": "file",
-          "size": 0,
-          "children": []
-        },
-        {
-          "name": "triggers.json",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\triggers.json",
-          "type": "file",
-          "size": 7228,
-          "children": []
-        },
-        {
-          "name": "ul_templates.json",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\ul_templates.json",
-          "type": "file",
-          "size": 0,
-          "children": []
-        },
-        {
-          "name": "unified_config.py",
-          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\unified_config.py",
-          "type": "file",
-          "size": 13205,
-          "children": []
+          "name": "security",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\security",
+          "type": "directory",
+          "size": null,
+          "children": [
+            {
+              "name": "__init__.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\security\\__init__.py",
+              "type": "file",
+              "size": 544,
+              "children": []
+            },
+            {
+              "name": "file_security.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\security\\file_security.py",
+              "type": "file",
+              "size": 3246,
+              "children": []
+            },
+            {
+              "name": "validation.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\security\\validation.py",
+              "type": "file",
+              "size": 827,
+              "children": []
+            }
+          ]
         },
         {
           "name": "utils",
@@ -2786,17 +2996,17 @@
               "children": []
             },
             {
-              "name": "logger.py",
-              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\utils\\logger.py",
-              "type": "file",
-              "size": 1132,
-              "children": []
-            },
-            {
               "name": "metrics.py",
               "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\utils\\metrics.py",
               "type": "file",
               "size": 1997,
+              "children": []
+            },
+            {
+              "name": "signals.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\utils\\signals.py",
+              "type": "file",
+              "size": 0,
               "children": []
             },
             {
@@ -2811,13 +3021,6 @@
               "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\utils\\tracing.py",
               "type": "file",
               "size": 1110,
-              "children": []
-            },
-            {
-              "name": "validation.py",
-              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\utils\\validation.py",
-              "type": "file",
-              "size": 827,
               "children": []
             }
           ]
@@ -2867,10 +3070,17 @@
                   "name": "event_bus.py",
                   "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\kitsu\\core\\event_bus.py",
                   "type": "file",
-                  "size": 1957,
+                  "size": 2498,
                   "children": []
                 }
               ]
+            },
+            {
+              "name": "main.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\kitsu\\main.py",
+              "type": "file",
+              "size": 2979,
+              "children": []
             },
             {
               "name": "modules",
@@ -2896,7 +3106,7 @@
                   "name": "llm.py",
                   "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\kitsu\\modules\\llm.py",
                   "type": "file",
-                  "size": 1423,
+                  "size": 1475,
                   "children": []
                 },
                 {
@@ -2910,7 +3120,7 @@
                   "name": "preprocess.py",
                   "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\kitsu\\modules\\preprocess.py",
                   "type": "file",
-                  "size": 1272,
+                  "size": 1324,
                   "children": []
                 },
                 {
@@ -2924,21 +3134,21 @@
                   "name": "reflex.py",
                   "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\kitsu\\modules\\reflex.py",
                   "type": "file",
-                  "size": 1984,
+                  "size": 2036,
                   "children": []
                 },
                 {
                   "name": "router.py",
                   "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\kitsu\\modules\\router.py",
                   "type": "file",
-                  "size": 1696,
+                  "size": 1748,
                   "children": []
                 },
                 {
                   "name": "slm.py",
                   "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\src\\kitsu\\modules\\slm.py",
                   "type": "file",
-                  "size": 1895,
+                  "size": 1947,
                   "children": []
                 }
               ]
@@ -14801,13 +15011,6 @@
           ]
         }
       ]
-    },
-    {
-      "name": "wikilinks.md",
-      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\wikilinks.md",
-      "type": "file",
-      "size": 0,
-      "children": []
     }
   ]
 }

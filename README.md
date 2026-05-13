@@ -1,23 +1,73 @@
-# Kitsu — local desktop AI companion
+# Kitsu — Local Desktop AI Companion
 
-Kitsu (kitsu) is a local-first desktop AI companion with a Shimeji-style presence,
-a layered emotion system, and a self-learning fast-response brain. She runs on any
-device from a weak CPU-only laptop up to a high-end workstation, adapting her
-capability profile to the hardware she runs on.
+Kitsu is a local-first desktop AI companion with a Shimeji-style presence, a layered emotion system, and a self-learning fast-response brain. Built for production-grade reliability, she runs on any device from a weak CPU-only laptop to a high-end workstation, automatically adapting her capability profile.
 
 ---
 
-## What kitsu is
+## 🦊 Quick Start
 
-- A **desktop overlay companion** — lives on your screen, reacts to what you do
-- A **local AI** — no cloud required; all inference runs on your machine
-- A **self-learning system** — her fast-brain learns your patterns over time,
-  responding to common inputs instantly without ever touching a model
-- A **personality, not a chatbot** — emotion state shapes every response at every tier
+### Installation
+
+```bash
+# Clone the repository
+git clone <repository-url>
+cd kitsu_desktop_ai
+
+# Run first-time setup
+python r.py --first-run
+
+# Start Kitsu
+python r.py
+```
+
+### Modern Features
+
+- **🎯 Event-Driven Architecture**: Modern EventBus system for clean component communication
+- **🧠 Multi-Tier AI Pipeline**: FastBrain → SLM → LLM with Judge validation
+- **🔧 InputMux (Sanity Layer)**: Normalizes all input before processing
+- **💾 Unified Configuration**: Single configuration system for modern and legacy
+- **🔄 Hot-Swappable Modules**: Easy to extend and modify components
 
 ---
 
-## AI ARCHITECTURE
+## Key Features
+
+- **Desktop Overlay Companion**: Lives on your screen and reacts to your interactions
+- **Local-First AI**: No cloud required; all inference runs privately on your machine
+- **Self-Learning Core**: Her "Reflex" brain learns your patterns over time, responding to common inputs instantly using an O(1) SimHash cache
+- **Emotion-Driven Personality**: A 10-float vibe vector shapes every response, ensuring she feels like a character, not a chatbot
+- **Non-Blocking Architecture**: A robust asynchronous chat loop ensures the interface remains responsive during deep reasoning
+
+---
+
+## 🏗️ Modern Architecture
+
+### Event-Driven System
+
+Kitsu now uses a **modern event-driven architecture** that provides better separation of concerns and improved maintainability:
+
+```
+User Input → InputMux → EventBus → InputManager → AI Pipeline → Response
+```
+
+### Core Components
+
+- **EventBus**: Central pub/sub system for decoupled communication
+- **InputMux**: "Sanity Layer" that normalizes all input types
+- **InputManager**: Coordinates the multi-tier AI pipeline
+- **ChatApp**: Modern user interface with async handling
+- **Modern Launcher**: Unified entry point with first-run integration
+
+### AI Pipeline
+
+The modern system implements a sophisticated multi-tier processing pipeline:
+
+1. **FastBrain (Reflex)**: Quick, pre-trained responses for common queries
+2. **SLM (Local Model)**: Qwen2.5-1.5B for balanced, intelligent responses  
+3. **LLM (Fallback)**: Larger models for complex queries
+4. **Judge Validation**: Ensures responses are in-character and safe
+
+---
 
 ## Modern 4-Layer Architecture
 
@@ -61,127 +111,42 @@ ServiceContainer → ModuleRegistry → LifecycleManager → RuntimeOrchestrator
 ## Legacy AI Pipeline
 
 The original AI pipeline is preserved within the modern architecture:
+Kitsu utilizes a **Tiered Cascading Pipeline** driven by a central asynchronous `EventBus`.
 
-```
-User input
-    │
-    ▼
-┌─────────────┐     always-on, learns from every response
-│  FastBrain  │◄────────────────────────────────────────┐
-│ (Markov +   │                                         │
-│  Huffman)   │──► known input? respond instantly       │
-└──────┬──────┘                                         │
-       │ unknown                                        │
-       ▼                                                │
-┌─────────────┐                                         │
-│ PolicyRouter│──► classify intent                      │
-└──────┬──────┘                                         │
-       │                                                │
-  ┌────┴─────────────────┐                              │
-  │                      │                              │
-  ▼                      ▼                              │
-┌──────┐           ┌──────────┐                         │
-│ SLM  │           │   LLM    │                         │
-│(fox  │           │(thinking)│                         │
-│style)│           └──────────┘                         │
-└──┬───┘                 │                              │
-   └──────────┬──────────┘                              │
-              ▼                                         │
-    ┌──────────────────┐                                │
-    │  EmotionEngine   │ shapes every response          │
-    └────────┬─────────┘                                │
-             │                                          │
-             ▼                                          │
-    final response ─────────────────────────────────────┘
-             │          fed back into FastBrain
-             ▼
-         User + Avatar
+### The Three Paths of Reasoning
+
+1.  **Reflex (Base Layer)**:
+    - Uses SimHash for instant cache lookups and Markov-based templates.
+    - Latency: < 100ms.
+2.  **SLM (Small Language Model)**:
+    - Powered by Qwen2.5-1.5B Q4.
+    - Handles casual conversation with high personality consistency.
+    - Latency: < 500ms.
+3.  **LLM (Deep Reasoning)**:
+    - Engaged for complex tasks, analysis, and web search.
+    - Includes a multi-step judging loop to ensure quality.
+    - Latency: Variable (within budget).
+
+### Quality Assurance
+A dedicated **Judge** module analyzes every model-generated response for character consistency, coherence, and factual safety before it reaches the user.
+
+---
+
+## Getting Started
+
+### Prerequisites
+- Python 3.9+
+- Recommended: 8GB RAM for SLM/LLM operation.
+
+### Installation
+```bash
+pip install -e .
 ```
 
-### Brain Stack (Inference Pipeline)
-
-**FastBrain → SLM → LLM**
-
-#### FastBrain (Base Layer)
-
-- **Binary + Markov Chain + Huffman Tree**
-- **Handles:**
-  - Common inputs (greetings, repeated phrases)
-  - Spam detection
-  - Instant responses (0ms)
-- **Self-learning:**
-  - Promotes frequent inputs via: `score = frequency × recency`
-  - Feeds confirmed outputs back into itself
-
-#### SLM (Style + Reasoning Lite)
-
-- Shapes personality (fox-like tone)
-- Handles normal conversation
-- Lightweight, offline
-
-#### LLM (Deep Reasoning)
-
-- Used only when needed:
-  - Complex queries
-  - Web search
-  - Analysis
-
-### Reasoning Optimization
-
-Pretrained models may hallucinate due to custom prompts/LoRA
-**Long-term goal:**
-
-- Custom LLM with:
-
-  - Universal Transformers
-  - Tokenizer + embeddings
-  - Multi-head attention
-  - Value cache
-  - Looped reasoning
-
-##  EMOTION SYSTEM
-
-### Layers
-
-**Mood (Primary)**
-
-- behave, mean, flirty, protective
-
-**Style (Expression)**
-
-- chaotic, sweet, cold, direct, sarcastic, playful, eerie
-
-**State (Micro-behavior)**
-
-- normal, fox, glitch, analyst, submissive, detached
-
-### Behavior Model
-
-- Emotions stored in decaying stack
-- Dominant emotion determines: `emotion → mood + style + state`
-- **Supports:**
-  - Triggers
-  - Reactions
-  - Personality overlays
-
-### Special Rules
-
-- Spam detection → adds irritation
-- Unsafe combinations → auto-adjust
-- Style rules control:
-  - Tone
-  - Length
-  - Emoji usage
-
-## ⚙️ STRIP / TIER SYSTEM
-
-### Concept
-
-- **Tier system** = user-facing
-- **Strip system** = internal flags
-
-### Flags (Read-only after startup)
-
+### Running the Chat Loop
+Start the interactive CLI to chat with Kitsu:
+```bash
+python src/kitsu/main.py
 ```
 USE_FAST_BRAIN
 USE_SLM
@@ -383,7 +348,9 @@ automation
 
 ## Project Layout
 
-```
+The project follows a production-grade `src` layout:
+
+```text
 kitsu-desktop-ai/
 ├── r.py                           # Simple entry point (delegates to launcher)
 ├── runtime/                       # Modern 4-layer architecture
@@ -464,12 +431,21 @@ This project uses **Obsidian-compatible documentation** with bidirectional linki
 
 The documentation uses Obsidian's [[wikilinks]] for navigation - click any link to explore related concepts.
 
+├── src/kitsu/              # Core Package Root
+│   ├── core/               # Infrastructure (EventBus, RequestContext)
+│   ├── modules/            # Processing Modules (SLM, LLM, Router, etc.)
+│   ├── utils/              # Helpers (Timing, Budgets)
+│   └── main.py             # CLI Entry Point
+├── data/                   # Persistent State (Reflex Cache, Configs)
+├── docs/                   # Documentation and Knowledge Base
+└── pyproject.toml          # Package Metadata and Dependencies
+```
+
 ---
 
-## Capability tiers
+## Configuration
 
-kitsu detects your hardware on first launch and selects a profile automatically.
-You can override it in settings.
+Kitsu uses a tiered capability system. You can override settings in `pyproject.toml` or via environment variables.
 
 | Tier   | RAM    | What runs                              | Profile         |
 |--------|--------|----------------------------------------|-----------------|
@@ -677,10 +653,15 @@ See `docs/CONTRIBUTING.md` for code style, PR process, and testing requirements.
 Every PR touching `core/` or `config/` requires two reviewers.
 Every PR touching `system/gateway.py` or `system/permission_manager.py`
 requires a security review note explaining why the change is safe.
+| Tier   | RAM    | Profile      | Capability Profile                              |
+|--------|--------|--------------|-------------------------------------------------|
+| Micro  | <2 GB  | `ultra_low`  | Reflex + Templates only. No model inference.    |
+| Low    | 2–4 GB | `low`        | Reflex + Micro-SLM. 2D avatar.                  |
+| Mid    | 4–8 GB | `balanced`   | Full SLM + 2D/3D toggle.                        |
+| High   | 8+ GB  | `full`       | SLM + LLM (Deep Reasoning). All features.       |
 
 ---
 
 ## License
 
-See `LICENSE`. The fast-brain, emotion system, and plugin API are open.
-Model weights and Live2D/VRM assets are subject to their own licenses.
+See `LICENSE`. The core architecture, reflex systems, and modular framework are open-source. Model weights and specific character assets are subject to their respective licenses.

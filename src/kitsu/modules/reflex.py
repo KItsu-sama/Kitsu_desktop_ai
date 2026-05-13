@@ -2,7 +2,7 @@ import json
 import os
 import random
 from kitsu.core.event_bus import bus
-from kitsu.core.context import RequestContext
+from kitsu.core.context import RequestContext, can_respond
 
 CACHE_FILE = "data/reflex_cache.json"
 
@@ -42,6 +42,8 @@ async def on_reflex_path(ctx: RequestContext):
     Applies vibe vector last before emitting.
     Budget: under 100ms total.
     """
+    if not can_respond(ctx): return
+
     # 1. Learned Cache Lookup
     if ctx.simhash in LEARNED_CACHE:
         ctx.response = LEARNED_CACHE[ctx.simhash]["text"]
