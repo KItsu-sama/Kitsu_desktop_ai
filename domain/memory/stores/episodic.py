@@ -1,5 +1,5 @@
 """
-memory/stores/episodic.py
+domain/memory/stores/episodic.py
 
 Episodic memory store for significant events and conversations.
 Implements MemoryStoreContract.

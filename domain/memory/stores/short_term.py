@@ -1,5 +1,5 @@
 """
-memory/stores/short_term.py
+domain/memory/stores/short_term.py
 
 Short-term memory store for recent interactions.
 Implements MemoryStoreContract.

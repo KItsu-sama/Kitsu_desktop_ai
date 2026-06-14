@@ -52,12 +52,17 @@ The modern architecture executes startup in deterministic phases:
 - **Features**: Capability-based module registration, graceful startup/shutdown
 - **Status**: ✅ Working - Successfully launches and shuts down (0.14s startup time)
 
-### Legacy Compatibility (`legacy_compat.py`)
-- **Purpose**: Bridge between legacy modules and modern architecture
-- **Features**: Adapter pattern for inconsistent interfaces
-- **Components**:
-  - `LegacyModuleAdapter`: Wraps legacy modules with RuntimeModule interface
-  - `LegacyCompatibilityOrchestrator`: Bridges legacy launcher with modern architecture
+### Runtime State & Crash Recovery
+- **Purpose**: Central runtime health tracking and crash-driven recovery
+- **Files**:
+  - `runtime/core/runtime_state.py` - tracks BOOTING, RUNNING, DEGRADED, SAFE_MODE, SHUTTING_DOWN, STOPPED, FAILED
+  - `runtime/core/crash_manager.py` - records crashes, persists diagnostics, and forces safe mode after repeated failures
+- **Features**:
+  - Persistent runtime state in `data/runtime/runtime_state.json`
+  - Crash history and diagnostics in `data/runtime/logs/crashes/`
+  - Automatic safe-mode fallback when crash thresholds are exceeded
+  - Graceful degraded startup when optional systems fail
+- **Status**: ✅ Active modern runtime with legacy compatibility removed
 
 ### Runtime Orchestrator (`runtime_orchestrator.py`)
 - **Purpose**: Central coordination of all systems
@@ -79,22 +84,9 @@ The modern architecture executes startup in deterministic phases:
 - **Features**: Phased initialization, graceful degradation, health monitoring
 - **Capability**: Non-critical phases can fail without breaking startup
 
-## Legacy Components (Preserved)
+## Runtime Cleanup
 
-### Bootstrap (`bootstrap.py`)
-- **Purpose**: Legacy container setup (preserved for compatibility)
-- **Features**: Creates AppContainer with legacy service registration
-- **Status**: Preserved but superseded by modern architecture
-
-### Legacy Launcher (`launcher.py`)
-- **Purpose**: Original launcher implementation
-- **Features**: CLI parsing, config loading, hardware detection
-- **Status**: Preserved as fallback, delegates to modern when possible
-
-### Legacy Orchestrator (`orchestrator.py`)
-- **Purpose**: Original event loop implementation
-- **Features**: Event handling, module coordination
-- **Status**: Preserved for compatibility, modern version preferred
+The legacy runtime compatibility layer has been removed. The modern runtime architecture is now the supported path.
 
 ## Critical Systems Integration
 
@@ -149,17 +141,17 @@ The runtime module integrates all critical stability systems:
 - Battery and thermal awareness
 - Student laptop optimization
 
-### Legacy Compatibility Benefits
+### Runtime Resilience Benefits
 
-**Backward Compatibility**:
-- Existing configs and CLI still work
-- Legacy modules wrapped with adapters
-- Gradual migration path
+**Modern Reliability**:
+- Runtime state tracking improves failure diagnosis
+- Crash recovery forces safe mode after repeated failures
+- Optional failures degrade gracefully instead of crashing
 
 **Risk Mitigation**:
-- Modern architecture proven to work
-- Legacy fallback available
-- No breaking changes
+- Modern architecture is the supported path
+- No legacy fallback is required
+- State persistence enables faster recovery
 
 ## Performance Metrics
 
@@ -225,10 +217,10 @@ The runtime module integrates all critical stability systems:
 - Verify startup phase order
 - Review health check implementation
 
-**Legacy Compatibility Issues**:
-- Check adapter mappings
-- Verify interface implementations
-- Test with legacy launcher
+**Modern Runtime Issues**:
+- Check runtime state transitions
+- Verify crash recovery and safe-mode fallback
+- Confirm modern startup with `python r.py`
 
 ### Debug Tools
 
@@ -260,15 +252,13 @@ The modern 4-layer architecture provides a solid foundation for:
 | Component | Status | Architecture | Notes |
 |-----------|--------|-------------|-------|
 | Modern Launcher | ✅ Working | Modern | 0.14s startup, full 4-layer support |
-| Legacy Compatibility | ✅ Working | Hybrid | Adapters for legacy modules |
 | Runtime Orchestrator | ✅ Working | Modern | Event-driven coordination |
 | Module Registry | ✅ Working | Modern | State tracking, dependency validation |
 | Service Container | ✅ Working | Modern | DI container, circular dependency detection |
 | Lifecycle Manager | ✅ Working | Modern | Phased startup, graceful degradation |
-| Legacy Launcher | ✅ Preserved | Legacy | Fallback compatibility |
-| Legacy Orchestrator | ✅ Preserved | Legacy | Original event loop |
-| Bootstrap | ✅ Preserved | Legacy | Original container setup |
+| Runtime State | ✅ Active | Modern | State transitions and health tracking |
+| Crash Manager | ✅ Active | Modern | Crash recovery and safe-mode forcing |
 
 **Overall Architecture Status**: ✅ **Production Ready**
 
-The modern 4-layer architecture is successfully implemented and provides a robust foundation for Kitsu's evolution from AI assistant to cognitive runtime. Legacy compatibility ensures smooth migration while modern architecture delivers improved reliability, performance, and maintainability.
+The modern 4-layer architecture is successfully implemented and provides a robust foundation for Kitsu's evolution from AI assistant to cognitive runtime. Modern runtime state tracking and crash recovery deliver improved reliability, performance, and maintainability.

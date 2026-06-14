@@ -1,5 +1,5 @@
 """
-core/memory/memory_manager.py — Memory Manager (Architecture Compliant)
+domain/personality/memory_manager.py — Memory Manager (Architecture Compliant)
 
 COMBINED FEATURES:
 - All plugins from both versions

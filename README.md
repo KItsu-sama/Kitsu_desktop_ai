@@ -352,18 +352,21 @@ The project follows a production-grade `src` layout:
 
 ```text
 kitsu-desktop-ai/
-├── r.py                           # Simple entry point (delegates to launcher)
-├── runtime/                       # Modern 4-layer architecture
-│   ├── modern_launcher.py         # Modern launcher with DI and lifecycle
-│   ├── legacy_compat.py           # Legacy compatibility layer
-│   ├── runtime_orchestrator.py    # Main event loop coordinator
-│   ├── module_registry.py         # Module registration and state tracking
-│   ├── lifecycle_manager.py       # Lifecycle orchestration
-│   ├── service_container.py       # Dependency injection container
-│   ├── bootstrap.py               # Legacy bootstrap (preserved)
-│   ├── launcher.py                 # Legacy launcher (preserved)
-│   ├── orchestrator.py             # Legacy orchestrator (preserved)
-│   └── MODULE_SUMMARY.md          # Runtime documentation
+├── r.py                           # Simple entry point (delegates to modern launcher)
+├── runtime/                       # Modern runtime architecture
+│   ├── core/                      # Runtime health and orchestration services
+│   │   ├── runtime_state.py       # Runtime health state tracking
+│   │   ├── crash_manager.py       # Crash history and safe-mode recovery
+│   │   ├── runtime_orchestrator.py# Main event loop coordinator
+│   │   ├── module_registry.py     # Module registration and state tracking
+│   │   ├── lifecycle_manager.py   # Lifecycle orchestration
+│   │   └── service_container.py   # Dependency injection container
+│   ├── launchers/                 # Startup and bootstrap code
+│   │   ├── modern_launcher.py     # Modern launcher with phased startup
+│   │   ├── bootstrap.py           # Dependency injection / bootstrap
+│   │   └── __init__.py
+│   └── docs/                     # Runtime documentation
+│       └── MODULE_SUMMARY.md      # Runtime documentation
 ├── domain/                        # Core business logic and stability systems
 │   ├── core/                      # Central orchestration and contracts
 │   ├── capabilities/              # Safety and permission system
@@ -489,14 +492,12 @@ the validation rules. Example: 3D avatar + no LLM, or voice-only + no avatar.
 
 ```
 r.py (Simple Entry Point)
-   └── launcher.py (Legacy Compatibility)
-         ├── Modern Architecture Delegation
-         │     └── runtime/modern_launcher.py
-         │           ├── ServiceContainer (DI)
-         │           ├── ModuleRegistry
-         │           ├── LifecycleManager
-         │           └── RuntimeOrchestrator
-         └── Legacy Fallback (if needed)
+   └── application/launcher.py
+         ├── RuntimeStateStore
+         ├── CrashManager
+         ├── EventBus
+         ├── ChatApp
+         └── Optional degraded modules
 ```
 
 ### 4-Layer Startup Flow

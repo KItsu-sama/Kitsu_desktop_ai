@@ -1,5 +1,5 @@
 """
-utils/logger.py
+infastrucher/logging/logger.py
 Logger setup for Kitsu with color support and proper level handling
 """
 
@@ -87,17 +87,17 @@ def setup_logger(
     - File (kitsu.log): DEBUG level with all messages
     
     Args:
-        name: Logger name
+        name: Logger name for the returned logger handle
         log_file: Optional log file path (defaults to "data/logs/kitsu.log")
         
     Returns:
         Configured logger
     """
-    logger = logging.getLogger(name)
-    logger.setLevel(logging.DEBUG)  # Logger accepts all, handlers filter
+    root_logger = logging.getLogger()
+    root_logger.setLevel(logging.DEBUG)  # Logger accepts all, handlers filter
     
-    # Remove existing handlers
-    logger.handlers.clear()
+    # Remove existing handlers from the root logger so we don't duplicate output
+    root_logger.handlers.clear()
     
     # Set default log file
     if log_file is None:
@@ -114,7 +114,7 @@ def setup_logger(
         datefmt='%H:%M:%S'
     )
     console_handler.setFormatter(console_formatter)
-    logger.addHandler(console_handler)
+    root_logger.addHandler(console_handler)
     
     # =========================================================================
     # File Handler (kitsu.log) — DEBUG level (all messages)
@@ -130,9 +130,9 @@ def setup_logger(
         datefmt='%Y-%m-%d %H:%M:%S'
     )
     file_handler.setFormatter(file_formatter)
-    logger.addHandler(file_handler)
+    root_logger.addHandler(file_handler)
     
-    return logger
+    return logging.getLogger(name)
 
 
 def get_logger(name: str) -> logging.Logger:
@@ -140,8 +140,21 @@ def get_logger(name: str) -> logging.Logger:
     return logging.getLogger(name)
 
 
+def configure_logging(debug: bool = False, name: str = "kitsu", log_file: Optional[str] = None) -> logging.Logger:
+    """Entry-point-friendly logging configuration."""
+    set_debug_output(enabled=debug)
+    return setup_logger(name=name, log_file=log_file)
+
+
+
+
+
+
+
 def set_debug_output(enabled: bool):
+
     """
+
     Enable or disable debug output to console
     
     Args:

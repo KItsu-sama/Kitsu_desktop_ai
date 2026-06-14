@@ -1,44 +1,53 @@
 """
-RULE: ORCHESTRATION & PIPELINES.
-- Coordinates between Domain and Infra.
-- Handles the main chat loop and the "Strip System" logic.
-- Does not perform low-level system tasks; it tells Infra to do them.
+# application/__init__.py
+
+RULE: APPLICATION COORDINATION LAYER.
+- Handles command routing, user management, and application initialization.
+- Bridge between entry point (r.py) and runtime orchestrator.
+- Manages CLI commands, user profiles, and application state.
 
 ARCHITECTURE OWNERSHIP:
 =====================
 
 What owns this?
-- UserManager (user profile management)
 - CommandRouter (CLI command handling)
-- Adapters (system integration)
+- UserManager (user profile and preferences)
+- ApplicationAdapter (main app initialization)
+- SplashScreen (startup UI)
 
 What can import this?
-- runtime/ (for application coordination)
-- interfaces/ (for UI integration)
-- features/ (for feature coordination)
+- r.py (entry point only)
+- scripts/ (setup wizards, first-run)
+- runtime/ (for application initialization)
 
 What imports it?
-- runtime/ (orchestrator coordination)
-- interfaces/ (desktop/web integration)
-- features/ (plugin system)
+- r.py (main entry point)
+- runtime/launchers/modern_launcher.py (ModernLauncher)
+- scripts/first_run.py (setup scripts)
 
 Is it active or deprecated?
-- ACTIVE: All application systems
-- DEPRECATED: None
+- ACTIVE: All application layer systems
+- NO DEPRECATED: Core application never deprecated
 
 Is it runtime-critical?
-- CRITICAL: CommandRouter, UserManager
-- SEMI-CRITICAL: Adapters
-- Failure here = no application coordination
+- CRITICAL: CommandRouter, ApplicationAdapter
+- SEMI-CRITICAL: UserManager (profile loading)
+- NON-CRITICAL: SplashScreen (UI only)
+- Failure here = cannot initialize application or route commands
 """
 
 __version__ = "0.0.1"
 
-# Application layer exports
-from .user_manager import UserManager
-from .commands.command_router import CommandRouter
+# Application exports
+try:
+    from .launcher import main as app_main
+    from .user_manager import UserManager
+    from .main import ApplicationAdapter
+except ImportError:
+    pass
 
 __all__ = [
+    "app_main",
     "UserManager",
-    "CommandRouter"
+    "ApplicationAdapter",
 ]

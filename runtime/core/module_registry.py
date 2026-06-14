@@ -1,7 +1,7 @@
 """
 runtime/core/module_registry.py
 
-Unified module registry to consolidate legacy and modern module systems.
+Unified module registry to consolidate legacy and current module systems.
 This fixes the dual architecture problem by providing a single entry point
 for all module registration and management.
 """
@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 class ModuleType(Enum):
     """Types of modules in the unified system."""
     LEGACY = "legacy"
-    MODERN = "modern"
+    CURRENT = "current"
     HYBRID = "hybrid"
 
 
@@ -85,7 +85,7 @@ class UnifiedModuleRegistry:
         self, 
         module_id: str, 
         module_class: Type,
-        module_type: ModuleType = ModuleType.MODERN,
+        module_type: ModuleType = ModuleType.CURRENT,
         dependencies: Optional[List[str]] = None,
         metadata: Optional[Dict[str, Any]] = None
     ) -> None:

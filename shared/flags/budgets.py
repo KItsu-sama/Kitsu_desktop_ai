@@ -1,5 +1,5 @@
 """
-shared/budgets.py
+shared/flags/budgets.py
 
 Budget management system for Kitsu's resource allocation.
 

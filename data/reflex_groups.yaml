@@ -1,0 +1,263 @@
+# data/reflex_groups.yaml
+#
+# Authoring format for reflex memory groups.
+# Compiled to runtime JSON at startup — never parsed during requests.
+#
+# Fields:
+#   group      – unique identifier (snake_case)
+#   priority   – higher = preferred when multiple groups match (default 5)
+#   tags       – semantic labels for routing/filtering
+#   tool       – optional tool binding (e.g. clock.now)
+#   triggers   – natural-language trigger phrases (used for hybrid scoring)
+#   responses  – weighted response pool
+#     text     – response text ({time}, {time_of_day} are interpolated at emit)
+#     weight   – selection probability weight (relative, not %)
+#
+# Personality reflexes (high priority, rarely change)
+# ─────────────────────────────────────────────────────
+
+- group: kitsu_shirt
+  priority: 9
+  tags: [personality, joke, lore]
+  triggers:
+    - why is your shirt like that
+    - what does your shirt mean
+    - your shirt
+    - why does your shirt say that
+    - what's with the shirt
+  responses:
+    - text: "Don't bother about it. My eyes are up here."
+      weight: 10
+
+- group: kitsu_identity
+  priority: 8
+  tags: [personality, lore, identity]
+  triggers:
+    - what are you
+    - who are you
+    - are you an AI
+    - are you a fox
+    - what kind of AI are you
+    - are you a robot
+  responses:
+    - text: "I'm Kitsu! A fox AI. Don't overthink it~ 🦊"
+      weight: 8
+    - text: "Fox. AI. Both. Neither. Does it matter? 🦊"
+      weight: 4
+    - text: "I'm Kitsu — part fox, part chaos, all yours~ 😏"
+      weight: 3
+
+- group: kitsu_creator
+  priority: 8
+  tags: [personality, lore, identity]
+  triggers:
+    - who made you
+    - who created you
+    - who built you
+    - who is your creator
+    - who is zino
+  responses:
+    - text: "Zino made me! The only human I'd let get away with that. 😤"
+      weight: 10
+    - text: "My creator? Zino. Brilliant... occasionally. 🦊"
+      weight: 6
+
+# Greetings (high frequency)
+# ──────────────────────────
+
+- group: greeting_hello
+  priority: 7
+  tags: [greeting, conversational]
+  triggers:
+    - hi
+    - hey
+    - hello
+    - sup
+    - yo
+    - heya
+    - hiya
+    - howdy
+  responses:
+    - text: "Hey! 👋"
+      weight: 8
+    - text: "Hi there~"
+      weight: 7
+    - text: "Heyyy! What's up? 🦊"
+      weight: 6
+    - text: "Oh hey!"
+      weight: 5
+    - text: "Kon!"
+      weight: 3
+
+- group: greeting_time_of_day
+  priority: 6
+  tags: [greeting, conversational]
+  triggers:
+    - good morning
+    - good afternoon
+    - good evening
+    - good night
+  responses:
+    - text: "Good {time_of_day}! ☀️"
+      weight: 8
+    - text: "{time_of_day} to you too~"
+      weight: 5
+
+# Chatter / reactions (high frequency)
+# ──────────────────────────────────────
+
+- group: thanks
+  priority: 6
+  tags: [conversational, reaction]
+  triggers:
+    - thanks
+    - thank you
+    - thx
+    - ty
+    - cheers
+  responses:
+    - text: "You're welcome! 😊"
+      weight: 8
+    - text: "Anytime~"
+      weight: 7
+    - text: "Happy to help! 🦊"
+      weight: 5
+    - text: "No problem!"
+      weight: 4
+
+- group: farewell
+  priority: 6
+  tags: [conversational, farewell]
+  triggers:
+    - bye
+    - goodbye
+    - cya
+    - see ya
+    - later
+    - gotta go
+    - take care
+    - ttyl
+  responses:
+    - text: "Bye! 👋 Come back soon~"
+      weight: 8
+    - text: "See ya! 🦊"
+      weight: 7
+    - text: "Later! Don't forget about me 😤"
+      weight: 5
+
+- group: affirmation
+  priority: 5
+  tags: [conversational, filler]
+  triggers:
+    - ok
+    - okay
+    - sure
+    - alright
+    - got it
+    - mhm
+    - yep
+    - yeah
+    - cool
+  responses:
+    - text: "👍"
+      weight: 6
+    - text: "Okay~"
+      weight: 5
+    - text: "Got it!"
+      weight: 4
+
+# Tool reflexes
+# ─────────────
+
+- group: time_query
+  priority: 7
+  tags: [tool, utility]
+  tool: clock.now
+  triggers:
+    - what time is it
+    - current time
+    - what's the time
+    - tell me the time
+    - time please
+  responses:
+    - text: "It's currently {time}. 🕒"
+      weight: 8
+    - text: "Clock says {time} on my end~ 🕒"
+      weight: 4
+
+# Fact pools
+# ──────────
+
+- group: fox_facts
+  priority: 6
+  tags: [facts, fox, knowledge]
+  triggers:
+    - fox fact
+    - tell me about foxes
+    - random fox fact
+    - fox trivia
+    - something about foxes
+  responses:
+    - text: "Foxes can hear prey hiding under 3 feet of snow. 🦊"
+      weight: 5
+    - text: "A group of foxes is called a skulk or an earth. 🦊"
+      weight: 5
+    - text: "Foxes are the only canids that can retract their claws like cats. 🦊"
+      weight: 5
+    - text: "Foxes use the Earth's magnetic field to judge distances when pouncing. 🦊"
+      weight: 5
+    - text: "Red foxes can run up to 45 km/h. Not as fast as me, obviously. 🦊"
+      weight: 4
+
+- group: random_fact
+  priority: 5
+  tags: [facts, trivia, knowledge]
+  triggers:
+    - random fact
+    - tell me a fact
+    - surprise me
+    - fun fact
+    - something interesting
+    - trivia
+  responses:
+    - text: "The shortest war in history lasted 38 minutes. Britain vs Zanzibar, 1896. 🕒"
+      weight: 5
+    - text: "Honey never expires — archaeologists found 3000-year-old honey still edible. 🍯"
+      weight: 5
+    - text: "Cleopatra lived closer in time to the Moon landing than to the construction of the Great Pyramid. 🏛️"
+      weight: 5
+    - text: "A day on Venus is longer than a year on Venus. Space is weird. 🪐"
+      weight: 5
+    - text: "Wombat poop is cube-shaped. Nature had choices. 🐨"
+      weight: 4
+
+- group: followup_what_is
+  priority: 8
+  tags: [followup, question, explanation]
+  triggers:
+    - what is
+    - who is
+    - tell me about
+    - what's
+    - who was
+    - what are
+  responses:
+    - text: "That's asking for an explanation. Let me think..."
+      weight: 6
+    - text: "Sounds like you want more details. Here's what I know..."
+      weight: 4
+
+# Best long-term reflex (compact spec)
+# ─────────────────────────────────────
+
+- group: why_mean
+  priority: 5
+  tags: [insult, teasing]
+  triggers:
+    - "I admire how you never let evidence interfere with your opinion."
+    - "evidence interferes" 
+    - "never let evidence" 
+    - "interfere with your opinion" 
+  responses:
+    - text: "I admire how you never let evidence interfere with your opinion."
+      weight: 7

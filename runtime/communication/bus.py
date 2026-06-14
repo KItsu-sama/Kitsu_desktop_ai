@@ -1,125 +1,294 @@
+# runtime/bus.py
 """
-core/bus.py
-
 Unified EventBus + MessageBus for Kitsu.
-Supports both publish/subscribe events and request/response messaging.
+Supports both publish/subscribe events (with priorities & circuit breakers) 
+and request/response messaging (RPC).
 
 Usage:
 
-# Events (fire-and-forget)
-from runtime.bus import bus
-from runtime.events import InputReceived
-
-bus.subscribe(InputReceived, my_handler)
-bus.publish(InputReceived(text="hello"))
+# Events (fire-and-forget with priorities)
+bus.subscribe("INPUT_RECEIVED", handler, priority=-100)  # high priority
+bus.emit("INPUT_RECEIVED", {"text": "hello"})
 
 # Requests (RPC-style)
 result = await bus.request("ai.infer", {"prompt": "hello"})
+
+# Streams
+async for chunk in bus.stream("RESPONSE_STREAM", request_id):
+    process(chunk)
 """
 
 from __future__ import annotations
 
 import asyncio
+import inspect
 import logging
 import time
 from collections import defaultdict
-from typing import Any, Callable, Coroutine, Dict, List, Type, Union
+from dataclasses import dataclass, field
+from enum import Enum
+from typing import Any, Callable, Coroutine, Dict, List, Optional, Set, Type, Union
 
-logger = logging.getLogger('kitsu.core.bus')
+logger = logging.getLogger('kitsu.runtime.bus')
 
+
+# ─────────────────────────────────────────────────────────────
+# Exceptions
+# ─────────────────────────────────────────────────────────────
 
 class BusTimeout(Exception):
     """Raised when a request times out."""
     pass
 
 
-class MessageBus:
-    """Unified event bus with pub/sub + request/response capabilities."""
-    
-    module_id = 'core.bus'
-    required_flags: list[str] = []
+class CircuitOpenError(Exception):
+    """Raised when attempting to use a circuit that's open."""
+    pass
+
+
+# ─────────────────────────────────────────────────────────────
+# Circuit Breaker State
+# ─────────────────────────────────────────────────────────────
+
+class CircuitState(Enum):
+    CLOSED = "closed"
+    OPEN = "open"
+    HALF_OPEN = "half_open"
+
+
+# ─────────────────────────────────────────────────────────────
+# Stats & Metrics
+# ─────────────────────────────────────────────────────────────
+
+@dataclass
+class HandlerStats:
+    """Per-handler error tracking."""
+    consecutive_errors: int = 0
+    total_errors: int = 0
+    last_error_time: float = 0.0
+    total_calls: int = 0
+    successful_calls: int = 0
+
+
+@dataclass
+class EventMetrics:
+    """Event bus metrics."""
+    events_emitted: int = 0
+    handlers_executed: int = 0
+    handlers_skipped: int = 0
+    handler_errors: int = 0
+    total_execution_time_ns: int = 0
+
+
+@dataclass
+class HandlerInfo:
+    """Handler metadata."""
+    handler: Callable[[Any], Any]
+    priority: int = 0
+    stats: HandlerStats = field(default_factory=HandlerStats)
+    circuit_state: CircuitState = CircuitState.CLOSED
+    half_open_in_progress: bool = False
+    lock: asyncio.Lock = field(default_factory=asyncio.Lock)
+
+
+# ─────────────────────────────────────────────────────────────
+# EventBus (Main Implementation)
+# ─────────────────────────────────────────────────────────────
+
+class EventBus:
+    """
+    Async-safe event bus with:
+    - Priority handlers (lower = executes first)
+    - Circuit breaker (skip after 5 consecutive failures)
+    - Request/Response (RPC) support
+    - Thread-safe metrics
+    - Async/sync handler support
+    """
+
+    CIRCUIT_BREAK_THRESHOLD = 5
+    CIRCUIT_RESET_TIMEOUT = 30.0
 
     def __init__(self) -> None:
-        self._event_subscribers: Dict[Type, List[Callable]] = defaultdict(list)
+        # Event system
+        self._event_handlers: Dict[str, List[HandlerInfo]] = defaultdict(list)
+        self._event_metrics: Dict[str, EventMetrics] = defaultdict(EventMetrics)
+        
+        # Request/Response system
         self._request_handlers: Dict[str, Callable[[Any], Union[Any, Coroutine[Any, Any, Any]]]] = {}
+        
+        # Lifecycle
+        self._started: bool = False
+        self._lock = asyncio.Lock()
+        self._active_tasks: Set[asyncio.Task] = set()
 
-    # --- Event Pub/Sub (synchronous + async) ---
+    # ─────────────────────────────────────────────────────────────
+    # Lifecycle (ModuleContract compliance)
+    # ─────────────────────────────────────────────────────────────
 
-    def subscribe(self, event_type: Type, handler: Callable) -> None:
-        """Register a handler for a specific event type (legacy + new)."""
-        self._event_subscribers[event_type].append(handler)
-        logger.debug('Subscribed to event %s', getattr(event_type, 'name', str(event_type)))
+    async def start(self) -> bool:
+        """Start the event bus."""
+        async with self._lock:
+            if self._started:
+                logger.debug("EventBus already started")
+                return True
 
-    def unsubscribe(self, event_type: Type, handler: Callable) -> None:
-        """Remove a previously registered event handler."""
-        handlers = self._event_subscribers.get(event_type, [])
-        if handler in handlers:
-            handlers.remove(handler)
+            self._started = True
+            logger.info("🚀 EventBus started (Priority + Circuit Breaker + RPC)")
+            return True
 
-    def publish(self, event: Any) -> None:
+    async def stop(self) -> bool:
+        """Stop the event bus."""
+        async with self._lock:
+            if not self._started:
+                return True
+
+            self._started = False
+            active = list(self._active_tasks)
+
+        # Cancel outside lock
+        for task in active:
+            task.cancel()
+
+        if active:
+            await asyncio.gather(*active, return_exceptions=True)
+
+        # Clear all handlers
+        self._event_handlers.clear()
+        self._request_handlers.clear()
+        self._event_metrics.clear()
+
+        logger.info("🛑 EventBus stopped")
+        return True
+
+    async def health_check(self) -> Dict[str, Any]:
+        """Return bus health status."""
+        async with self._lock:
+            event_count = sum(len(handlers) for handlers in self._event_handlers.values())
+            circuits = await self.get_circuit_status()
+            
+            return {
+                'ok': True,
+                'started': self._started,
+                'event_handlers': event_count,
+                'request_handlers': len(self._request_handlers),
+                'open_circuits': len(circuits),
+                'circuit_status': circuits
+            }
+
+    # ─────────────────────────────────────────────────────────────
+    # Event Subscription (with priorities)
+    # ─────────────────────────────────────────────────────────────
+
+    async def subscribe(
+        self,
+        event: str,
+        handler: Callable,
+        priority: int = 0
+    ) -> None:
         """
-        Publish an event synchronously to all handlers.
-        Exceptions are logged but do not stop other handlers.
+        Register handler with PRIORITY (lower = executes first).
+        
+        Examples:
+            await bus.subscribe("PREPROCESS_DONE", router, priority=-100)  # CRITICAL
+            await bus.subscribe("LLM_PATH", llm_handler, priority=100)     # LOW
         """
-        start_time = time.perf_counter()
-        event_type = type(event)
-        handlers = list(self._event_subscribers.get(event_type, []))
-        
-        logger.debug(f"[BUS] Publishing {event_type.__name__} to {len(handlers)} handlers")
-        
-        for i, handler in enumerate(handlers):
-            try:
-                handler_start = time.perf_counter()
-                result = handler(event)
-                handler_time = (time.perf_counter() - handler_start) * 1000
-                
-                if asyncio.iscoroutine(result):
-                    # Fire async handlers in background tasks
-                    logger.debug(f"[BUS] Handler {i+1}/{len(handlers)}: async, {handler_time:.1f}ms")
-                    asyncio.create_task(self._safe_async_invoke(result, handler, event_type, event))
-                else:
-                    # Sync handler completed
-                    logger.debug(f"[BUS] Handler {i+1}/{len(handlers)}: sync, {handler_time:.1f}ms")
-            except Exception as exc:
-                self._log_handler_error(handler, event_type, exc)
-        
-        total_time = (time.perf_counter() - start_time) * 1000
-        logger.debug(f"[BUS] Published {event_type.__name__} in {total_time:.1f}ms")
+        handler_name = getattr(handler, "__qualname__", repr(handler))
 
-    async def publish_async(self, event: Any) -> None:
+        async with self._lock:
+            # Remove existing subscription
+            self._unsubscribe_unlocked(event, handler)
+
+            info = HandlerInfo(handler=handler, priority=priority)
+            self._event_handlers[event].append(info)
+            
+            # Sort by priority (lower = higher priority)
+            self._event_handlers[event].sort(key=lambda h: h.priority)
+
+            logger.debug("➕ subscribe: %s → %s (priority=%d)", event, handler_name, priority)
+
+    async def unsubscribe(self, event: str, handler: Callable) -> None:
+        """Unsubscribe handler from event."""
+        async with self._lock:
+            self._unsubscribe_unlocked(event, handler)
+
+    def _unsubscribe_unlocked(self, event: str, handler: Callable) -> None:
+        """Remove existing handler subscription (caller must hold lock)."""
+        handlers = self._event_handlers.get(event, [])
+        handler_name = f"{handler.__module__}.{handler.__qualname__}"
+
+        self._event_handlers[event] = [
+            h for h in handlers if h.handler != handler
+        ]
+
+        if not self._event_handlers[event]:
+            del self._event_handlers[event]
+
+        logger.debug("➖ unsubscribe: %s → %s", event, handler_name)
+
+    # ─────────────────────────────────────────────────────────────
+    # Event Emission (with circuit breakers)
+    # ─────────────────────────────────────────────────────────────
+
+    async def emit(self, event: str, payload: Any = None) -> None:
         """
-        Publish an event asynchronously, awaiting all handlers.
-        Use for critical events where you need confirmation all handlers completed.
+        Fire event with PRIORITY EXECUTION + CIRCUIT BREAKERS.
+        
+        1. Sort handlers by priority (router first)
+        2. Skip circuit-breaker-tripped handlers  
+        3. Execute remaining handlers CONCURRENTLY
         """
-        start_time = time.perf_counter()
-        event_type = type(event)
-        handlers = list(self._event_subscribers.get(event_type, []))
-        
-        logger.debug(f"[BUS] Async publishing {event_type.__name__} to {len(handlers)} handlers")
-        
-        tasks = []
-        for i, handler in enumerate(handlers):
-            try:
-                handler_start = time.perf_counter()
-                result = handler(event)
-                handler_time = (time.perf_counter() - handler_start) * 1000
-                
-                if asyncio.iscoroutine(result):
-                    logger.debug(f"[BUS] Async handler {i+1}/{len(handlers)}: {handler_time:.1f}ms")
-                    tasks.append(self._safe_async_invoke(result, handler, event_type, event))
-                else:
-                    # Sync handlers run immediately
-                    logger.debug(f"[BUS] Sync handler {i+1}/{len(handlers)}: {handler_time:.1f}ms")
-            except Exception as exc:
-                self._log_handler_error(handler, event_type, exc)
-        
+        if not self._started:
+            logger.warning("emit called on stopped EventBus: %s", event)
+            return
+
+        async with self._lock:
+            handlers = list(self._event_handlers.get(event, []))
+
+        if not handlers:
+            logger.debug("emit: %s (no handlers)", event)
+            return
+
+        start_time = time.monotonic_ns()
+
+        async with self._lock:
+            self._event_metrics[event].events_emitted += 1
+
+        skipped = 0
+        tasks: List[asyncio.Task] = []
+
+        for handler_info in handlers:
+            if await self._should_skip_handler(handler_info):
+                skipped += 1
+                logger.debug("⏭️ SKIP %s (circuit breaker)", 
+                           getattr(handler_info.handler, "__qualname__", repr(handler_info.handler)))
+                continue
+
+            task = asyncio.create_task(
+                self._run_handler_tracked(handler_info, payload, event)
+            )
+            self._active_tasks.add(task)
+            task.add_done_callback(self._active_tasks.discard)
+            tasks.append(task)
+
+        async with self._lock:
+            self._event_metrics[event].handlers_skipped += skipped
+
         if tasks:
-            await asyncio.gather(*tasks, return_exceptions=True)
-        
-        total_time = (time.perf_counter() - start_time) * 1000
-        logger.debug(f"[BUS] Async published {event_type.__name__} in {total_time:.1f}ms")
+            results = await asyncio.gather(*tasks, return_exceptions=True)
 
-    # --- Request/Response (RPC) ---
+            async with self._lock:
+                self._event_metrics[event].handlers_executed += len(tasks)
+                for result in results:
+                    if isinstance(result, Exception) and not isinstance(result, asyncio.CancelledError):
+                        self._event_metrics[event].handler_errors += 1
+
+        duration = time.monotonic_ns() - start_time
+        async with self._lock:
+            self._event_metrics[event].total_execution_time_ns += duration
+
+    # ─────────────────────────────────────────────────────────────
+    # Request/Response (RPC)
+    # ─────────────────────────────────────────────────────────────
 
     def register_handler(self, channel: str, handler: Callable[[Any], Union[Any, Coroutine[Any, Any, Any]]]) -> None:
         """Register a request handler for a named channel."""
@@ -133,24 +302,25 @@ class MessageBus:
         Send a request to a channel and await response.
         Supports both sync and async handlers.
         """
+        if not self._started:
+            raise RuntimeError(f"Request on {channel} failed: EventBus not started")
+
         start_time = time.perf_counter()
         
         if channel not in self._request_handlers:
-            logger.warning(f"[BUS] No handler registered for channel: {channel}")
+            logger.warning("[BUS] No handler registered for channel: %s", channel)
             raise BusTimeout(f'No handler for channel {channel}')
 
         handler = self._request_handlers[channel]
-        logger.debug(f"[BUS] Requesting on channel '{channel}' (timeout: {timeout_ms}ms)")
+        logger.debug("[BUS] Requesting on channel '%s' (timeout: %dms)", channel, timeout_ms)
         
         try:
             handler_start = time.perf_counter()
             if asyncio.iscoroutinefunction(handler):
-                # Native async handler
-                logger.debug(f"[BUS] Using async handler for '{channel}'")
+                logger.debug("[BUS] Using async handler for '%s'", channel)
                 coro = handler(payload)
             else:
-                # Sync handler → run in threadpool
-                logger.debug(f"[BUS] Using sync handler for '{channel}'")
+                logger.debug("[BUS] Using sync handler for '%s'", channel)
                 loop = asyncio.get_running_loop()
                 coro = loop.run_in_executor(None, handler, payload)
 
@@ -158,97 +328,221 @@ class MessageBus:
             handler_time = (time.perf_counter() - handler_start) * 1000
             total_time = (time.perf_counter() - start_time) * 1000
             
-            logger.debug(f"[BUS] Request on '{channel}' completed: handler={handler_time:.1f}ms, total={total_time:.1f}ms")
+            logger.debug("[BUS] Request on '%s' completed: handler=%.1fms, total=%.1fms", 
+                        channel, handler_time, total_time)
             return result
             
         except asyncio.TimeoutError as exc:
             total_time = (time.perf_counter() - start_time) * 1000
-            logger.warning(f'[BUS] Request timeout on channel {channel} ({total_time:.1f}ms > {timeout_ms}ms)')
+            logger.warning('[BUS] Request timeout on channel %s (%.1fms > %dms)', 
+                          channel, total_time, timeout_ms)
             raise BusTimeout(f'Timeout waiting for {channel}') from exc
         except Exception as exc:
             total_time = (time.perf_counter() - start_time) * 1000
-            logger.error(f'[BUS] Request handler failed on channel {channel} after {total_time:.1f}ms: {exc}')
+            logger.error('[BUS] Request handler failed on channel %s after %.1fms: %s', 
+                        channel, total_time, exc)
             raise
 
-    # --- Lifecycle (ModuleContract compliance) ---
+    # ─────────────────────────────────────────────────────────────
+    # Streaming Support
+    # ─────────────────────────────────────────────────────────────
 
-    async def start(self) -> bool:
-        """ModuleContract: Initialize bus (already ready on construction)."""
-        logger.info('EventBus started')
-        return True
+    async def stream(self, event: str, request_id: str, timeout: float = 30.0) -> Any:
+        """
+        Stream events matching request_id until timeout.
+        
+        Usage: `async for chunk in bus.stream("RESPONSE_STREAM", ctx.id):`
+        """
+        # TODO: Implement per-request channels/polling
+        deadline = asyncio.get_event_loop().time() + timeout
+        while asyncio.get_event_loop().time() < deadline:
+            await asyncio.sleep(0.01)
+        raise asyncio.TimeoutError(f"Stream timeout: {event} ({timeout}s)")
 
-    async def stop(self) -> bool:
-        """ModuleContract: Clear all handlers and subscribers."""
-        self._event_subscribers.clear()
-        self._request_handlers.clear()
-        logger.info('EventBus stopped')
-        return True
+    # ─────────────────────────────────────────────────────────────
+    # Circuit Breaker Logic
+    # ─────────────────────────────────────────────────────────────
 
-    async def health_check(self) -> Dict[str, Any]:
-        """ModuleContract: Return bus health status."""
-        event_count = sum(len(handlers) for handlers in self._event_subscribers.values())
+    async def _should_skip_handler(self, handler_info: HandlerInfo) -> bool:
+        """Check if handler should be skipped (circuit breaker logic)."""
+        async with handler_info.lock:
+            state = handler_info.circuit_state
+
+            if state == CircuitState.OPEN:
+                elapsed = time.monotonic() - handler_info.stats.last_error_time
+
+                # Move to HALF_OPEN after timeout
+                if elapsed >= self.CIRCUIT_RESET_TIMEOUT:
+                    handler_info.circuit_state = CircuitState.HALF_OPEN
+                    handler_info.half_open_in_progress = False
+                    logger.info("🔄 Circuit HALF_OPEN: %s", 
+                               getattr(handler_info.handler, "__qualname__", repr(handler_info.handler)))
+                else:
+                    return True
+
+            # HALF_OPEN allows ONE test request
+            if handler_info.circuit_state == CircuitState.HALF_OPEN:
+                if handler_info.half_open_in_progress:
+                    return True
+                handler_info.half_open_in_progress = True
+
+            return False
+
+    async def _update_handler_stats(self, handler_info: HandlerInfo, success: bool) -> None:
+        """Update handler stats and circuit breaker state."""
+        async with handler_info.lock:
+            stats = handler_info.stats
+            stats.total_calls += 1
+
+            if success:
+                stats.successful_calls += 1
+                stats.consecutive_errors = 0
+
+                # HALF_OPEN success closes breaker
+                if handler_info.circuit_state == CircuitState.HALF_OPEN:
+                    handler_info.circuit_state = CircuitState.CLOSED
+                    handler_info.half_open_in_progress = False
+                    logger.info("✅ Circuit CLOSED: %s recovered",
+                               getattr(handler_info.handler, "__qualname__", repr(handler_info.handler)))
+            else:
+                stats.consecutive_errors += 1
+                stats.total_errors += 1
+                stats.last_error_time = time.monotonic()
+
+                # HALF_OPEN failure reopens immediately
+                if handler_info.circuit_state == CircuitState.HALF_OPEN:
+                    handler_info.circuit_state = CircuitState.OPEN
+                    handler_info.half_open_in_progress = False
+                    logger.warning("🚫 Circuit REOPENED: %s",
+                                  getattr(handler_info.handler, "__qualname__", repr(handler_info.handler)))
+                elif stats.consecutive_errors >= self.CIRCUIT_BREAK_THRESHOLD:
+                    handler_info.circuit_state = CircuitState.OPEN
+                    logger.warning("🚫 Circuit OPEN: %s (%d consecutive failures)",
+                                  getattr(handler_info.handler, "__qualname__", repr(handler_info.handler)),
+                                  stats.consecutive_errors)
+
+    async def _run_handler_tracked(self, handler_info: HandlerInfo, payload: Any, event: str) -> None:
+        """Execute handler with error tracking."""
+        success = True
+        try:
+            handler = handler_info.handler
+
+            if inspect.iscoroutinefunction(handler):
+                await handler(payload)
+            else:
+                result = await asyncio.to_thread(handler, payload)
+                if inspect.isawaitable(result):
+                    await result
+
+        except asyncio.CancelledError:
+            raise
+        except Exception:
+            success = False
+            logger.exception("💥 handler %s failed on %s",
+                           getattr(handler_info.handler, "__qualname__", repr(handler_info.handler)),
+                           event)
+            raise
+        finally:
+            await self._update_handler_stats(handler_info, success)
+
+    # ─────────────────────────────────────────────────────────────
+    # Monitoring & Metrics
+    # ─────────────────────────────────────────────────────────────
+
+    async def get_circuit_status(self) -> Dict[str, List[str]]:
+        """Get all OPEN circuit breakers."""
+        async with self._lock:
+            open_circuits = {}
+            for event, handlers in self._event_handlers.items():
+                open_handlers = [
+                    getattr(h.handler, "__qualname__", repr(h.handler))
+                    for h in handlers 
+                    if h.circuit_state == CircuitState.OPEN
+                ]
+                if open_handlers:
+                    open_circuits[event] = open_handlers
+            return open_circuits
+
+    async def reset_circuits(self, event: Optional[str] = None) -> None:
+        """Reset circuit breakers to CLOSED state."""
+        async with self._lock:
+            if event:
+                handlers = self._event_handlers.get(event, [])
+            else:
+                handlers = []
+                for h_list in self._event_handlers.values():
+                    handlers.extend(h_list)
+            
+            for handler_info in handlers:
+                async with handler_info.lock:
+                    handler_info.circuit_state = CircuitState.CLOSED
+                    handler_info.stats = HandlerStats()
+                    handler_info.half_open_in_progress = False
+
+    async def get_metrics(self) -> Dict[str, EventMetrics]:
+        """Get event metrics."""
+        async with self._lock:
+            return dict(self._event_metrics)
+
+    async def get_handler_stats(self, event: str) -> List[dict]:
+        """Get detailed handler stats for event."""
+        async with self._lock:
+            handlers = self._event_handlers.get(event, [])
+            result = []
+            for h in handlers:
+                result.append({
+                    "handler": getattr(h.handler, "__qualname__", repr(h.handler)),
+                    "priority": h.priority,
+                    "circuit_state": h.circuit_state.value,
+                    "consecutive_errors": h.stats.consecutive_errors,
+                    "total_errors": h.stats.total_errors,
+                    "total_calls": h.stats.total_calls,
+                    "successful_calls": h.stats.successful_calls,
+                    "success_rate": (h.stats.successful_calls / max(h.stats.total_calls, 1) * 100)
+                })
+            return result
+
+    async def get_stats(self) -> Dict[str, Any]:
+        """Comprehensive production stats."""
+        metrics = await self.get_metrics()
+        circuits = await self.get_circuit_status()
+        
+        total_events = sum(m.events_emitted for m in metrics.values())
+        total_errors = sum(m.handler_errors for m in metrics.values())
+        
+        total_handlers = sum(len(h) for h in self._event_handlers.values())
+        avg_execution = sum(
+            m.total_execution_time_ns / 1_000_000 / max(m.handlers_executed, 1)
+            for m in metrics.values()
+        ) / max(len(metrics), 1)
+        
         return {
-            'ok': True,
-            'latency_ms': 0.0,
-            'event_handlers': event_count,
-            'request_handlers': len(self._request_handlers)
+            "started": self._started,
+            "total_events": total_events,
+            "total_errors": total_errors,
+            "total_handlers": total_handlers,
+            "request_handlers": len(self._request_handlers),
+            "open_circuits": len(circuits),
+            "circuit_status": circuits,
+            "avg_execution_ms": avg_execution
         }
 
-    # --- Utilities ---
+    # ─────────────────────────────────────────────────────────────
+    # Legacy Compatibility (sync publish)
+    # ─────────────────────────────────────────────────────────────
 
-    def clear(self) -> None:
-        """Remove all subscriptions and handlers. Useful in tests."""
-        self._event_subscribers.clear()
-        self._request_handlers.clear()
-
-    def subscriber_count(self, event_type: Type) -> int:
-        """Get number of subscribers for an event type."""
-        return len(self._event_subscribers.get(event_type, []))
-
-    def handler_count(self, channel: str) -> int:
-        """Get number of handlers for a request channel (always 0 or 1)."""
-        return 1 if channel in self._request_handlers else 0
-
-    # --- Internal helpers ---
-
-    async def _safe_async_invoke(self, coro: Coroutine, handler: Callable, event_type: Type, event: Any) -> None:
-        """Safely invoke async event handler."""
-        try:
-            await coro
-        except Exception as exc:
-            self._log_handler_error(handler, event_type, exc)
-
-    def _log_handler_error(self, handler: Callable, event_type: Type, exc: Exception) -> None:
-        """Log handler exception with context."""
-        handler_name = (getattr(handler, '__name__', None) or 
-                       getattr(handler, '__qualname__', None) or 
-                       repr(handler))
-        logger.error(
-            "EventBus: handler %s raised %s for event %s",
-            handler_name,
-            type(exc).__name__,
-            getattr(event_type, 'name', str(event_type)),
-            exc_info=True,
-        )
+    def publish(self, event: Any) -> None:
+        """
+        Legacy sync publish for event objects.
+        Creates task to emit asynchronously.
+        """
+        event_name = type(event).__name__
+        asyncio.create_task(self.emit(event_name, event))
 
 
-# Module-level singleton. Import this everywhere.
-bus: MessageBus = MessageBus()
+# ─────────────────────────────────────────────────────────────
+# Singleton
+# ─────────────────────────────────────────────────────────────
 
-"""
-# 1. Events (fire-and-forget)
-bus.subscribe(InputReceived, handler)
-bus.publish(InputReceived(text="hi"))
-
-# 2. Async events (await completion)  
-await bus.publish_async(ResponseReady(...)) 
-
-# 3. Requests (RPC)
-bus.register_handler("tts.speak", tts_handler)
-audio = await bus.request("tts.speak", "hello")
-
-# 4. Mixed pipeline
-bus.publish(InputReceived(text="hi"))
-result = await bus.request("ai.infer", {"prompt": "hi"})
-bus.publish(ResponseReady(...))
-"""
+MessageBus = EventBus
+bus = EventBus()

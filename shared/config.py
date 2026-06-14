@@ -18,7 +18,7 @@ from typing import Any, Dict, List
 
 import yaml
 
-from shared.file_security import safe_file_read, safe_file_write
+from shared.security.file_security import safe_file_read, safe_file_write
 
 logger = logging.getLogger('kitsu.config')
 

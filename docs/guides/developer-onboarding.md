@@ -14,6 +14,10 @@ updated: 2026-04-30
 
 # Developer Onboarding Guide (Production Core)
 
+> NOTE: The runtime/legacy compatibility layer has been removed. This guide still includes historical migration notes, but the current codebase uses the modern runtime only.
+>
+> Use `python r.py` as the supported startup path.
+
 Welcome to the Kitsu development team! This guide will get you up to speed with our new production-grade event-driven architecture.
 
 ## Project Setup
@@ -40,18 +44,21 @@ python src/kitsu/main.py
 
 ```
 project-root/
-├── r.py                           # Simple entry point (delegates to launcher)
-├── runtime/                       # Modern 4-layer architecture
-│   ├── modern_launcher.py         # Modern launcher with DI and lifecycle
-│   ├── legacy_compat.py           # Legacy compatibility layer
-│   ├── runtime_orchestrator.py    # Main event loop coordinator
-│   ├── module_registry.py         # Module registration and state tracking
-│   ├── lifecycle_manager.py       # Lifecycle orchestration
-│   ├── service_container.py       # Dependency injection container
-│   ├── bootstrap.py               # Legacy bootstrap (preserved)
-│   ├── launcher.py                 # Legacy launcher (preserved)
-│   ├── orchestrator.py             # Legacy orchestrator (preserved)
-│   └── MODULE_SUMMARY.md          # Runtime documentation
+├── r.py                           # Simple entry point (delegates to modern launcher)
+├── runtime/                       # Modern runtime architecture
+│   ├── core/                      # Runtime health and orchestration services
+│   │   ├── runtime_state.py       # Runtime health state tracking
+│   │   ├── crash_manager.py       # Crash history and safe-mode recovery
+│   │   ├── runtime_orchestrator.py# Main event loop coordinator
+│   │   ├── module_registry.py     # Module registration and state tracking
+│   │   ├── lifecycle_manager.py   # Lifecycle orchestration
+│   │   └── service_container.py   # Dependency injection container
+│   ├── launchers/                 # Startup and bootstrap code
+│   │   ├── modern_launcher.py     # Modern launcher with phased startup
+│   │   ├── bootstrap.py           # Dependency injection / bootstrap
+│   │   └── __init__.py
+│   └── docs/                     # Runtime documentation
+│       └── MODULE_SUMMARY.md      # Runtime documentation
 ├── domain/                        # Core business logic and stability systems
 │   ├── core/                      # Central orchestration and contracts
 │   ├── capabilities/              # Safety and permission system
@@ -165,12 +172,9 @@ python r.py --safe
 ```
 
 #### Legacy Mode (Fallback)
+The legacy runtime fallback has been removed. Use the modern entry point instead:
 ```bash
-# Direct legacy launcher (fallback)
-python runtime/launcher.py
-
-# Development mode
-python runtime/launcher.py --dev
+python r.py
 ```
 
 #### Tauri Development
@@ -252,12 +256,13 @@ Kitsu includes comprehensive safety and stability systems:
 - Circuit breaker patterns to prevent cascading failures
 - Health monitoring with comprehensive logging
 
-### 3. Legacy Compatibility
+### 3. Runtime State & Recovery
 
-The system maintains **full backward compatibility**:
-- **Legacy Compatibility Layer** (`runtime/legacy_compat.py`)
-- **Adapter Pattern** for legacy modules
-- **Graceful Migration Path** from legacy to modern architecture
+The current runtime now uses modern state and crash recovery systems:
+- `runtime/core/runtime_state.py` tracks runtime state transitions
+- `runtime/core/crash_manager.py` records crash events and forces safe mode
+- Legacy compatibility adapters have been removed from the codebase
+- The modern startup path is `python r.py`
 
 ### 4. Capability Tiers and Resource Management
 
@@ -336,10 +341,10 @@ if gateway.check_permission("filesystem", "read", path):
 - Clear dependency hierarchy through DI container
 - Interface-driven development with standardized contracts
 
-**Legacy Compatibility**:
-- Legacy modules wrapped with compatibility adapters
-- Gradual migration path from legacy to modern
-- Preserve existing functionality during transition
+**Runtime Compatibility**:
+- The modern runtime is the supported startup path
+- Legacy compatibility adapters have been removed from the codebase
+- Migrate modules directly to modern runtime interfaces
 
 ### 3. Import Discipline
 
@@ -350,7 +355,7 @@ from domain.capabilities import CapabilityManager
 from domain.inference import ResourceController
 
 # Bad - circular dependencies
-from runtime.legacy_compat import LegacyModuleAdapter
+# Avoid legacy compatibility imports and adapters
 from runtime.runtime_orchestrator import RuntimeOrchestrator
 ```
 
@@ -410,13 +415,13 @@ Every module must have:
 4. Test integration with state machine
 5. Document changes
 
-### 5. Migrating Legacy Modules
+### 5. Modern Architecture Migration
 
-1. Create compatibility adapter in `runtime/legacy_compat.py`
+1. Replace legacy module entrypoints with modern runtime-compatible services
 2. Implement modern interfaces from `domain/contracts/`
-3. Register with ModuleRegistry
-4. Test with both legacy and modern launchers
-5. Update migration documentation
+3. Register modules with `ModuleRegistry`
+4. Verify startup under `python r.py`
+5. Update migration documentation and remove legacy references
 
 ## Testing Strategy
 
@@ -437,17 +442,17 @@ Every module must have:
 - Verify critical systems integration
 - Test resource adaptation and state transitions
 
-### 2. Legacy Compatibility Testing
+### 2. Modern Architecture Validation
 
 **Compatibility Tests**:
-- Test legacy module adapters
-- Verify legacy launcher still works
-- Test migration path from legacy to modern
+- Verify modern startup via `python r.py`
+- Confirm `RuntimeState` transitions and crash recovery behavior
+- Validate optional module degradation without full failure
 
 **Regression Tests**:
-- Ensure existing functionality preserved
-- Test both modern and legacy entry points
-- Verify configuration compatibility
+- Ensure existing functionality is preserved under the modern runtime
+- Verify configuration compatibility for runtime profiles and safe mode
+- Confirm health and shutdown sequencing
 
 ### 3. Performance Tests
 
@@ -488,8 +493,8 @@ logger.debug(f"Current phase: {lifecycle.current_phase}")
 - Module startup failures → Check ModuleRegistry dependencies
 - Lifecycle issues → Check phase order in LifecycleManager
 
-**Legacy Compatibility**:
-- Import errors → Check legacy adapter mappings
+**Modern Runtime**:
+- Startup errors → Check runtime state transitions
 - Permission denied → Verify capability system integration
 - Model loading failures → Check resource controller configuration
 
@@ -519,7 +524,7 @@ logger.debug(f"Current phase: {lifecycle.current_phase}")
 - Add tests for new features
 - Ensure all tests pass
 - Performance impact assessment
-- Test both modern and legacy compatibility
+- Test modern runtime compatibility
 
 ## Getting Help
 
@@ -535,7 +540,7 @@ logger.debug(f"Current phase: {lifecycle.current_phase}")
 - **Modern Architecture**: `runtime/MODULE_SUMMARY.md`
 - **Critical Systems**: `CRITICAL_SYSTEMS_ARCHITECTURE.md`
 - **System Design**: `SYSTEM_ARCHITECTURE.md`
-- **Legacy Migration**: `runtime/legacy_compat.py`
+- **Legacy Migration**: legacy compatibility removed; use modern runtime only
 
 ### 3. Community
 
@@ -549,7 +554,7 @@ logger.debug(f"Current phase: {lifecycle.current_phase}")
 Check the `examples/` directory for:
 - Modern architecture patterns
 - Critical system implementations
-- Legacy compatibility examples
+- Modern runtime examples
 - Integration patterns
 
 ## Next Steps
@@ -570,9 +575,6 @@ Welcome to the Kitsu development team! 🦊
 ```bash
 # Modern startup
 python r.py
-
-# Legacy fallback
-python runtime/launcher.py
 
 # Development mode
 python r.py --safe

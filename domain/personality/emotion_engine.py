@@ -1,5 +1,5 @@
 """
-personality/emotion_engine.py
+domain/personality/emotion_engine.py
 
 EmotionEngine = Manager — Lifecycle and state of emotion system.
 
@@ -56,6 +56,13 @@ from .emotional_triggers import (
     apply_personality_modifiers
 )
 from domain.personality.kitsu_self_interface import KitsuSelfInterface, KitsuSelfAdapter
+
+# Import debug logging
+try:
+    from shared.debug_timer import debug_personality_change, _debug
+except ImportError:
+    def debug_personality_change(*args, **kwargs): pass
+    def _debug(*args, **kwargs): pass
 
 if TYPE_CHECKING:
     from domain.personality.kitsu_self import KitsuSelf
@@ -185,6 +192,21 @@ class EmotionEngine:
         self.is_hidden: bool = False
 
         log.info(f"EmotionEngine initialized: {self.mood}/{self.style}/{self.state}")
+    
+    @classmethod
+    def get_singleton(cls) -> 'EmotionEngine':
+        """
+        Get or create the singleton instance of EmotionEngine.
+        Required for InputMux to access emotional state.
+        """
+        if not hasattr(cls, '_singleton'):
+            cls._singleton = cls()
+        return cls._singleton
+
+    @classmethod
+    def get_s(cls) -> 'EmotionEngine':  # Short alias for convenience
+        """Short alias for get_singleton()"""
+        return cls.get_singleton()
 
     # =========================================================================
     # Core Emotion Stack
@@ -585,6 +607,15 @@ class EmotionEngine:
             old = self.mood
             self.mood = mood
             
+            # Debug output
+            debug_personality_change(
+                emotion=self.get_current_emotion(),
+                mood=mood,
+                style=self.style,
+                trigger="manual_set_mood",
+                strength=1.0
+            )
+            
             # Use personality mapper for manual override
             if self.personality_mapper.set_manual_mood_override(mood, duration):
                 self._update_legacy_mode()
@@ -605,12 +636,67 @@ class EmotionEngine:
                                 context_tags=["system"]
                             )
                             log.info(f"Mood override persisted to memory: {mood}")
+                            _debug("PERSONALITY", "PERSIST", f"mood_override={mood}")
                         else:
                             log.warning("Memory manager not available for mood persistence")
                     except Exception as e:
                         log.error(f"Failed to persist mood override: {e}")
         else:
             log.warning(f"Invalid mood: {mood}")
+            _debug("PERSONALITY", "INVALID_MOOD", f"attempted mood={mood}")
+    
+        return {
+            "dominant_emotion": dominant,
+            "confidence": intensity,
+            "mood": self.mood,
+            "style": self.style,
+            "state": self.state,
+            "vibe": vibe,
+            "energy_level": self.energy_level,
+            "trust_level": self.trust_level
+        }
+    
+    def get_emotional_state(self) -> Dict[str, Any]:
+        """Get emotional state for other modules (InputMux, etc.).
+
+        Returns:
+            Dict with emotional state information including vibe vector
+        """
+        dominant = self.get_current_emotion()
+        intensity = self.get_current_intensity()
+
+        # Generate vibe vector (10-dim representation of emotional state)
+        vibe = self._generate_vibe_vector(dominant, intensity)
+
+        return {
+            "dominant_emotion": dominant,
+            # Keep legacy meaning: confidence == emotional intensity
+            "confidence": intensity,
+            "mood": self.mood,
+            "style": self.style,
+            "state": self.state,
+            "vibe": vibe,
+            "energy_level": self.energy_level,
+            "trust_level": self.trust_level,
+        }
+
+    def _generate_vibe_vector(self, emotion: str, intensity: float) -> list[float]:
+        """Generate a 10-dim vibe vector from emotional state"""
+        # Base emotion mappings (simplified)
+        emotion_map = {
+            "happy": [0.9, 0.2, 0.1, 0.0, 0.0, 0.8, 0.3, 0.2, 0.7, 0.4],
+            "sad": [0.1, 0.0, 0.0, 0.2, 0.8, 0.1, 0.9, 0.8, 0.2, 0.3],
+            "angry": [0.0, 0.0, 0.0, 0.1, 0.9, 0.0, 0.2, 0.9, 0.1, 0.0],
+            "neutral": [0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5, 0.5],
+            "curious": [0.3, 0.1, 0.0, 0.2, 0.1, 0.7, 0.4, 0.1, 0.9, 0.8],
+            "playful": [0.8, 0.3, 0.1, 0.1, 0.0, 0.9, 0.2, 0.1, 0.6, 0.9],
+        }
+
+        base_vibe = emotion_map.get(emotion, emotion_map["neutral"])
+
+        # Scale by intensity
+        return [v * intensity for v in base_vibe]
+
 
     def clear_mood_override(self):
         """Clear any manual mood override immediately"""
@@ -757,22 +843,27 @@ class EmotionEngine:
         }
 
     def get_emotional_state(self) -> Dict[str, Any]:
-        """
-        Get emotional state for UI/voice.
+        """Get emotional state for other modules (InputMux, etc.).
 
         Returns:
-            Dict with dominant_emotion and confidence
+            Dict with emotional state information including vibe vector
         """
         dominant = self.get_current_emotion()
-        resistance = self.get_resistance()
+        intensity = self.get_current_intensity()
+
+        vibe = self._generate_vibe_vector(dominant, intensity)
 
         return {
             "dominant_emotion": dominant,
-            "confidence": resistance,
+            "confidence": intensity,
             "mood": self.mood,
             "style": self.style,
-            "state": self.state
+            "state": self.state,
+            "vibe": vibe,
+            "energy_level": self.energy_level,
+            "trust_level": self.trust_level,
         }
+
 
     def get_avatar_hint(self) -> str:
         """

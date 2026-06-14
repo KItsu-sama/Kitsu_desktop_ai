@@ -34,7 +34,8 @@ This release represents a complete architectural overhaul, introducing a modern 
 #### Documentation
 - **Modern Architecture Guide**: `docs/MODERN_ARCHITECTURE.md`
 - **User Guide**: `docs/USER_GUIDE.md`
-- **Development Guide**: `docs/DEVELOPMENT.md`
+- **Development Guide**: (removed) `docs/DEVELOPMENT.md` was obsolete/contradictory; see `docs/_DEVELOPMENT_DELETED_BY_BLACKBOXAI.md`
+
 - **Updated README**: Reflects modern system
 
 ### 🔄 Changed

@@ -43,14 +43,12 @@ from .personality.emotion_engine import EmotionEngine
 from .personality.emotion_stack_manager import EmotionStackManager
 from .personality.personality_mapper import PersonalityMapper
 from .personality.memory_manager import MemoryManager
-from .ai.llm.provider import LLMProvider
 from .interaction.input_manager import InputManager
 
 __all__ = [
     "EmotionEngine",
-    "EmotionStackManager", 
+    "EmotionStackManager",
     "PersonalityMapper",
     "MemoryManager",
-    "LLMProvider",
     "InputManager"
 ]

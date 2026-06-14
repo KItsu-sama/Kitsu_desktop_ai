@@ -1,39 +1,59 @@
 #!/usr/bin/env python3
-"""
-r.py — Kitsu Desktop AI Entry Point
+"""r.py — Kitsu Desktop AI Entry Point
 
-Single unified CLI wrapper that:
-  - Parses command-line arguments
-  - Configures the runtime environment
-  - Delegates to ModernLauncher for all runtime operations
+This file should be a pure entry point.
+Responsibilities:
+  - sys.path anchor
+  - CLI arg parsing
+  - configure logging once
+  - delegate all runtime phases to application.launcher.ModernLauncher
 
-This is the ONLY public entry point. No application logic here.
+No first-run logic here; no handler setup here beyond calling configure_logging.
 """
 
 import argparse
 import asyncio
-import logging
-import sys
 import os
+import sys
 from pathlib import Path
 
-# Setup unbuffered output and UTF-8 encoding
-sys.stdin.reconfigure(encoding='utf-8', errors='ignore')
-os.environ['PYTHONUNBUFFERED'] = '1'
-os.environ['PYTHONIOENCODING'] = 'utf-8'
+# rich
+from rich.console import Console
+from rich.table import Table
+from rich.panel import Panel
+
+import logging
+
+# Fix: Standardize on PROJECT_ROOT as the base anchor for absolute tracking
+PROJECT_ROOT = Path(__file__).resolve().parent
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+# Setup unbuffered output and UTF-8 encoding safely
+try:
+    if hasattr(sys.stdin, "reconfigure"):
+        # mypy/pyright may not know about TextIO.reconfigure; safe at runtime.
+        sys.stdin.reconfigure(encoding="utf-8", errors="ignore")  # type: ignore[attr-defined]
+    else:
+        import io
+
+        sys.stdin = io.TextIOWrapper(sys.stdin.buffer, encoding="utf-8", errors="ignore")
+except Exception:
+    pass
 
 
+os.environ["PYTHONUNBUFFERED"] = "1"
+os.environ["PYTHONIOENCODING"] = "utf-8"
 
 LOGO = r""" 
 =============================||=============================
-
                 ░\                        /░
              /░/  ░\                    /░  \░\
-           /░/      \░\              /░/      \░\
-           ░/         \░\          /░/         \░
-         /░░           \░\        /░/           ░░\
-        /░░             \░\      /░/             ░░\
-        ░░     /░░░░\    ░░\____/░░    /░░░░\     ░░
+           /░/     \░░\              /░░/     \░\
+           ░/        \░░\          /░░/        \░
+         /░/          \░░\        /░░/          \░\
+        /░|            \░░\      /░░/            |░\
+        ░░     /====\    ░░\____/░░    /====\     ░░
         ░░    |░░░░░░░ /░░/░░||░░\░░\ ░░░░░░░|    ░░
         ░░   /░░░░░░░░░░░░░_=┘└=_░░░░░░░░░░░░░\   ░░
         \░░  |░░░/░░░░░░░//      \\░░░░░░░░\░░|  ░░/
@@ -53,107 +73,133 @@ LOGO = r"""
                       \░░░░░░¯¯░░░░░░░/
                        \░░░░░||░░░░░/ 
                          ¯¯==--==¯¯
-
 =============================||=============================
 """
 
-
-def setup_logging(debug: bool = False) -> None:
-    """Configure logging for the application."""
-    level = logging.DEBUG if debug else logging.INFO
-    logging.basicConfig(
-        level=level,
-        format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-        handlers=[logging.StreamHandler(sys.stdout)]
-    )
+__version__ = "2.1.3"
 
 
 def parse_args() -> dict:
-    """Parse and return CLI arguments as configuration dict."""
     parser = argparse.ArgumentParser(
         prog="kitsu",
-        description="Kitsu Desktop AI - Local AI Assistant Runtime"
+        description="Kitsu Desktop AI - Local AI Assistant Runtime",
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  python r.py --logo                    # Show logo
+  python r.py --debug                   # Debug mode
+  python r.py --safe                    # Safe mode (laptop friendly)
+  python r.py --profile high            # Custom profile
+  python r.py --status                  # Health check
+  python r.py --version                 # Show version
+        """,
     )
+    parser.add_argument("--debug", action="store_true", help="Enable debug logging")
+    parser.add_argument("--logo", action="store_true", help="Display Kitsu logo and exit")
+    parser.add_argument("--safe", action="store_true", help="Force safe-mode profile")
+    parser.add_argument("--profile", type=str, help="Override hardware profile")
+    parser.add_argument("--version", action="version", version=f"Kitsu {__version__}")
+    parser.add_argument("--status", action="store_true", help="Show health dashboard")
 
-    parser.add_argument(
-        "--debug",
-        action="store_true",
-        help="Enable debug logging"
-    )
-
-    parser.add_argument(
-        "--logo",
-        action="store_true",
-        help="Display Kitsu logo and exit"
-    )
-
-    parser.add_argument(
-        "--safe",
-        action="store_true",
-        help="Force safe-mode profile (minimal resources)"
-    )
-
-    parser.add_argument(
-        "--profile",
-        type=str,
-        help="Override hardware profile (e.g., 'ultra_low', 'mid', 'high')"
-    )
-
-    args = parser.parse_args()
-    
-    return {
-        "debug": args.debug,
-        "logo": args.logo,
-        "safe": args.safe,
-        "profile": args.profile,
-    }
+    return vars(parser.parse_args())
 
 
 async def main() -> int:
-    """Main entry point - delegates to ModernLauncher."""
     args = parse_args()
-    
-    # Setup logging
-    setup_logging(debug=args["debug"])
-    logger = logging.getLogger(__name__)
-    
-    # Show logo and exit if requested
+
+    # Early Exit Flags (Prevents accidental side effects like creating files)
     if args["logo"]:
         print(LOGO)
         return 0
-    
-    # Import and run modern launcher
+
+    # Configure logging (entrypoint-only responsibility)
+    from infrastructure.logging.logger import configure_logging
+
+    configure_logging(debug=bool(args["debug"]))
+    logger = logging.getLogger(__name__)
+
+    # Status check (build minimal wiring needed for HealthMonitor)
+    if args["status"]:
+        try:
+            from runtime.infrastructure.container import get_container
+            from runtime.communication.bus import MessageBus
+            from runtime.infrastructure.clocks import ClockService
+            from runtime.legacy.orchestrator import Orchestrator
+            from runtime.systems.health import HealthMonitor
+
+            container = get_container()
+
+            # Minimal wiring required to instantiate HealthMonitor
+            container.register_singleton(MessageBus, MessageBus)
+            container.register_singleton(ClockService, ClockService)
+            container.register_singleton(Orchestrator, Orchestrator)
+
+            event_bus = container.get(MessageBus)
+            orchestrator = container.get(Orchestrator)
+            clock_service = container.get(ClockService)
+
+            health = HealthMonitor(
+                event_bus=event_bus,
+                orchestrator=orchestrator,
+                clock_service=clock_service,
+                container=container,
+            )
+
+            await health.start()
+            status = health.get_status()
+            console = Console()
+
+            table = Table(title="Kitsu System Health")
+
+            table.add_column("Component")
+            table.add_column("Status")
+            table.add_column("Detail")
+
+            table.add_row(
+                "AI Tier",
+                "[green]OK[/green]",
+                status["ai"]["tier"]
+            )
+
+            table.add_row(
+                "CPU",
+                "[yellow]ACTIVE[/yellow]",
+                f"{status['system']['cpu_percent']:.0f}%"
+            )
+
+            console.print(
+                Panel(table, title="KITSU STATUS")
+            )
+            return 0
+
+
+        except Exception as e:
+            logger.error(f"❌ Health status failed: {e}", exc_info=True)
+            return 1
+
+
     try:
-        from runtime.launchers.modern_launcher import ModernLauncher
+        from application.launcher import Launcher
     except ImportError as e:
-        print(f"❌ Failed to import ModernLauncher: {e}")
+        logger.error(f"❌ Failed to import Launcher from application.launcher: {e}")
         return 1
-    
+
     try:
-        launcher = ModernLauncher()
-        
-        success = await launcher.launch(
-            profile_override=args["profile"],
-            safe_mode=args["safe"]
-        )
-        
+        launcher = Launcher(safe_mode=bool(args.get("safe", False)))
+        success = await launcher.start()
         return 0 if success else 1
-        
-    except KeyboardInterrupt:
-        logger.info("⏸️  Interrupted by user")
-        return 130
     except Exception as e:
-        logger.error(f"❌ Launcher failed: {e}", exc_info=True)
+        logger.error(f"❌ Launcher failed: {e}", exc_info=bool(args.get("debug", False)))
         return 1
 
 
 if __name__ == "__main__":
     try:
-        exit_code = asyncio.run(main())
-        sys.exit(exit_code)
+        sys.exit(asyncio.run(main()))
     except KeyboardInterrupt:
         print("\n👋 Goodbye!")
         sys.exit(130)
     except Exception as e:
         print(f"❌ Fatal error: {e}", file=sys.stderr)
         sys.exit(1)
+

@@ -46,7 +46,7 @@ task = await background_manager.start_task(
 - Graceful shutdown coordination with configurable timeouts
 - Event-driven shutdown notifications
 - Multiple signal support with proper restoration
-- Legacy compatibility layer
+- Legacy compatibility layer (historical)
 
 **Integration**:
 ```python
@@ -56,7 +56,7 @@ from core.lifecycle import create_lifecycle_manager, create_graceful_shutdown
 lifecycle = create_lifecycle_manager(event_bus)
 await lifecycle.wait_for_shutdown()
 
-# Legacy compatibility
+# Legacy compatibility (historical)
 legacy_shutdown = create_graceful_shutdown(engine)
 ```
 
@@ -114,10 +114,10 @@ registered_modules = [
 - Runtime parameter adjustment
 - Profile-based settings
 
-### 5. **Legacy Compatibility**
-- Drop-in replacement for existing code
-- Gradual migration path
-- No breaking changes
+### 5. **Historical Compatibility Notes**
+- Historical legacy compatibility layers have been removed
+- The modern runtime is now the supported startup path
+- Migration is complete for the current runtime architecture
 
 ## Usage Patterns
 

@@ -1,0 +1,38 @@
+{
+  "modules": {
+    "input_mux": {
+      "enabled": true
+    },
+    "input_manager": {
+      "enabled": true
+    },
+    "slm": {
+      "enabled": true,
+      "model": "Qwen2.5-1.5B"
+    },
+    "llm": {
+      "enabled": true,
+      "fallback": true
+    },
+    "memory": {
+      "enabled": true
+    },
+    "judge": {
+      "enabled": true
+    }
+  },
+  "event_system": {
+    "bus_type": "kitsu.core.event_bus",
+    "max_subscribers": 100,
+    "timeout_ms": 5000
+  },
+  "pipeline": {
+    "tiers": [
+      "fast_brain",
+      "slm",
+      "llm"
+    ],
+    "judge_validation": true,
+    "behavior_gating": true
+  }
+}

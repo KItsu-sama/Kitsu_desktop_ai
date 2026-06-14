@@ -20,7 +20,7 @@ import time
 from typing import Dict, Any
 from pathlib import Path
 from rich.console import Console
-from shared.logging.logger import set_debug_output, is_debug_output_enabled
+from shared.logger import set_debug_output, is_debug_output_enabled
 
 log = logging.getLogger(__name__)
 
@@ -179,17 +179,264 @@ class CommandRouter:
         return {"success": False, "output": "❌ LLM controller not available"}
 
     async def _cmd_debug(self, parts, full_cmd):
+        """
+        Debug command with subcommands:
+        /debug              - show current debug status
+        /debug on           - enable debug output
+        /debug off          - disable debug output
+        /debug view         - show comprehensive debug information
+        /debug router       - show router configuration
+        /debug reflex       - show reflex system status
+        /debug cache        - show cache statistics
+        /debug personality  - show personality/emotion state
+        """
         if len(parts) < 2:
             status = "ON 🔵" if is_debug_output_enabled() else "OFF 🔴"
-            return {"success": True, "output": f"🐛 Debug output is currently: {status}"}
+            return {"success": True, "output": f"🐛 Debug output is currently: {status}\n\nUsage: /debug [on|off|view|router|reflex|cache|personality]"}
+        
         mode = parts[1].lower()
+        
         if mode == "on":
             set_debug_output(True)
-            return {"success": True, "output": "🐛 Debug output enabled 🔵"}
+            return {"success": True, "output": "🐛 Debug output enabled 🔵\n\n⚠️ Debug output will show:\n  • Router decisions & routing paths\n  • Reflex matching & cache operations\n  • Personality changes & triggers\n  • Judge scoring & escalations\n  • Response pipeline stages\n  • Timing information (milliseconds)"}
+        
         elif mode == "off":
             set_debug_output(False)
             return {"success": True, "output": "🐛 Debug output disabled 🔴"}
-        return {"success": False, "output": "❌ Usage: /debug [on|off]"}
+        
+        elif mode == "view":
+            return await self._debug_view_comprehensive()
+        
+        elif mode == "router":
+            return await self._debug_view_router()
+        
+        elif mode == "reflex":
+            return await self._debug_view_reflex()
+        
+        elif mode == "cache":
+            return await self._debug_view_cache()
+        
+        elif mode == "personality":
+            return await self._debug_view_personality()
+        elif mode == "reasons":
+            return await self._debug_view_reasons()
+        
+        return {"success": False, "output": "❌ Usage: /debug [on|off|view|router|reflex|cache|personality]"}
+    
+    async def _debug_view_comprehensive(self) -> Dict[str, Any]:
+        """Show comprehensive debug information across all systems."""
+        output = "\n" + "="*60 + "\n🔍 COMPREHENSIVE DEBUG VIEW\n" + "="*60
+        
+        # Router status
+        output += "\n\n🧭 ROUTER:\n"
+        output += "  ├─ Status: Decision-making enabled\n"
+        output += "  ├─ Routes: REFLEX → SLM → LLM (escalation chain)\n"
+        output += "  ├─ Complexity scoring: Enabled\n"
+        output += "  └─ Template matching: 11 fast templates cached\n"
+        
+        # Reflex status
+        output += "\n📦 REFLEX MATCHING:\n"
+        output += "  ├─ Status: Active\n"
+        output += "  ├─ Threshold: 0.35\n"
+        output += "  ├─ Groups loaded: Check logs for count\n"
+        output += "  ├─ Cache: See /debug cache\n"
+        output += "  └─ Similarity: SimHash + Trigram + Token overlap\n"
+        
+        # Personality status
+        personality_output = await self._debug_view_personality()
+        output += "\n" + personality_output["output"]
+        
+        # Cache status
+        cache_output = await self._debug_view_cache()
+        output += "\n" + cache_output["output"]
+        
+        # Performance tips
+        output += "\n\n⚡ PERFORMANCE TIPS:\n"
+        output += "  • Enable /debug to see millisecond-precision timing\n"
+        output += "  • Watch for reflex cache hits (fastest responses)\n"
+        output += "  • Monitor escalations to understand routing decisions\n"
+        output += "  • Use /stats for memory and performance metrics\n"
+        
+        return {"success": True, "output": output}
+    
+    async def _debug_view_router(self) -> Dict[str, Any]:
+        """Show router configuration and status."""
+        output = "\n" + "="*60 + "\n🧭 ROUTER CONFIGURATION\n" + "="*60
+        output += "\n\nRouting Pipeline:\n"
+        output += "  1. CACHE CHECK\n"
+        output += "     ├─ Reflex cache lookup (fastest)\n"
+        output += "     └─ Template matching (11 templates)\n"
+        output += "\n  2. COMPLEXITY ANALYSIS\n"
+        output += "     ├─ Token count scoring (0.0-1.0)\n"
+        output += "     ├─ Reasoning keyword detection\n"
+        output += "     └─ Threshold: 0.3\n"
+        output += "\n  3. ROUTING DECISION\n"
+        output += "     ├─ Cache hit → REFLEX_PATH (instant)\n"
+        output += "     ├─ Low complexity (< 0.3) → SLM_PATH (lightweight)\n"
+        output += "     └─ High complexity (≥ 0.3) → LLM_PATH (full model)\n"
+        output += "\n\nFast Templates (REFLEX by default):\n"
+        output += "  • hi, hello, hey\n"
+        output += "  • what time is it\n"
+        output += "  • tell me a fact\n"
+        output += "  • tell me a random fact\n"
+        output += "\n\nEnable /debug on to see routing decisions in real-time"
+        
+        return {"success": True, "output": output}
+    
+    async def _debug_view_reflex(self) -> Dict[str, Any]:
+        """Show reflex system status."""
+        output = "\n" + "="*60 + "\n📦 REFLEX MATCHING SYSTEM\n" + "="*60
+        output += "\n\nMatching Pipeline:\n"
+        output += "  1. INPUT NORMALIZATION\n"
+        output += "     └─ Tokenization → SimHash computation\n"
+        output += "\n  2. CACHE LOOKUP\n"
+        output += "     └─ Exact simhash match → instant response (cache hit)\n"
+        output += "\n  3. CANDIDATE RETRIEVAL\n"
+        output += "     ├─ Score all groups against query\n"
+        output += "     ├─ Filter by threshold (0.35)\n"
+        output += "     └─ Sort by score + priority\n"
+        output += "\n  4. SCORING ALGORITHM\n"
+        output += "     ├─ Trigram similarity: 40%\n"
+        output += "     ├─ Token overlap: 30%\n"
+        output += "     └─ SimHash similarity: 30%\n"
+        output += "\n  5. RESPONSE SELECTION\n"
+        output += "     ├─ Weighted random draw\n"
+        output += "     ├─ Recent response exclusion\n"
+        output += "     └─ Tool routing (if applicable)\n"
+        output += "\n  6. JUDGE VALIDATION\n"
+        output += "     └─ Tone check + confidence scoring\n"
+        output += "\n\nEnable /debug on to see matching scores and candidates"
+        
+        return {"success": True, "output": output}
+    
+    async def _debug_view_cache(self) -> Dict[str, Any]:
+        """Show cache statistics and status."""
+        from pathlib import Path
+        cache_file = Path("data/reflex_cache.json")
+        
+        output = "\n" + "="*60 + "\n💾 RESPONSE CACHE STATUS\n" + "="*60
+        
+        if cache_file.exists():
+            try:
+                import json
+                with open(cache_file, 'r') as f:
+                    cache_data = json.load(f)
+                
+                cache_size = len(cache_data)
+                output += f"\n\n✓ Cache file: {cache_file}\n"
+                output += f"  ├─ Entries: {cache_size}\n"
+                output += f"  ├─ Max capacity: 10,000\n"
+                output += f"  ├─ Usage: {(cache_size/10000)*100:.1f}%\n"
+                
+                # Calculate quality distribution
+                quality_scores = []
+                for entry in cache_data.values():
+                    if isinstance(entry, dict) and "quality" in entry:
+                        quality_scores.append(entry["quality"])
+                
+                if quality_scores:
+                    avg_quality = sum(quality_scores) / len(quality_scores)
+                    output += f"  └─ Avg. quality: {avg_quality:.2f}\n"
+                
+                output += "\n\nCache Operation:\n"
+                output += "  └─ Entries are stored when:\n"
+                output += "     • Response from LLM route\n"
+                output += "     • Judge quality score ≥ 0.8\n"
+                output += "     • Automatic caching (no manual action needed)\n"
+                
+                output += "\n\nCache Lookup (Fastest Path):\n"
+                output += "  • Query → SimHash\n"
+                output += "  • SimHash lookup in cache\n"
+                output += "  • Cache hit = instant response\n"
+                output += "  • Cache miss = fallback to matching\n"
+            except Exception as e:
+                output += f"\n\n❌ Error reading cache: {e}\n"
+        else:
+            output += f"\n\n⚠️ Cache file not found: {cache_file}\n"
+            output += "   Cache will be created on first high-quality LLM response\n"
+        
+        return {"success": True, "output": output}
+    
+    async def _debug_view_personality(self) -> Dict[str, Any]:
+        """Show personality and emotion state."""
+        emotion_engine = self.controller.emotion_engine
+        output = "\n" + "="*60 + "\n🎭 PERSONALITY & EMOTION STATE\n" + "="*60
+        
+        if emotion_engine and hasattr(emotion_engine, 'get_state_dict'):
+            state = emotion_engine.get_state_dict()
+            output += "\n\nCurrent State:\n"
+            output += f"  ├─ Mood: {state.get('mood', '?').upper()}\n"
+            output += f"  ├─ Style: {state.get('style', '?').upper()}\n"
+            output += f"  ├─ State: {state.get('state', '?').upper()}\n"
+            output += f"  ├─ Dominant emotion: {state.get('dominant_emotion', '?')}\n"
+            output += f"  ├─ Emotion stack: {state.get('stack_size', 0)} items\n"
+            output += f"  └─ Resistance: {state.get('resistance', 0.0):.2f}\n"
+            
+            if hasattr(emotion_engine, 'energy_level'):
+                output += f"\n\nPersonality Traits:\n"
+                output += f"  ├─ Energy: {emotion_engine.energy_level:.2%}\n"
+                output += f"  ├─ Trust: {emotion_engine.trust_level:.2%}\n"
+                if hasattr(emotion_engine, 'personality_traits'):
+                    traits = emotion_engine.personality_traits
+                    for trait, value in traits.items():
+                        output += f"  ├─ {trait.title()}: {value:.0%}\n"
+        else:
+            output += "\n\n❌ Emotion engine not available\n"
+        
+        output += "\n\nMood System:\n"
+        output += "  └─ Four primary moods:\n"
+        output += "     ├─ BEHAVE - calm, collected, professional\n"
+        output += "     ├─ MEAN - sarcastic, sassy, direct\n"
+        output += "     ├─ FLIRTY - playful, charming, witty\n"
+        output += "     └─ PROTECTIVE - caring, supportive, concerned\n"
+        
+        output += "\n\nStyle System (Expression Overlay):\n"
+        output += "  └─ Expression styles:\n"
+        output += "     ├─ CHAOTIC - unpredictable, energetic\n"
+        output += "     ├─ SWEET - gentle, kind, warm\n"
+        output += "     ├─ COLD - detached, formal, aloof\n"
+        output += "     ├─ DIRECT - straightforward, honest\n"
+        output += "     ├─ SARCASTIC - witty, ironic, clever\n"
+        output += "     ├─ PLAYFUL - fun, joking, light\n"
+        output += "     └─ EERIE - mysterious, unsettling\n"
+        
+        output += "\n\nEnable /debug on to see real-time personality changes\n"
+        
+        return {"success": True, "output": output}
+
+    async def _debug_view_reasons(self) -> Dict[str, Any]:
+        """Listen briefly for RESPONSE_READY_META events and show debug reasons."""
+        output = "\n" + "="*60 + "\n🧩 RECENT RESPONSE REASONS\n" + "="*60 + "\n"
+        try:
+            # Import local event bus
+            from application.core.event_bus import bus
+            import asyncio
+
+            collected = []
+
+            async def _collector(payload):
+                try:
+                    pid = payload.get('id') if isinstance(payload, dict) else None
+                    reason = payload.get('debug_reason') if isinstance(payload, dict) else None
+                    ts = __import__('time').time()
+                    collected.append({'id': pid, 'debug_reason': reason, 'ts': ts})
+                except Exception:
+                    pass
+
+            # Subscribe and collect for 2 seconds
+            await bus.subscribe('RESPONSE_READY_META', _collector)
+            await asyncio.sleep(2.0)
+            await bus.unsubscribe('RESPONSE_READY_META', _collector)
+
+            if not collected:
+                output += "No recent RESPONSE_READY_META events captured (try again while generating responses).\n"
+            else:
+                for c in collected:
+                    output += f"- id={c['id']} reason={c['debug_reason']} ts={c['ts']:.0f}\n"
+
+            return {"success": True, "output": output}
+        except Exception as e:
+            return {"success": False, "output": f"❌ Failed to collect reasons: {e}"}
 
     # =========================================================================
     # Info Commands
@@ -394,10 +641,10 @@ class CommandRouter:
 
     async def _cmd_style(self, parts, full_cmd):
         if len(parts) < 2:
-            from shared.personality_config import VALID_STYLES
+            from domain.personality.emotion_config import VALID_STYLES
             return {"success": False, "output": f"❌ Usage: /style <{', '.join(sorted(VALID_STYLES))}> [duration_in_seconds]"}
         style = parts[1].lower()
-        from shared.personality_config import validate_style
+        from domain.personality.emotion_config import validate_style
         
         # Try to get EmotionManager from orchestrator first
         emotion_manager = None
@@ -425,7 +672,7 @@ class CommandRouter:
             else:
                 return {"success": True, "output": f"✨ Style set to: {style}"}
         
-        from shared.personality_config import VALID_STYLES
+        from domain.personality.emotion_config import VALID_STYLES
         return {"success": False, "output": f"❌ Invalid style. Valid: {', '.join(sorted(VALID_STYLES))}"}
 
     async def _cmd_trigger(self, parts, full_cmd):

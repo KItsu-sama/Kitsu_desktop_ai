@@ -10,17 +10,17 @@ import asyncio
 import logging
 from typing import Optional
 
-from runtime.runtime_orchestrator import RuntimeOrchestrator, get_runtime_orchestrator
+from runtime.core.runtime_orchestrator import RuntimeOrchestrator, get_runtime_orchestrator
 from runtime.config.profiles import select_profile
-from shared.capability_flags import CapabilityFlags
-from runtime.runtime_config import RuntimeConfig
+from shared import CapabilityFlags
+from runtime.config.runtime_config import RuntimeConfig
 
 log = logging.getLogger(__name__)
 
 
-class ModernLauncher:
+class Launcher:
     """
-    Modern launcher with proper 4-layer architecture.
+    Launcher with proper 4-layer architecture.
     
     Implements deterministic startup phases:
     PHASE 0 — Core Services
@@ -55,7 +55,7 @@ class ModernLauncher:
         self.startup_time = asyncio.get_event_loop().time()
         
         try:
-            log.info("=== Kitsu Modern Launcher Starting ===")
+            log.info("=== Kitsu Launcher Starting ===")
             
             # Step 1: Initialize Runtime Orchestrator
             self.orchestrator = get_runtime_orchestrator()
@@ -168,12 +168,12 @@ class ModernLauncher:
     
     def _create_health_monitor_class(self):
         """Create a health monitor class that can be instantiated with DI."""
-        from runtime.health import HealthMonitor
+        from runtime.systems.health import HealthMonitor
         return HealthMonitor
     
     def _create_performance_manager_class(self):
         """Create a performance manager class that can be instantiated with DI."""
-        from runtime.performance_manager import PerformanceManager
+        from runtime.infrastructure.performance_manager import PerformanceManager
         return PerformanceManager
     
     def _create_emotion_engine_class(self):
@@ -220,15 +220,16 @@ class ModernLauncher:
         return await self.orchestrator.get_system_status()
 
 
+
 # Global launcher instance
-_launcher: Optional[ModernLauncher] = None
+_launcher: Optional[Launcher] = None
 
 
-def get_modern_launcher() -> ModernLauncher:
-    """Get the global modern launcher instance."""
+def get_launcher() -> Launcher:
+    """Get the global launcher instance."""
     global _launcher
     if _launcher is None:
-        _launcher = ModernLauncher()
+        _launcher = Launcher()
     return _launcher
 
 
@@ -242,7 +243,7 @@ async def launch_kitsu(
     
     This is the main entry point for the new system.
     """
-    launcher = get_modern_launcher()
+    launcher = get_launcher()
     return await launcher.launch(
         profile_override=profile_override,
         safe_mode=safe_mode,
@@ -252,5 +253,5 @@ async def launch_kitsu(
 
 async def shutdown_kitsu() -> bool:
     """Shutdown Kitsu gracefully."""
-    launcher = get_modern_launcher()
+    launcher = get_launcher()
     return await launcher.shutdown()

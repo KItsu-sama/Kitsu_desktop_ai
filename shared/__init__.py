@@ -43,16 +43,16 @@ Is it runtime-critical?
 __version__ = "0.0.1"
 
 # Configuration exports
-from .config.config_loader import ConfigLoader
-from .config.unified_config import UnifiedConfig
+from .config_loader import ConfigLoader
+from .unified_config import UnifiedConfig
 
 # Feature flags exports
 from .flags.capability_flags import CapabilityFlags
 from .flags.budgets import BudgetManager
 
 # Logging exports
-from .logging.session_logger import SessionLogger
-from .logging.logger import get_debug_logger, set_debug_output
+from .session_logger import SessionLogger
+from .logger import get_debug_logger, set_debug_output
 
 # Security exports
 from .security.file_security import safe_file_read, safe_file_write

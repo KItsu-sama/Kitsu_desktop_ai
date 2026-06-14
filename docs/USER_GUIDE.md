@@ -231,8 +231,9 @@ python r.py --first-run
 ```
 
 Or completely reset:
+
 ```bash
-python src/kitsu/first_run.py --reset
+python r.py --first-run
 ```
 
 ## Data and Privacy
@@ -302,10 +303,10 @@ Available AI models:
 
 ### Extending Kitsu
 
-Add custom modules by creating files in `src/kitsu/modules/`:
+Add custom modules by creating files in `application/modules/`:
 ```python
-from kitsu.core.event_bus import bus
-from kitsu.core.context import RequestContext
+from application.core.event_bus import bus
+from application.core.context import RequestContext
 
 async def handle_custom_event(ctx: RequestContext):
     # Your custom logic

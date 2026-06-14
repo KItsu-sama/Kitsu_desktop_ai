@@ -10,9 +10,7 @@
     ├── .obsidian
     │   ├── app.json
     │   ├── appearance.json
-    │   ├── canvas.json
     │   ├── core-plugins.json
-    │   ├── graph.json
     │   ├── hotkeys.json
     │   ├── themes
     │   │   └── ITS Theme
@@ -22,6 +20,7 @@
     ├── .windsurf
     │   └── workflows
     │       └── first-run-workflow.md
+    ├── CRITICAL_BUGS_FIXED.md
     ├── CRITICAL_SYSTEMS_ARCHITECTURE.md
     ├── Full layout.canvas
     ├── LICENSE
@@ -29,7 +28,9 @@
     ├── PERSONALITY_ENHANCEMENTS.md
     ├── README.md
     ├── SYSTEM_ARCHITECTURE.md
-    ├── app
+    ├── TODO.md
+    ├── TODO_runtime_state_and_legacy_merge.md
+    ├── application
     │   ├── __init__.py
     │   ├── adapters
     │   │   ├── desktop.py
@@ -43,6 +44,29 @@
     │   │   ├── command_handlers
     │   │   │   └── __init__.py
     │   │   └── command_router.py
+    │   ├── core
+    │   │   ├── __init__.py
+    │   │   ├── context.py
+    │   │   ├── event_bus.py
+    │   │   └── subscriptions.py
+    │   ├── first_run.py
+    │   ├── launcher.py
+    │   ├── main.py
+    │   ├── modules
+    │   │   ├── __init__.py
+    │   │   ├── input_manager.py
+    │   │   ├── input_mux.py
+    │   │   ├── judge.py
+    │   │   ├── llm.py
+    │   │   ├── memory.py
+    │   │   ├── preprocess.py
+    │   │   ├── quiz_handler.py
+    │   │   ├── reflex.py
+    │   │   ├── reflex_compiler.py
+    │   │   ├── reprocess.py
+    │   │   ├── router.py
+    │   │   └── slm.py
+    │   ├── splash.py
     │   └── user_manager.py
     ├── assets
     │   ├── banner.jpg
@@ -55,6 +79,7 @@
     ├── data
     │   ├── config
     │   │   ├── modern_config.json
+    │   │   ├── modules_config.json
     │   │   ├── permissions.json
     │   │   ├── personality.json
     │   │   ├── system_config.json
@@ -65,24 +90,37 @@
     │   │   └── backups
     │   ├── profiles
     │   ├── reflex_cache.json
+    │   ├── reflex_groups.yaml
+    │   ├── reflex_runtime.json
     │   └── runtime
+    │       ├── .first_run
     │       ├── .first_run_complete
     │       ├── .modern_first_run
     │       ├── crash.log
     │       ├── feature_manifest.json
     │       ├── last_crash.json
-    │       └── memory.json
+    │       ├── memory.json
+    │       └── runtime_state.json
     ├── docs
     │   ├── .obsidian
     │   │   ├── app.json
     │   │   ├── appearance.json
-    │   │   └── core-plugins.json
+    │   │   ├── canvas.json
+    │   │   ├── core-plugins.json
+    │   │   ├── graph.json
+    │   │   ├── hotkeys.json
+    │   │   ├── themes
+    │   │   │   └── ITS Theme
+    │   │   │       ├── manifest.json
+    │   │   │       └── theme.css
+    │   │   └── workspace.json
     │   ├── CHANGELOG.md
     │   ├── DEVELOPMENT.md
     │   ├── MODERN_ARCHITECTURE.md
     │   ├── README.md
     │   ├── SECURITY.md
     │   ├── USER_GUIDE.md
+    │   ├── _DEVELOPMENT_DELETED_BY_BLACKBOXAI.md
     │   ├── __init__.py
     │   ├── api
     │   │   └── README.md
@@ -225,19 +263,7 @@
     │   ├── unified_events.py
     │   ├── unified_manager.py
     │   └── vector.py
-    ├── features
-    │   ├── __init__.py
-    │   ├── browser_integration
-    │   ├── community_features
-    │   ├── loader.py
-    │   ├── plugin_api.py
-    │   └── quiz_solver
-    │       ├── auto_solver.py
-    │       ├── config.json
-    │       ├── module.py
-    │       ├── performance_tracker.py
-    │       └── safety.py
-    ├── infra
+    ├── infrastructure
     │   ├── __init__.py
     │   ├── llm
     │   │   └── llm_fallback_generator.py
@@ -297,6 +323,18 @@
     ├── kitsu_desktop_ai.md
     ├── layout.json
     ├── layout.txt
+    ├── plugins
+    │   ├── __init__.py
+    │   ├── browser_integration
+    │   ├── community_features
+    │   ├── loader.py
+    │   ├── plugin_api.py
+    │   └── quiz_solver
+    │       ├── auto_solver.py
+    │       ├── config.json
+    │       ├── module.py
+    │       ├── performance_tracker.py
+    │       └── safety.py
     ├── pyproject.toml
     ├── r.py
     ├── requirements.txt
@@ -315,9 +353,11 @@
     │   │   └── runtime_config.py
     │   ├── core
     │   │   ├── __init__.py
+    │   │   ├── crash_manager.py
     │   │   ├── lifecycle.py
     │   │   ├── module_registry.py
-    │   │   └── runtime_orchestrator.py
+    │   │   ├── runtime_orchestrator.py
+    │   │   └── runtime_state.py
     │   ├── docs
     │   │   ├── MODULE_SUMMARY.md
     │   │   ├── README_REFACTORING.md
@@ -337,14 +377,12 @@
     │   ├── launchers
     │   │   ├── __init__.py
     │   │   ├── bootstrap.py
-    │   │   ├── legacy_compat.py
     │   │   └── modern_launcher.py
     │   ├── legacy
     │   │   ├── __init__.py
     │   │   ├── application.py
-    │   │   ├── launcher.py
-    │   │   ├── main.py
     │   │   └── orchestrator.py
+    │   ├── runtime_orchestrator.py
     │   └── systems
     │       ├── __init__.py
     │       ├── behavior_engine.py
@@ -352,18 +390,13 @@
     │       ├── health.py
     │       ├── idle_manager.py
     │       └── system_monitor.py
+    ├── runtime.canvas
     ├── scripts
     │   ├── __init__.py
     │   ├── fast_brain_trainer.py
-    │   ├── first_run.py
     │   └── setup_wizard.py
     ├── shared
     │   ├── __init__.py
-    │   ├── config
-    │   │   ├── __init__.py
-    │   │   ├── config_loader.py
-    │   │   ├── defaults.yaml
-    │   │   └── unified_config.py
     │   ├── config.py
     │   ├── config_files
     │   │   ├── __init__.py
@@ -372,6 +405,7 @@
     │   │   ├── personality.json
     │   │   ├── system_config.json
     │   │   └── user_profile.json
+    │   ├── config_loader.py
     │   ├── constants
     │   ├── data
     │   │   ├── __init__.py
@@ -386,25 +420,28 @@
     │   │   ├── budgets.py
     │   │   ├── capability_flags.py
     │   │   └── tiers.py
-    │   ├── learning
+    │   ├── legacy_duplicates
+    │   │   ├── config
+    │   │   │   ├── __init__.py
+    │   │   │   └── defaults.yaml
+    │   │   ├── learning
+    │   │   ├── logging
+    │   │   │   └── __init__.py
+    │   │   ├── lora
+    │   │   ├── memory
+    │   │   │   └── backups
+    │   │   ├── models
+    │   │   │   ├── __init__.py
+    │   │   │   ├── model_dict.json
+    │   │   │   └── ollama.yaml
+    │   │   └── personality
+    │   │       ├── __init__.py
+    │   │       ├── personality_config.py.backup
+    │   │       ├── triggers.json
+    │   │       └── ul_templates.json
     │   ├── loader.py
-    │   ├── logging
-    │   │   ├── __init__.py
-    │   │   ├── logger.py
-    │   │   └── session_logger.py
-    │   ├── lora
-    │   ├── memory
-    │   │   └── backups
-    │   ├── models
-    │   │   ├── __init__.py
-    │   │   ├── model_dict.json
-    │   │   └── ollama.yaml
+    │   ├── logger.py
     │   ├── mods
-    │   ├── personality
-    │   │   ├── __init__.py
-    │   │   ├── personality_config.py.backup
-    │   │   ├── triggers.json
-    │   │   └── ul_templates.json
     │   ├── profiles
     │   │   ├── balanced.yaml
     │   │   ├── full.yaml
@@ -421,42 +458,19 @@
     │   │   ├── __init__.py
     │   │   ├── file_security.py
     │   │   └── validation.py
+    │   ├── session_logger.py
+    │   ├── unified_config.py
     │   └── utils
+    │       ├── __init__.py
     │       ├── anim_map.json
     │       ├── config.json
     │       ├── layout_maper.py
     │       ├── layout_mapper.py
     │       ├── metrics.py
     │       ├── signals.py
-    │       ├── simhash.py
+    │       ├── simhashh.py
+    │       ├── timing.py
     │       └── tracing.py
-    ├── src
-    │   └── kitsu
-    │       ├── __init__.py
-    │       ├── core
-    │       │   ├── __init__.py
-    │       │   ├── context.py
-    │       │   └── event_bus.py
-    │       ├── first_run.py
-    │       ├── launcher.py
-    │       ├── main.py
-    │       ├── modules
-    │       │   ├── __init__.py
-    │       │   ├── input_manager.py
-    │       │   ├── input_mux.py
-    │       │   ├── judge.py
-    │       │   ├── llm.py
-    │       │   ├── memory.py
-    │       │   ├── preprocess.py
-    │       │   ├── quiz_handler.py
-    │       │   ├── reflex.py
-    │       │   ├── reprocess.py
-    │       │   ├── router.py
-    │       │   └── slm.py
-    │       ├── splash.py
-    │       └── utils
-    │           ├── __init__.py
-    │           └── timing.py
     ├── src-tauri
     │   ├── frontend
     │   │   ├── assets
@@ -472,8 +486,7 @@
     │   │   ├── hw_detect.rs
     │   │   ├── local_api.rs
     │   │   └── main.rs
-    │   └── tauri
-.....
-    └── vendor
-        └── Open-LLM-VTuber
-....
+    │   └── tauri (full repo)
+    ....
+    ├── vendor
+    │   └── Open-LLM-VTuber (full repo)

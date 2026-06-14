@@ -1,5 +1,5 @@
 """
-memory/stores/vector_memory.py
+domain/memory/stores/vector_memory.py
 
 Vector memory store for semantic search and embeddings.
 Implements MemoryStoreContract.

@@ -1,8 +1,8 @@
 {
-  "name": "kitsu",
-  "nickname": "ki",
-  "refer_title": "ki",
-  "gender": "male",
+  "name": "Zino",
+  "nickname": "zi",
+  "refer_title": "zi",
+  "gender": "unspecified",
   "status": "user",
   "permissions": {
     "is_admin": false,

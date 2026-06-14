@@ -1,3 +1,5 @@
+# runtime/__init__.py
+
 """
 RULE: RUNTIME STATE & EXECUTION.
 - Contains runtime state management and execution contexts.
@@ -10,6 +12,7 @@ What owns this?
 - ServiceContainer (dependency injection)
 - ModuleRegistry (module management)
 - LifecycleManager (startup/shutdown)
+- EventBus (system communication)
 
 What can import this?
 - r.py (entry point only)
@@ -24,28 +27,29 @@ What imports it?
 
 Is it active or deprecated?
 - ACTIVE: Modern 4-layer architecture
-- DEPRECATED: Legacy components (moved to legacy/)
+- DEPRECATED: Legacy components have been removed
 
 Is it runtime-critical?
 - CRITICAL: Core runtime execution
-- All components are runtime-critical
+- EventBus is CRITICAL for all communication
 - Failure here = system failure
 """
+
 
 __version__ = "0.0.1"
 
 # Runtime exports
-from .legacy.orchestrator import Orchestrator
-from .legacy.launcher import main
 from .core.lifecycle import LifecycleManager
 from .systems.system_monitor import SystemMonitor
 
 # Runtime configuration
 from .config.runtime_config import RuntimeConfig
 
+# Expose runtime components
+from runtime.communication.bus import bus, EventBus, BusTimeout, CircuitOpenError
+
 __all__ = [
-    "Orchestrator",
-    "main",
+    'bus', 'EventBus', 'BusTimeout', 'CircuitOpenError',
     "LifecycleManager",
     "SystemMonitor",
     "RuntimeConfig"

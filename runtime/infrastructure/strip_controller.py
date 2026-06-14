@@ -1,4 +1,6 @@
 """
+# runtime/infrastructure/strip_controller.py
+
 Strip Controller: Enforce hardware tier constraints on intelligence routing.
 
 Matrix:
@@ -22,8 +24,8 @@ from __future__ import annotations
 import logging
 from typing import Optional
 
-from shared.capability_flags import CapabilityFlags
-from runtime.policy_router import RoutingTarget
+from shared.flags.capability_flags import CapabilityFlags
+from runtime.communication.policy_router import RoutingTarget
 
 logger = logging.getLogger('kitsu.router.strip_controller')
 

@@ -21,7 +21,7 @@ Kitsu has been refactored to use a modern event-driven architecture that provide
 
 ## Core Components
 
-### 1. EventBus (`src/kitsu/core/event_bus.py`)
+### 1. EventBus (`application/core/event_bus.py`)
 
 The central communication hub that enables decoupled, event-driven communication between components.
 
@@ -38,7 +38,7 @@ The central communication hub that enables decoupled, event-driven communication
 - `SLM_PATH`: Route to SLM module
 - `RESPONSE_READY`: Final response ready for display
 
-### 2. InputMux (`src/kitsu/modules/input_mux.py`)
+### 2. InputMux (`application/modules/input_mux.py`)
 
 The "Sanity Layer" that normalizes all input before it enters the AI pipeline.
 
@@ -53,7 +53,7 @@ The "Sanity Layer" that normalizes all input before it enters the AI pipeline.
 - `SPEECH`: Transcribed speech input
 - `COMMAND`: System commands (starting with /)
 
-### 3. InputManager (`src/kitsu/modules/input_manager.py`)
+### 3. InputManager (`application/modules/input_manager.py`)
 
 Coordinates the AI pipeline and routes events between modules.
 
@@ -63,7 +63,7 @@ Coordinates the AI pipeline and routes events between modules.
 - Handle fallback scenarios
 - Manage response lifecycle
 
-### 4. ChatApp (`src/kitsu/main.py`)
+### 4. ChatApp (`application/main.py`)
 
 The main user interface that handles user interaction and response display.
 
@@ -75,17 +75,18 @@ The main user interface that handles user interaction and response display.
 
 ## AI Pipeline
 
-The modern system implements a multi-tier AI processing pipeline:
+The modern system implements a sequential AI processing pipeline (streaming removed for now):
 
 ```
-Input → Behavior Engine → FastBrain → SLM → LLM → Judge → Response
+RAW_INPUT → preprocess → route → judge → response
 ```
 
-### Tiers
+### Layers (actual runtime tiers)
 
-1. **FastBrain (Reflex)**: Quick, pre-trained responses
-2. **SLM (Local Model)**: Qwen2.5-1.5B for balanced responses
-3. **LLM (Fallback)**: Larger models for complex queries
+- **reflex**: fast cached/template responses
+- **local_model (SLM)**: small local generation
+- **fallback_model (LLM)**: heavier fallback generation
+
 
 ### Judge Validation
 
@@ -102,14 +103,14 @@ Modern modules automatically register themselves when imported:
 
 ```python
 # Auto-import modules to register subscribers
-import kitsu.modules.preprocess
-import kitsu.modules.router
-import kitsu.modules.reflex
-import kitsu.modules.slm
-import kitsu.modules.llm
-import kitsu.modules.memory
-import kitsu.modules.input_mux
-import kitsu.modules.input_manager
+import application.modules.preprocess
+import application.modules.router
+import application.modules.reflex
+import application.modules.slm
+import application.modules.llm
+import application.modules.memory
+import application.modules.input_mux
+import application.modules.input_manager
 ```
 
 ### Module Structure
@@ -223,8 +224,8 @@ python r.py --first-run
 
 ```python
 # Test module in isolation
-import kitsu.modules.your_module
-from kitsu.core.context import RequestContext
+import application.modules.your_module
+from application.core.context import RequestContext
 
 ctx = RequestContext(text="test input")
 await bus.emit("TEST_EVENT", ctx)

@@ -1,0 +1,12 @@
+{
+  "current_mood": "cheerful",
+  "energy_level": 0.8,
+  "valence": 0.7,
+  "arousal": 0.6,
+  "conversation_count": 42,
+  "last_interaction": "2026-01-15T14:30:00Z",
+  "learned_preferences": {
+    "likes_topic": ["coding", "anime", "foxes", "japan", "kitsunes", "drawing", "role playing", "storytelling"],
+    "humor_style": "puns_and_wordplay"
+  }
+}

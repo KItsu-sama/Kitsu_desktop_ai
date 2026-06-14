@@ -2,8 +2,7 @@
 ARCHITECTURE OWNERSHIP:
 =====================
 
-What owns this?
-- ModernLauncher (4-layer architecture)
+- Launcher (4-layer architecture)
 - LegacyCompat (bridge layer)
 - Bootstrap (container setup)
 - KitsuLauncher (alternative entry)
@@ -16,8 +15,7 @@ What imports it?
 - r.py (main entry point)
 - runtime/ (startup coordination)
 
-Is it active or deprecated?
-- ACTIVE: ModernLauncher, LegacyCompat
+- ACTIVE: Launcher, LegacyCompat
 - DEPRECATED: Bootstrap (legacy)
 - MAINTENANCE: KitsuLauncher
 

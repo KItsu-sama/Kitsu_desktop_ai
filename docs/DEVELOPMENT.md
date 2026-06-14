@@ -43,9 +43,11 @@ kitsu_desktop_ai/
 │   ├── main.py                 # Modern chat app
 │   ├── launcher.py             # Modern launcher
 │   └── first_run.py            # Modern first-run
-├── runtime/legacy/              # Legacy system
-│   ├── orchestrator.py         # Legacy orchestrator
-│   └── launcher.py             # Legacy launcher
+├── runtime/                     # Modern runtime architecture
+│   ├── core/                   # Runtime core services
+│   ├── launchers/              # Startup and bootstrap code
+│   ├── config/                 # Runtime configuration and profiles
+│   └── docs/                   # Runtime documentation
 ├── scripts/                    # Setup scripts
 │   ├── first_run.py            # Legacy first-run
 │   └── setup_wizard.py         # Setup wizard
@@ -60,7 +62,7 @@ kitsu_desktop_ai/
 
 The modern system uses an event-driven architecture with these key components:
 
-#### EventBus (`src/kitsu/core/event_bus.py`)
+#### EventBus (`application/core/event_bus.py`)
 
 Central communication hub implementing pub/sub pattern.
 
@@ -74,7 +76,7 @@ await bus.emit("EVENT_NAME", request_context)
 bus.subscribe("EVENT_NAME", handler_function)
 ```
 
-#### RequestContext (`src/kitsu/core/context.py`)
+#### RequestContext (`application/core/context.py`)
 
 Standardized request context passed through the pipeline.
 

@@ -1,260 +1,694 @@
 """
-core/container.py
+runtime/infrastructure/container.py
 
-Dependency injection container to simplify bootstrap complexity.
-Provides automatic dependency resolution and service wiring.
+Production-grade Dependency Injection Container for the Kitsu Runtime.
+
+Features:
+- Deterministic circular dependency tracing
+- Singleton / Scoped / Transient lifetimes
+- Async-safe resolution tracking via ContextVar
+- Runtime freeze locking
+- Dependency graph validation
+- Optional dependency support
+- Async factory support
+- Disposal lifecycle management
+- Scope isolation
+- Constructor introspection with type resolution
+- Captive dependency validation
+- Sync/async resolution boundary enforcement
 """
 
 from __future__ import annotations
 
+import inspect
 import logging
-from typing import Dict, Any, Optional, Type, Callable, List
-from dataclasses import dataclass
+import sys
+from contextvars import ContextVar
 from enum import Enum
+from types import UnionType
+from typing import (
+    Any,
+    Callable,
+    Dict,
+    List,
+    Optional,
+    Type,
+    Union,
+    get_args,
+    get_origin,
+    ForwardRef,
+)
 
 logger = logging.getLogger(__name__)
 
 
+# ============================================================
+# Resolution Context
+# ============================================================
+
+_resolution_stack: ContextVar[List[Type]] = ContextVar(
+    "_resolution_stack",
+    default=[],
+)
+
+
+# ============================================================
+# Lifetimes
+# ============================================================
+
+
 class ServiceLifetime(Enum):
-    """Service lifetime options."""
     SINGLETON = "singleton"
-    TRANSIENT = "transient"
     SCOPED = "scoped"
+    TRANSIENT = "transient"
 
 
-@dataclass
+# ============================================================
+# Dependency Specification
+# ============================================================
+
+
+class DependencySpec:
+    def __init__(self, dependency_type: Type, optional: bool = False):
+        self.dependency_type = dependency_type
+        self.optional = optional
+
+
+# ============================================================
+# Service Descriptor
+# ============================================================
+
+
 class ServiceDescriptor:
-    """Describes a service registration."""
-    interface: Type
-    implementation: Type
-    lifetime: ServiceLifetime
-    dependencies: List[Type]
-    factory: Optional[Callable] = None
-    instance: Optional[Any] = None
+    def __init__(
+        self,
+        interface: Type,
+        implementation: Type,
+        lifetime: ServiceLifetime,
+        dependencies: Dict[str, DependencySpec],
+        factory: Optional[Callable[..., Any]] = None,
+        instance: Optional[Any] = None,
+    ):
+        self.interface = interface
+        self.implementation = implementation
+        self.lifetime = lifetime
+        self.dependencies = dependencies
+        self.factory = factory
+        self.instance = instance
+
+
+# ============================================================
+# Exceptions
+# ============================================================
+
+
+class DIContainerError(Exception):
+    pass
+
+
+class CircularDependencyError(DIContainerError):
+    pass
+
+
+class ServiceNotRegisteredError(DIContainerError):
+    pass
+
+
+class LifetimeViolationError(DIContainerError):
+    pass
+
+
+class FrozenContainerError(DIContainerError):
+    pass
+
+
+class AsyncResolutionError(DIContainerError):
+    pass
+
+
+# ============================================================
+# Scope
+# ============================================================
+
+
+class DIScope:
+    """Scoped resolution context."""
+
+    def __init__(self, container: DIContainer):
+        self._container = container
+        self._scoped_instances: Dict[Type, Any] = {}
+        self._disposed = False
+
+    def get(self, interface: Type) -> Any:
+        return self._container._resolve(interface, self)
+
+    async def get_async(self, interface: Type) -> Any:
+        return await self._container._resolve_async(interface, self)
+
+    async def dispose(self) -> None:
+        if self._disposed:
+            return
+
+        for instance in reversed(list(self._scoped_instances.values())):
+            await self._container._dispose_instance(instance)
+
+        self._scoped_instances.clear()
+        self._disposed = True
+
+
+# ============================================================
+# Main Container
+# ============================================================
 
 
 class DIContainer:
-    """
-    Dependency injection container.
-    
-    Provides:
-    - Service registration and resolution
-    - Automatic dependency injection
-    - Lifetime management
-    - Circular dependency detection
-    """
-    
+    """Production-grade dependency injection container."""
+
     def __init__(self):
         self._services: Dict[Type, ServiceDescriptor] = {}
         self._singletons: Dict[Type, Any] = {}
-        self._resolving: set[Type] = set()
-    
+        self._frozen: bool = False
+
+    # ========================================================
+    # Registration
+    # ========================================================
+
     def register_singleton(
-        self, 
-        interface: Type, 
-        implementation: Type = None,
-        factory: Callable = None
+        self,
+        interface: Type,
+        implementation: Optional[Type] = None,
+        factory: Optional[Callable[..., Any]] = None,
     ) -> None:
-        """Register a singleton service."""
-        impl = implementation or interface
-        self._services[interface] = ServiceDescriptor(
-            interface=interface,
-            implementation=impl,
-            lifetime=ServiceLifetime.SINGLETON,
-            dependencies=self._get_dependencies(impl),
-            factory=factory
+        self._register(
+            interface,
+            implementation or interface,
+            ServiceLifetime.SINGLETON,
+            factory,
         )
-        logger.debug(f"Registered singleton: {interface.__name__}")
-    
+
+    def register_scoped(
+        self,
+        interface: Type,
+        implementation: Optional[Type] = None,
+        factory: Optional[Callable[..., Any]] = None,
+    ) -> None:
+        self._register(
+            interface,
+            implementation or interface,
+            ServiceLifetime.SCOPED,
+            factory,
+        )
+
     def register_transient(
-        self, 
-        interface: Type, 
-        implementation: Type = None,
-        factory: Callable = None
+        self,
+        interface: Type,
+        implementation: Optional[Type] = None,
+        factory: Optional[Callable[..., Any]] = None,
     ) -> None:
-        """Register a transient service."""
-        impl = implementation or interface
-        self._services[interface] = ServiceDescriptor(
-            interface=interface,
-            implementation=impl,
-            lifetime=ServiceLifetime.TRANSIENT,
-            dependencies=self._get_dependencies(impl),
-            factory=factory
+        self._register(
+            interface,
+            implementation or interface,
+            ServiceLifetime.TRANSIENT,
+            factory,
         )
-        logger.debug(f"Registered transient: {interface.__name__}")
-    
+
     def register_instance(self, interface: Type, instance: Any) -> None:
-        """Register a pre-created instance."""
-        self._services[interface] = ServiceDescriptor(
+        self._assert_not_frozen()
+
+        descriptor = ServiceDescriptor(
             interface=interface,
             implementation=type(instance),
             lifetime=ServiceLifetime.SINGLETON,
-            dependencies=[],
-            instance=instance
+            dependencies={},
+            instance=instance,
         )
+
+        self._services[interface] = descriptor
         self._singletons[interface] = instance
-        logger.debug(f"Registered instance: {interface.__name__}")
-    
+
+        logger.debug("Registered instance: %s", getattr(interface, "__name__", str(interface)))
+
+    def _register(
+        self,
+        interface: Type,
+        implementation: Type,
+        lifetime: ServiceLifetime,
+        factory: Optional[Callable[..., Any]],
+    ) -> None:
+        self._assert_not_frozen()
+
+        descriptor = ServiceDescriptor(
+            interface=interface,
+            implementation=implementation,
+            lifetime=lifetime,
+            dependencies=self._get_dependencies(implementation),
+            factory=factory,
+        )
+
+        self._services[interface] = descriptor
+
+        logger.debug(
+            "Registered %s: %s -> %s",
+            lifetime.value,
+            getattr(interface, "__name__", str(interface)),
+            getattr(implementation, "__name__", str(implementation)),
+        )
+
+    # ========================================================
+    # Freeze
+    # ========================================================
+
+    def freeze(self) -> None:
+        if not self._frozen:
+            self._frozen = True
+            logger.info("DIContainer frozen successfully.")
+
+    def _assert_not_frozen(self) -> None:
+        if self._frozen:
+            raise FrozenContainerError("Container is frozen and cannot be modified.")
+
+    # ========================================================
+    # Scope Management
+    # ========================================================
+
+    def create_scope(self) -> DIScope:
+        return DIScope(self)
+
+    # ========================================================
+    # Public Resolution API
+    # ========================================================
+
     def get(self, interface: Type) -> Any:
-        """Resolve a service instance."""
-        if interface not in self._services:
-            raise ValueError(f"Service {interface.__name__} not registered")
-        
-        descriptor = self._services[interface]
-        
-        # Check for circular dependencies
-        if interface in self._resolving:
-            cycle = " -> ".join([t.__name__ for t in self._resolving] + [interface.__name__])
-            raise ValueError(f"Circular dependency detected: {cycle}")
-        
-        # Return existing singleton if available
-        if descriptor.lifetime == ServiceLifetime.SINGLETON:
-            if interface in self._singletons:
-                return self._singletons[interface]
-        
-        # Create new instance
-        self._resolving.add(interface)
-        try:
-            instance = self._create_instance(descriptor)
-            
-            # Store singleton
-            if descriptor.lifetime == ServiceLifetime.SINGLETON:
-                self._singletons[interface] = instance
-            
-            return instance
-        finally:
-            self._resolving.discard(interface)
-    
+        return self._resolve(interface, None)
+
+    async def get_async(self, interface: Type) -> Any:
+        return await self._resolve_async(interface, None)
+
     def get_optional(self, interface: Type) -> Optional[Any]:
-        """Resolve a service instance, returning None if not registered."""
         if interface not in self._services:
             return None
         return self.get(interface)
-    
-    def is_registered(self, interface: Type) -> bool:
-        """Check if a service is registered."""
-        return interface in self._services
-    
-    def build_graph(self) -> None:
-        """Build and validate the dependency graph."""
-        logger.info("Building dependency graph...")
-        
-        # Skip validation for now to handle complex dependencies
-        # Dependencies will be resolved at runtime
-        
-        logger.info(f"Dependency graph built successfully with {len(self._services)} services")
-    
-    def create_instance_safe(self, interface: Type) -> Optional[Any]:
-        """Create an instance safely, returning None on failure."""
-        try:
-            return self.get(interface)
-        except Exception as e:
-            logger.error(f"Failed to create instance of {interface.__name__}: {e}")
+
+    async def get_optional_async(self, interface: Type) -> Optional[Any]:
+        if interface not in self._services:
             return None
-    
-    def _create_instance(self, descriptor: ServiceDescriptor) -> Any:
-        """Create a service instance with dependency injection."""
-        # Use factory if provided
-        if descriptor.factory:
-            return descriptor.factory()
-        
-        # Use pre-created instance if available
-        if descriptor.instance:
+        return await self.get_async(interface)
+
+    # ========================================================
+    # Internal Resolution
+    # ========================================================
+
+    def _resolve(self, interface: Type, scope: Optional[DIScope]) -> Any:
+        descriptor = self._require_descriptor(interface)
+
+        stack = list(_resolution_stack.get())
+        if interface in stack:
+            cycle = " -> ".join([x.__name__ for x in stack] + [interface.__name__])
+            raise CircularDependencyError(cycle)
+
+        if descriptor.lifetime == ServiceLifetime.SINGLETON:
+            if interface in self._singletons:
+                return self._singletons[interface]
+
+        if descriptor.lifetime == ServiceLifetime.SCOPED:
+            if scope is None:
+                raise DIContainerError(
+                    f"Scoped service '{interface.__name__}' requires a scope."
+                )
+            if interface in scope._scoped_instances:
+                return scope._scoped_instances[interface]
+
+        if self._is_async_service(descriptor):
+            raise AsyncResolutionError(
+                f"Service '{interface.__name__}' is asynchronous. Use get_async()."
+            )
+
+        stack.append(interface)
+        token = _resolution_stack.set(stack)
+        try:
+            instance = self._create_instance_sync(descriptor, scope)
+            self._store_instance(interface, descriptor, instance, scope)
+            return instance
+        finally:
+            _resolution_stack.reset(token)
+
+    async def _resolve_async(self, interface: Type, scope: Optional[DIScope]) -> Any:
+        descriptor = self._require_descriptor(interface)
+
+        stack = list(_resolution_stack.get())
+        if interface in stack:
+            cycle = " -> ".join([x.__name__ for x in stack] + [interface.__name__])
+            raise CircularDependencyError(cycle)
+
+        if descriptor.lifetime == ServiceLifetime.SINGLETON:
+            if interface in self._singletons:
+                return self._singletons[interface]
+
+        if descriptor.lifetime == ServiceLifetime.SCOPED:
+            if scope is None:
+                raise DIContainerError(
+                    f"Scoped service '{interface.__name__}' requires a scope."
+                )
+            if interface in scope._scoped_instances:
+                return scope._scoped_instances[interface]
+
+        stack.append(interface)
+        token = _resolution_stack.set(stack)
+        try:
+            instance = await self._create_instance_async(descriptor, scope)
+            self._store_instance(interface, descriptor, instance, scope)
+            return instance
+        finally:
+            _resolution_stack.reset(token)
+
+    # ========================================================
+    # Instance Storage
+    # ========================================================
+
+    def _store_instance(
+        self,
+        interface: Type,
+        descriptor: ServiceDescriptor,
+        instance: Any,
+        scope: Optional[DIScope],
+    ) -> None:
+        if descriptor.lifetime == ServiceLifetime.SINGLETON:
+            self._singletons[interface] = instance
+        elif descriptor.lifetime == ServiceLifetime.SCOPED:
+            assert scope is not None
+            scope._scoped_instances[interface] = instance
+
+    # ========================================================
+    # Sync Construction
+    # ========================================================
+
+    def _create_instance_sync(self, descriptor: ServiceDescriptor, scope: Optional[DIScope]) -> Any:
+        if descriptor.instance is not None:
             return descriptor.instance
-        
-        # Resolve dependencies
-        dependencies = [self.get(dep) for dep in descriptor.dependencies]
-        
-        # Create instance with dependencies
-        try:
-            instance = descriptor.implementation(*dependencies)
-        except TypeError as e:
-            # Try keyword injection
-            if hasattr(descriptor.implementation, '__init__'):
-                import inspect
-                sig = inspect.signature(descriptor.implementation.__init__)
-                kwargs = {}
-                for i, dep in enumerate(descriptor.dependencies):
-                    param_name = list(sig.parameters.keys())[i+1]  # Skip 'self'
-                    kwargs[param_name] = dependencies[i]
-                instance = descriptor.implementation(**kwargs)
+
+        if descriptor.factory:
+            result = descriptor.factory(self)
+            self._validate_factory_result(descriptor.interface, result)
+            return result
+
+        kwargs: Dict[str, Any] = {}
+        for name, dep in descriptor.dependencies.items():
+            if dep.optional:
+                kwargs[name] = self.get_optional(dep.dependency_type)
             else:
-                raise e
-        
-        return instance
-    
-    def _get_dependencies(self, implementation: Type) -> List[Type]:
-        """Extract constructor dependencies from implementation."""
+                kwargs[name] = self._resolve(dep.dependency_type, scope)
+
+        return descriptor.implementation(**kwargs)
+
+    # ========================================================
+    # Async Construction
+    # ========================================================
+
+    async def _create_instance_async(self, descriptor: ServiceDescriptor, scope: Optional[DIScope]) -> Any:
+        if descriptor.instance is not None:
+            return descriptor.instance
+
+        if descriptor.factory:
+            if inspect.iscoroutinefunction(descriptor.factory):
+                result = await descriptor.factory(self)
+            else:
+                result = descriptor.factory(self)
+            self._validate_factory_result(descriptor.interface, result)
+            return result
+
+        kwargs: Dict[str, Any] = {}
+        for name, dep in descriptor.dependencies.items():
+            if dep.optional:
+                kwargs[name] = await self.get_optional_async(dep.dependency_type)
+            else:
+                kwargs[name] = await self._resolve_async(dep.dependency_type, scope)
+
+        implementation = descriptor.implementation
+        create_method = getattr(implementation, "create", None)
+        if create_method and inspect.iscoroutinefunction(create_method):
+            return await create_method(**kwargs)
+
+        return implementation(**kwargs)
+
+    # ========================================================
+    # Validation
+    # ========================================================
+
+    def build_graph(self) -> None:
+        logger.info("Validating dependency graph...")
+
+        errors: List[str] = []
+
+        for interface, descriptor in self._services.items():
+            for param_name, dep in descriptor.dependencies.items():
+                dep_type = dep.dependency_type
+                if dep.optional:
+                    continue
+
+                if dep_type not in self._services:
+                    errors.append(
+                        f"Missing dependency: {interface.__name__} requires {dep_type.__name__} for parameter '{param_name}'"
+                    )
+                    continue
+
+                dep_descriptor = self._services[dep_type]
+
+                if (
+                    descriptor.lifetime == ServiceLifetime.SINGLETON
+                    and dep_descriptor.lifetime == ServiceLifetime.TRANSIENT
+                ):
+                    errors.append(
+                        f"Captive dependency violation: Singleton '{interface.__name__}' depends on transient '{dep_type.__name__}'"
+                    )
+
+                if (
+                    not self._is_async_service(descriptor)
+                    and self._is_async_service(dep_descriptor)
+                ):
+                    errors.append(
+                        f"Sync/Async violation: Sync service '{interface.__name__}' depends on async service '{dep_type.__name__}'"
+                    )
+
         try:
-            import inspect
-            from typing import Union, get_origin, get_args, ForwardRef
-            
-            # Skip primitive types
-            primitive_types = (str, int, float, bool, type(None), Any)
-            
-            sig = inspect.signature(implementation.__init__)
-            dependencies = []
-            for param in sig.parameters.values():
-                if param.name != 'self' and param.annotation != inspect.Parameter.empty:
-                    # Handle string annotations by evaluating them
-                    annotation = param.annotation
-                    if isinstance(annotation, str):
-                        # Skip string parameters that aren't type annotations
-                        continue
-                    
-                    # Skip ForwardRef types
-                    if isinstance(annotation, ForwardRef):
-                        continue
-                    
-                    # Skip primitive types
-                    if annotation in primitive_types:
-                        continue
-                    
-                    # Handle Union types - take first non-None, non-primitive type
-                    if get_origin(annotation) is Union:
-                        args = get_args(annotation)
-                        for arg in args:
-                            if (arg is not type(None) and 
-                                not isinstance(arg, ForwardRef) and 
-                                arg not in primitive_types):
-                                dependencies.append(arg)
-                                break
-                    else:
-                        dependencies.append(annotation)
-            return dependencies
+            self._validate_cycles()
+        except CircularDependencyError as e:
+            errors.append(str(e))
+
+        if errors:
+            raise DIContainerError(
+                "Dependency graph validation failed:\n\n" + "\n".join(errors)
+            )
+
+        logger.info(
+            "Dependency graph validated successfully. %d services verified.",
+            len(self._services),
+        )
+
+    def _validate_cycles(self) -> None:
+        visited = set()
+        stack: List[Type] = []
+
+        def dfs(interface: Type) -> None:
+            if interface in stack:
+                cycle = " -> ".join([x.__name__ for x in stack] + [interface.__name__])
+                raise CircularDependencyError(cycle)
+
+            if interface in visited:
+                return
+
+            visited.add(interface)
+            stack.append(interface)
+
+            descriptor = self._services.get(interface)
+            if descriptor:
+                for dep in descriptor.dependencies.values():
+                    dep_type = dep.dependency_type
+                    if dep_type in self._services:
+                        dfs(dep_type)
+
+            stack.pop()
+
+        for interface in self._services:
+            dfs(interface)
+
+    # ========================================================
+    # Disposal
+    # ========================================================
+
+    async def shutdown(self) -> None:
+        logger.info("Shutting down DIContainer...")
+        for instance in reversed(list(self._singletons.values())):
+            await self._dispose_instance(instance)
+        self._singletons.clear()
+
+    async def _dispose_instance(self, instance: Any) -> None:
+        try:
+            if hasattr(instance, "dispose"):
+                result = instance.dispose()
+                if inspect.isawaitable(result):
+                    await result
+            elif hasattr(instance, "close"):
+                result = instance.close()
+                if inspect.isawaitable(result):
+                    await result
+            elif hasattr(instance, "shutdown"):
+                result = instance.shutdown()
+                if inspect.isawaitable(result):
+                    await result
+            elif hasattr(instance, "__aexit__"):
+                await instance.__aexit__(None, None, None)
         except Exception:
-            return []
-    
+            logger.exception("Failed to dispose instance: %s", type(instance).__name__)
+
+    # ========================================================
+    # Dependency Introspection
+    # ========================================================
+
+    def _get_dependencies(self, implementation: Type) -> Dict[str, DependencySpec]:
+        dependencies: Dict[str, DependencySpec] = {}
+
+        if (
+            not hasattr(implementation, "__init__")
+            or implementation.__init__ is object.__init__
+        ):
+            return dependencies
+
+        try:
+            module = sys.modules.get(implementation.__module__)
+            global_ns = getattr(module, "__dict__", None)
+
+            signature = inspect.signature(implementation.__init__)
+            type_hints = inspect.get_annotations(
+                implementation.__init__,
+                globals=global_ns,
+                eval_str=True,
+            )
+
+            for param_name, param in signature.parameters.items():
+                if param_name == "self":
+                    continue
+
+                if param.kind in (
+                    inspect.Parameter.VAR_POSITIONAL,
+                    inspect.Parameter.VAR_KEYWORD,
+                ):
+                    continue
+
+                annotation = type_hints.get(param_name, param.annotation)
+                if annotation == inspect.Parameter.empty:
+                    continue
+
+                dep_type, optional = self._unwrap_type(annotation)
+                if dep_type:
+                    dependencies[param_name] = DependencySpec(
+                        dependency_type=dep_type,
+                        optional=optional,
+                    )
+        except Exception:
+            logger.exception(
+                "Failed dependency extraction for %s",
+                implementation.__name__,
+            )
+
+        return dependencies
+
+    def _unwrap_type(self, annotation: Any) -> tuple[Optional[Type], bool]:
+        origin = get_origin(annotation)
+
+        if origin in (Union, UnionType):
+            args = get_args(annotation)
+            non_none = [
+                arg
+                for arg in args
+                if arg is not type(None)
+                and not isinstance(arg, ForwardRef)
+            ]
+            optional = len(non_none) != len(args)
+            if non_none:
+                return non_none[0], optional
+            return None, optional
+
+        if isinstance(annotation, ForwardRef):
+            return None, False
+
+        return annotation, False
+
+    # ========================================================
+    # Helpers
+    # ========================================================
+
+    def _require_descriptor(self, interface: Type) -> ServiceDescriptor:
+        descriptor = self._services.get(interface)
+        if descriptor is None:
+            raise ServiceNotRegisteredError(
+                f"Service '{interface.__name__}' is not registered."
+            )
+        return descriptor
+
+    def _validate_factory_result(self, interface: Type, result: Any) -> None:
+        if result is None:
+            raise DIContainerError(f"Factory for '{interface.__name__}' returned None.")
+        if not isinstance(result, interface):
+            raise DIContainerError(
+                f"Factory for '{interface.__name__}' returned invalid type: {type(result).__name__}"
+            )
+
+    def _is_async_service(self, descriptor: ServiceDescriptor) -> bool:
+        if descriptor.factory and inspect.iscoroutinefunction(descriptor.factory):
+            return True
+        create_method = getattr(descriptor.implementation, "create", None)
+        if create_method and inspect.iscoroutinefunction(create_method):
+            return True
+        return False
+
+    # ========================================================
+    # Diagnostics
+    # ========================================================
+
+    def is_registered(self, interface: Type) -> bool:
+        return interface in self._services
+
+    def get_registered_services(self) -> Dict[str, Any]:
+        return {k.__name__: v for k, v in self._services.items()}
+
+    def dump_graph(self) -> Dict[str, Any]:
+        output: Dict[str, Any] = {}
+        for interface, descriptor in self._services.items():
+            output[interface.__name__] = {
+                "implementation": descriptor.implementation.__name__,
+                "lifetime": descriptor.lifetime.value,
+                "dependencies": {
+                    name: dep.dependency_type.__name__
+                    for name, dep in descriptor.dependencies.items()
+                },
+            }
+        return output
+
+    # ========================================================
+    # Testing Utilities
+    # ========================================================
+
     def clear(self) -> None:
-        """Clear all registrations (for testing)."""
         self._services.clear()
         self._singletons.clear()
-        self._resolving.clear()
-    
-    def get_registered_services(self) -> Dict[Type, ServiceDescriptor]:
-        """Get all registered service descriptors."""
-        return dict(self._services)
+        self._frozen = False
 
 
-# Global container instance
+# ============================================================
+# Global container accessor (expected by imports)
+# ============================================================
+
 _container: Optional[DIContainer] = None
 
 
 def get_container() -> DIContainer:
-    """Get the global dependency injection container."""
+    """Return the global DIContainer instance.
+
+    Several runtime modules import this symbol.
+    """
+
     global _container
     if _container is None:
         _container = DIContainer()
     return _container
 
-
-def set_container(container: DIContainer) -> None:
-    """Set the global container (for testing)."""
-    global _container
-    _container = container
-
-
-def reset_container() -> None:
-    """Reset the global container."""
-    global _container
-    _container = DIContainer()

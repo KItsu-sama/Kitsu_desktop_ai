@@ -1,10 +1,13 @@
+# runtime/systems/health.py
+
 from __future__ import annotations
 
 import asyncio
 import logging
 import psutil
 from dataclasses import dataclass
-from typing import Dict
+from typing import Any, Dict
+
 
 from domain.contracts.contracts import ModuleContract
 from runtime.communication.events import EventBus, EventType, EventPayload
@@ -36,6 +39,11 @@ class HealthMonitor(ModuleContract):
         self._task: asyncio.Task | None = None
         self._running = False
 
+        # Some callers (like CLI --status) may provide a lightweight orchestrator stub.
+        # Health checks should not crash in that case.
+        self._modules_cache: Dict[str, Any] = {}
+
+
     async def start(self) -> bool:
         if self._running:
             return True
@@ -54,11 +62,17 @@ class HealthMonitor(ModuleContract):
         return HealthStatus(module_id=self.module_id, ok=True, latency_ms=0.0)
 
     async def _run_health_cycle(self) -> None:
-        # Get health status from all registered modules
+        # Get health status from all registered modules.
+        # In lightweight CLI contexts orchestrator may not be fully initialized.
         summary = {}
-        for module_id in self.orchestrator._modules:
+        module_ids = getattr(self.orchestrator, "_modules", None)
+        if not module_ids:
+            return
+
+        for module_id in module_ids:
             module = self.orchestrator.get_module(module_id)
             if module:
+
                 try:
                     status = await module.health_check()
                     summary[module_id] = status
@@ -108,36 +122,146 @@ class HealthMonitor(ModuleContract):
                         data={'module_id': module_id, 'detail': reason}
                     )
                 )
+    
+    def _calculate_global_status(
+        self,
+        cpu: float,
+        mem: float,
+        failures: int
+    ) -> str:
+        """
+        Calculate overall system health state.
+        """
+
+        # Critical conditions
+        if failures >= 3:
+            return "critical"
+
+        if mem >= 95:
+            return "critical"
+
+        if cpu >= 98:
+            return "critical"
+
+        # Degraded conditions
+        if failures > 0:
+            return "degraded"
+
+        if mem >= 85:
+            return "degraded"
+
+        if cpu >= 90:
+            return "degraded"
+
+        return "healthy"
 
     def get_summary(self) -> Dict[str, HealthStatus]:
         return {module_id: history[-1] for module_id, history in self._history.items() if history}
 
-    def get_status(self) -> Dict[str, any]:
-        """Get comprehensive system status for dashboard."""
+    def get_status(self) -> Dict[str, Any]:
         summary = self.get_summary()
-        
-        # Count running vs failed modules
-        running = sum(1 for status in summary.values() if getattr(status, 'ok', True))
+
+        running = sum(
+            1 for status in summary.values()
+            if getattr(status, 'ok', True)
+        )
+
         total = len(summary)
-        
-        # Get real data from system components
-        status_data = {
-            "personality": self._get_personality_status(),
-            "ai_tier": self._get_ai_tier_status(),
-            "memory_usage": self._get_memory_usage(),
-            "modules": f"{running}/{total} running",
-            "resources": self._get_resource_usage(),
-            "module_details": {
-                module_id: {
-                    "ok": getattr(status, 'ok', True),
-                    "detail": getattr(status, 'detail', None),
-                    "latency_ms": getattr(status, 'latency_ms', 0.0)
+        failed = total - running
+
+        memory = psutil.virtual_memory()
+        cpu = psutil.cpu_percent(interval=0.1)
+
+        gpu_percent = 0
+        vram_mb = 0
+        tier = "UNKNOWN"
+
+        try:
+            rc = self.container.get(
+                'domain.inference.resource_controller'
+            )
+
+            if hasattr(rc, 'get_current_tier'):
+                tier = rc.get_current_tier().value.upper()
+
+            if hasattr(rc, 'get_resource_usage'):
+                usage = rc.get_resource_usage()
+                gpu_percent = usage.get('gpu_percent', 0)
+                vram_mb = usage.get('vram_mb', 0)
+
+        except Exception:
+            pass
+
+        return {
+            "status": self._calculate_global_status(
+                cpu=cpu,
+                mem=memory.percent,
+                failures=failed
+            ),
+
+            "system": {
+                "cpu_percent": cpu,
+                "memory": {
+                    "used_gb": round(memory.used / (1024**3), 1),
+                    "total_gb": round(memory.total / (1024**3), 1),
+                    "percent": memory.percent
+                },
+                "gpu_percent": gpu_percent
+            },
+
+            "ai": {
+                "tier": tier,
+                "vram_used_gb": round(vram_mb / 1024, 1),
+                "personality": self._get_personality_data()
+            },
+
+            "modules": {
+                "running": running,
+                "failed": failed,
+                "total": total,
+                "details": {
+                    module_id: {
+                        "ok": getattr(status, 'ok', True),
+                        "latency_ms": getattr(status, 'latency_ms', 0.0),
+                        "detail": getattr(status, 'detail', None)
+                    }
+                    for module_id, status in summary.items()
                 }
-                for module_id, status in summary.items()
-            }
+            },
+
+            "timestamp": self.clock_service.monotonic()
         }
-        
-        return status_data
+
+    
+    def _get_personality_data(self) -> Dict[str, Any]:
+        try:
+            emotion_controller = self.container.get(
+                'domain.personality.emotion_controller'
+            )
+
+            if hasattr(emotion_controller, 'get_current_emotion'):
+                emotion = emotion_controller.get_current_emotion()
+
+                intensity = getattr(
+                    emotion_controller,
+                    'get_current_intensity',
+                    lambda: 0.8
+                )()
+
+                return {
+                    "emotion": emotion.name.lower(),
+                    "mood": emotion.mood.lower(),
+                    "intensity": round(float(intensity), 2)
+                }
+
+        except Exception:
+            pass
+
+        return {
+            "emotion": "playful",
+            "mood": "happy",
+            "intensity": 0.8
+        }
     
     def _get_personality_status(self) -> str:
         """Get real personality status from emotion engine."""

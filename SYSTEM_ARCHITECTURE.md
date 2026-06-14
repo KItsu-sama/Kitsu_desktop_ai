@@ -85,12 +85,12 @@ The modern architecture executes startup in deterministic phases:
 5. **Phase 4** - Cognition (memory, emotion, judge, router, slm, llm)
 6. **Phase 5** - Shell Systems (desktop_pet, wallpaper, cursor, voice)
 
-### Legacy Compatibility
+### Runtime State & Crash Recovery
 
-The system maintains **full backward compatibility** through:
-- **Legacy Compatibility Layer** (`runtime/legacy_compat.py`)
-- **Adapter Pattern** for legacy modules
-- **Graceful Migration Path** from legacy to modern architecture
+The modern runtime now tracks health state and crash recovery explicitly:
+- `runtime/core/runtime_state.py` stores the current runtime state and transition history
+- `runtime/core/crash_manager.py` records crash events and forces safe mode when needed
+- `r.py` remains the single entry point and delegates startup to `application/launcher.py`
 
 ## Startup Flow
 
@@ -98,14 +98,12 @@ The system maintains **full backward compatibility** through:
 
 ```
 r.py (Simple Entry Point)
-   └── launcher.py (Legacy Compatibility)
-         ├── Modern Architecture Delegation
-         │     └── runtime/modern_launcher.py
-         │           ├── ServiceContainer (DI)
-         │           ├── ModuleRegistry
-         │           ├── LifecycleManager
-         │           └── RuntimeOrchestrator
-         └── Legacy Fallback (if needed)
+   └── application/launcher.py
+         ├── RuntimeStateStore
+         ├── CrashManager
+         ├── EventBus
+         ├── ChatApp
+         └── Optional degraded modules
 ```
 
 ### 4-Layer Startup Flow

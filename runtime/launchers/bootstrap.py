@@ -240,7 +240,7 @@ class ServiceRegistry:
     def register_lifecycle_services(container) -> None:
         """Register lifecycle and background services."""
         from runtime.core.lifecycle import create_lifecycle_manager
-        from infra.system.background_tasks import create_background_manager
+        from infrastructure.system.background_tasks import create_background_manager
         from interfaces.desktop.terminal.splash import SplashScreen
         
         container.register_instance(type(create_lifecycle_manager()), create_lifecycle_manager())
