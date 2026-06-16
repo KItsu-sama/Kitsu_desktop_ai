@@ -2,3 +2,5 @@ psutil
 python
 rich
 numpy
+PyYAML
+aiohttp

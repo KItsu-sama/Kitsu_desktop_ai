@@ -9,6 +9,7 @@ compatibility with the original bootstrap interface.
 from __future__ import annotations
 
 import logging
+import os
 from dataclasses import dataclass
 from typing import Any, Optional
 
@@ -193,16 +194,24 @@ class ServiceRegistry:
         logger.info("Registered legacy providers")
     
     @staticmethod
+    def _strip_desktop_plugins_enabled() -> bool:
+        return os.environ.get("KITSU_STRIP_DESKTOP_PLUGINS", "").lower() in ("1", "true", "yes")
+
+    @staticmethod
     def register_system_gateway(container, flags: CapabilityFlags) -> None:
         """Register system gateway based on capabilities."""
-        gateway_class = PermissionedSystemGateway if flags.use_system_control else NullSystemGateway
+        if Bootstrap.ServiceRegistry._strip_desktop_plugins_enabled():
+            gateway_class = NullSystemGateway
+        else:
+            gateway_class = PermissionedSystemGateway if flags.use_system_control else NullSystemGateway
+
         container.register_singleton(gateway_class)
-        
         logger.info(f"Registered system gateway: {gateway_class.__name__}")
-    
+
     @staticmethod
     def register_legacy_subsystems(container, flags: CapabilityFlags) -> None:
         """Register legacy subsystems based on capability flags."""
+        strip_desktop_plugins = Bootstrap.ServiceRegistry._strip_desktop_plugins_enabled()
         from pathlib import Path
         
         # Model manager
@@ -217,7 +226,10 @@ class ServiceRegistry:
         
         # Avatar system
         if flags.use_2d or flags.use_3d:
-            container.register_singleton(AvatarController)
+            if strip_desktop_plugins:
+                logger.info("Stripping desktop/avatar plugins via KITSU_STRIP_DESKTOP_PLUGINS")
+            else:
+                container.register_singleton(AvatarController)
         
         # Memory manager - always enabled for now
         # Register MemoryConfig and Path for MemoryManager

@@ -8,6 +8,7 @@ ServiceContainer -> ModuleRegistry -> LifecycleManager -> RuntimeOrchestrator
 
 import asyncio
 import logging
+import os
 from typing import Optional
 
 from runtime.core.runtime_orchestrator import RuntimeOrchestrator, get_runtime_orchestrator
@@ -115,7 +116,8 @@ class Launcher:
     async def _register_modules_by_capabilities(self, flags: CapabilityFlags):
         """Register modules based on capability flags."""
         module_registry = self.orchestrator.module_registry
-        
+        strip_desktop_plugins = os.environ.get("KITSU_STRIP_DESKTOP_PLUGINS", "").lower() in ("1", "true", "yes")
+
         # Core monitoring modules (always registered)
         # These will be created with DI, so no string dependencies needed
         module_registry.register_module(
@@ -161,8 +163,11 @@ class Launcher:
         
         # Avatar system
         if flags.use_2d or flags.use_3d:
-            from interfaces.desktop.avatar.controller import AvatarController
-            module_registry.register_module("interfaces.avatar", AvatarController)
+            if strip_desktop_plugins:
+                log.info("KITSU_STRIP_DESKTOP_PLUGINS enabled; skipping desktop avatar module registration")
+            else:
+                from interfaces.desktop.avatar.controller import AvatarController
+                module_registry.register_module("interfaces.avatar", AvatarController)
         
         log.info(f"Registered modules based on capabilities: {len(module_registry.get_all_modules())} total")
     

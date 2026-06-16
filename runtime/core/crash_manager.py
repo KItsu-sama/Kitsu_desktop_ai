@@ -86,8 +86,8 @@ def check_should_force_safe_mode(threshold: int = CRASH_THRESHOLD) -> bool:
     
     # Check environment variable override
     import os
-    if os.environ.get("KITSU_SAFE_MODE", "").lower() in ("1", "true", "yes"):
-        logger.info("Safe mode forced via KITSU_SAFE_MODE environment variable")
+    if os.environ.get("KITSU_SAFE_MODE", "").lower() in ("1", "true", "yes") or os.environ.get("kitsu_SAFE_MODE", "").lower() in ("1", "true", "yes"):
+        logger.info("Safe mode forced via safe mode environment variable")
         state_store.set_safe_mode_forced(True)
         return True
     

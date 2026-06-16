@@ -159,6 +159,13 @@ def get_profile_path(profile_name: str) -> str:
     return f"config/profiles/{profile_name}.yaml"
 
 
+def _is_safe_mode_env_enabled() -> bool:
+    return any(
+        os.environ.get(key, "").lower() in ("1", "true", "yes")
+        for key in ("kitsu_SAFE_MODE", "KITSU_SAFE_MODE")
+    )
+
+
 def select_profile(profile_override: str | None = None, safe_mode: bool = False) -> HardwareProfile:
     """
     Select profile with full override support and advanced hardware detection.
@@ -171,7 +178,7 @@ def select_profile(profile_override: str | None = None, safe_mode: bool = False)
     5. Advanced hardware detection
     6. Simple hardware detection fallback
     """
-    if safe_mode or os.environ.get('kitsu_SAFE_MODE', '').lower() in ('1', 'true', 'yes'):
+    if safe_mode or _is_safe_mode_env_enabled():
         profile_path = SAFE_PROFILE_PATH
         logger.info('Safe mode enabled: using %s', SAFE_PROFILE_PATH.name)
     elif profile_override:

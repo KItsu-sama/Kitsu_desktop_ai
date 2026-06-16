@@ -70,6 +70,7 @@ class Launcher:
     async def start(self):
         """Start the modern Kitsu system with state tracking."""
         init_crash_logging()
+        success = False
         
         try:
             # Phase 1: BOOTING state
@@ -78,7 +79,13 @@ class Launcher:
                 reason="Application startup initiated"
             )
             
-            # Check if safe mode should be forced due to crash history
+            # Apply CLI safe mode early so downstream startup can honor it.
+            if self._safe_mode:
+                os.environ.setdefault("KITSU_SAFE_MODE", "1")
+                os.environ.setdefault("kitsu_SAFE_MODE", "1")
+                logger.info("Safe mode enabled from launcher CLI")
+
+            # Check if safe mode should be forced due to crash history or env.
             if check_should_force_safe_mode():
                 self._safe_mode = True
                 logger.warning("Safe mode forced due to crash history")
@@ -107,15 +114,15 @@ class Launcher:
                 logger.info("First-run setup needed, running initialization...")
                 try:
                     from .first_run import run_first_run
-                    success = await run_first_run(interactive=True)
-                    if not success:
+                    init_success = await run_first_run(interactive=True)
+                    if not init_success:
                         msg = "First-run setup failed"
                         print(f"\n❌ {msg}")
                         self.state_store.set_state(
                             RuntimeState.FAILED,
                             reason=msg
                         )
-                        return
+                        return False
                 except Exception as e:
                     self.state_store.set_state(
                         RuntimeState.FAILED,
@@ -178,6 +185,7 @@ class Launcher:
             
             # Phase 7: Main chat loop
             await self.app.run()
+            success = True
             
         except KeyboardInterrupt:
             print("\n👋 Goodbye!")
@@ -208,6 +216,8 @@ class Launcher:
             
             self.state_store.set_state(RuntimeState.STOPPED, reason="Application stopped")
             logger.info("Kitsu system stopped")
+
+        return success
     
     async def stop(self):
         """Stop the modern Kitsu system."""

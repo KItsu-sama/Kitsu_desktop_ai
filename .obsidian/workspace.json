@@ -15,8 +15,8 @@
               "state": {
                 "file": "runtime.canvas",
                 "viewState": {
-                  "x": 52.96522772610703,
-                  "y": 272.80444783018277,
+                  "x": 377.3079602281755,
+                  "y": 958.2478198179886,
                   "zoom": -0.8826779311916741
                 }
               },
@@ -188,6 +188,7 @@
   },
   "active": "b5e76d92abbc6301",
   "lastOpenFiles": [
+    "Dockerfile",
     "mergest.py",
     "data/config/modules_config.json",
     "application/__pycache__/splash.cpython-314.pyc.2448656864048",

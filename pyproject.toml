@@ -9,6 +9,8 @@ dependencies = [
     "psutil",
     "rich",
     "numpy",
+    "PyYAML",
+    "aiohttp",
 ]
 requires-python = ">=3.9"
 
