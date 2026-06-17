@@ -1,7 +1,13 @@
 # Build a minimal Python runtime for Kitsu Desktop AI on Hugging Face Spaces.
 # The container runs as non-root and exposes a lightweight HTTP health service.
 
-FROM python:3.11-slim
+FROM python:3.10-slim
+
+
+# Install system libraries required by llama-cpp-python wheel (OpenBLAS)
+RUN apt-get update && apt-get install -y \
+    libopenblas-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 # Create a non-root user with UID 1000 for Spaces compatibility
 RUN groupadd -g 1000 kitsu && useradd --no-log-init -u 1000 -g kitsu kitsu

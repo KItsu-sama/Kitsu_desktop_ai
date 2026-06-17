@@ -18,6 +18,8 @@ import yaml
 
 from domain.contracts.contracts import AIProviderContract
 from domain.ai.llm.ollama_client import OllamaClient
+from domain.ai.shared.gguf_provider import GGUFInferenceProvider
+
 
 logger = logging.getLogger(__name__)
 
@@ -82,6 +84,7 @@ def _estimate_confidence(response: str, user_input: str) -> float:
 # ---------------------------------------------------------------------------
 
 class SLMProvider(AIProviderContract):
+
     """
     Small Language Model provider using Ollama.
 
@@ -95,6 +98,18 @@ class SLMProvider(AIProviderContract):
         self._available = False
         self._initialized = False
         self._client: Optional[OllamaClient] = None
+
+        # Local GGUF mode (llama-cpp-python)
+        self._use_gguf = os.environ.get("KITSU_USE_GGUF", "false").lower() in ("1", "true", "yes")
+        self._gguf_engine: Optional[GGUFInferenceProvider] = None
+
+        if self._use_gguf:
+            self._gguf_engine = GGUFInferenceProvider(
+                model_env_var="KITSU_SLM_GGUF_PATH",
+                default_path="./data/models/qwen2.5-1.5b-instruct-q4_k_m.gguf",
+                system_prompt="You are Kitsu, a fox-spirit AI companion. Be warm, playful, and concise.",
+            )
+
 
         cfg = _load_ollama_config()
         slm_cfg = cfg.get("slm", {})
@@ -116,8 +131,16 @@ class SLMProvider(AIProviderContract):
     # ------------------------------------------------------------------
 
     async def initialize(self) -> bool:
-        """Connect to Ollama and verify the SLM model exists."""
+        """Initialize provider (GGUF if enabled, otherwise Ollama)."""
+        # Prefer local GGUF when enabled.
+        if self._use_gguf and self._gguf_engine is not None:
+            ok = self._gguf_engine.initialize()
+            self._available = ok
+            self._initialized = True
+            return ok
+
         self._client = OllamaClient(self._base_url, self._timeout)
+
 
         if not self._client.is_reachable():
             logger.warning(
@@ -180,12 +203,19 @@ class SLMProvider(AIProviderContract):
         emotion_state = ctx.get("emotion_state", "")
         memory_context = ctx.get("memory_context", "")
 
+        # Local GGUF path (no Ollama daemon required)
+        if self._use_gguf and self._gguf_engine is not None and self._gguf_engine.is_available():
+            # For GGUF, we feed context into the prompt via a simple wrapper.
+            enriched = f"{memory_context}\n\n{emotion_state}\n\n{prompt}".strip()
+            return await self._gguf_engine.infer(enriched, system_prompt=system)
+
         full_prompt = self._client.build_kitsu_prompt(
             user_input=prompt,
             personality_hint=personality_hint,
             memory_context=memory_context,
             emotion_state=emotion_state,
         )
+
 
         logger.debug(
             "SLM generating with model=%s (prompt_len=%d)",

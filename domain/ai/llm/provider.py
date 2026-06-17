@@ -17,6 +17,8 @@ import yaml
 
 from domain.contracts.contracts import AIProviderContract
 from domain.ai.llm.ollama_client import OllamaClient
+from domain.ai.shared.gguf_provider import GGUFInferenceProvider
+
 
 logger = logging.getLogger(__name__)
 
@@ -46,6 +48,7 @@ def _load_ollama_config() -> Dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 class LLMProvider(AIProviderContract):
+
     """
     Large Language Model provider using Ollama.
 
@@ -59,6 +62,17 @@ class LLMProvider(AIProviderContract):
         self._available = False
         self._initialized = False
         self._client: Optional[OllamaClient] = None
+
+        # Local GGUF mode (llama-cpp-python)
+        self._use_gguf = os.environ.get("KITSU_USE_GGUF", "false").lower() in ("1", "true", "yes")
+        self._gguf_engine: Optional[GGUFInferenceProvider] = None
+
+        if self._use_gguf:
+            self._gguf_engine = GGUFInferenceProvider(
+                model_env_var="KITSU_LLM_GGUF_PATH",
+                default_path="./data/models/llama-3.2-3b-instruct-q4_k_m.gguf",
+                system_prompt="You are Kitsu, a fox-spirit AI companion. Be warm, clever, and in character.",
+            )
 
         # Load config
         cfg = _load_ollama_config()
@@ -90,8 +104,15 @@ class LLMProvider(AIProviderContract):
     # ------------------------------------------------------------------
 
     async def initialize(self) -> bool:
-        """Connect to Ollama and verify the model exists."""
+        """Initialize provider (GGUF if enabled, otherwise Ollama)."""
+        if self._use_gguf and self._gguf_engine is not None:
+            ok = self._gguf_engine.initialize()
+            self._available = ok
+            self._initialized = True
+            return ok
+
         self._client = OllamaClient(self._base_url, self._timeout)
+
 
         if not self._client.is_reachable():
             logger.warning(
@@ -158,6 +179,11 @@ class LLMProvider(AIProviderContract):
         emotion_state = ctx.get("emotion_state", "")
         memory_context = ctx.get("memory_context", "")
 
+        # Local GGUF path (no Ollama daemon required)
+        if self._use_gguf and self._gguf_engine is not None and self._gguf_engine.is_available():
+            enriched = f"{memory_context}\n\n{emotion_state}\n\n{prompt}".strip()
+            return await self._gguf_engine.infer(enriched, system_prompt=system)
+
         # Build full prompt
         full_prompt = self._client.build_kitsu_prompt(
             user_input=prompt,
@@ -176,6 +202,7 @@ class LLMProvider(AIProviderContract):
             top_p=self._top_p,
             max_tokens=self._max_tokens,
         )
+
 
         if result:
             logger.debug("LLM response: %d chars", len(result))

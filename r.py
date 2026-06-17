@@ -103,9 +103,21 @@ Examples:
     parser.add_argument("--safe", action="store_true", help="Force safe-mode profile")
     parser.add_argument("--profile", type=str, help="Override hardware profile")
     parser.add_argument("--status", action="store_true", help="Show health dashboard")
+    parser.add_argument(
+        "--json",
+        action="store_true",
+        help="When used with --status, print machine-readable JSON",
+    )
+    parser.add_argument("--verbose", action="store_true", help="When used with --status, print extra details")
+    parser.add_argument(
+        "--deep",
+        action="store_true",
+        help="When used with --status, perform extra backend/storage checks",
+    )
     parser.add_argument("--serve", action="store_true", help="Run HTTP health server on port 7860")
     parser.add_argument("--port", type=int, default=7860, help="Port for --serve")
     parser.add_argument("--version", action="version", version=f"Kitsu {__version__}")
+
 
     return vars(parser.parse_args())
 
@@ -225,26 +237,134 @@ async def main() -> int:
             await health.start()
 
             if args["status"]:
-                status = health.get_status()
-                console = Console()
+                # Status execution timing (for quick CLI feedback)
+                import time
 
-                table = Table(title="Kitsu System Health")
-                table.add_column("Component")
-                table.add_column("Status")
-                table.add_column("Detail")
-                table.add_row(
-                    "AI Tier",
-                    "[green]OK[/green]",
-                    status["ai"]["tier"]
-                )
-                table.add_row(
-                    "CPU",
-                    "[yellow]ACTIVE[/yellow]",
-                    f"{status['system']['cpu_percent']:.0f}%"
-                )
-                console.print(Panel(table, title="KITSU STATUS"))
-                await health.stop()
-                return 0
+                start_ts = time.perf_counter()
+                try:
+                    status = health.get_status()
+
+                    # Deep checks: extend status with best-effort backend/storage probes
+                    if args.get("deep"):
+                        deep: dict = {}
+
+                        # Backend: attempt to read resource/tier controller usage more explicitly
+                        try:
+                            rc = container.get('domain.inference.resource_controller')  # type: ignore[arg-type]
+                            usage = rc.get_resource_usage() if hasattr(rc, 'get_resource_usage') else {}
+                            deep['backend'] = {
+                                'tier': rc.get_current_tier().value.upper() if hasattr(rc, 'get_current_tier') else None,
+                                'usage': usage,
+                            }
+                        except Exception as e:
+                            deep.setdefault('backend', {})['error'] = str(e)
+
+                        # Storage: verify key data directories are present + readable
+                        try:
+                            data_root = PROJECT_ROOT / 'data'
+                            storage_checks = {}
+                            for sub in ['models', 'runtime', 'logs', 'memory', 'profiles', 'config']:
+                                p = data_root / sub
+                                storage_checks[sub] = {
+                                    'exists': p.exists(),
+                                    'is_dir': p.is_dir(),
+                                }
+                                if p.exists() and p.is_dir():
+                                    storage_checks[sub]['readable'] = os.access(p, os.R_OK)
+                            deep['storage'] = storage_checks
+                        except Exception as e:
+                            deep.setdefault('storage', {})['error'] = str(e)
+
+                        status['deep'] = deep
+
+                    console = Console()
+
+                    if args.get("json"):
+                        # Ensure timestamp is JSON serializable (may already be float)
+                        console.print(json.dumps(status, ensure_ascii=False, indent=2))
+                        elapsed_ms = (time.perf_counter() - start_ts) * 1000
+                        console.print(f"⏱️ Completed --status in {elapsed_ms:.0f}ms")
+                        await health.stop()
+                        return 0
+
+                    table = Table(title="Kitsu System Health")
+                    table.add_column("Component")
+                    table.add_column("Status")
+                    table.add_column("Detail")
+
+                    # Overall health summary (if present)
+                    global_status = status.get('status', 'UNKNOWN')
+                    table.add_row(
+                        "Overall",
+                        "[green]OK[/green]" if global_status == 'healthy' else "[yellow]DEGRADED[/yellow]" if global_status == 'degraded' else "[red]CRITICAL[/red]",
+                        str(global_status).upper(),
+                    )
+
+                    table.add_row(
+                        "AI Tier",
+                        "[green]OK[/green]" if status.get('ai', {}).get('tier') not in (None, '', 'UNKNOWN') else "[yellow]UNKNOWN[/yellow]",
+                        str(status.get("ai", {}).get("tier"))
+                    )
+                    table.add_row(
+                        "CPU",
+                        "[yellow]ACTIVE[/yellow]",
+                        f"{status['system']['cpu_percent']:.0f}%" if 'system' in status and 'cpu_percent' in status['system'] else "N/A"
+                    )
+
+                    if args.get("verbose"):
+                        sys_info = status.get('system', {})
+                        mem = sys_info.get('memory', {}) if isinstance(sys_info.get('memory'), dict) else {}
+                        table.add_row(
+                            "Memory",
+                            "[cyan]RAM[/cyan]",
+                            f"{mem.get('used_gb','?')}/{mem.get('total_gb','?')}GB ({mem.get('percent','?'):.0f}%)" if mem else "N/A"
+                        )
+                        table.add_row(
+                            "GPU",
+                            "[cyan]GPU[/cyan]",
+                            f"{sys_info.get('gpu_percent',0):.0f}%" if isinstance(sys_info.get('gpu_percent'), (int,float)) else "N/A"
+                        )
+                        modules = status.get('modules', {})
+                        if isinstance(modules, dict):
+                            table.add_row(
+                                "Modules",
+                                "[magenta]MODULES[/magenta]",
+                                f"{modules.get('running','?')}/{modules.get('total','?')} running, {modules.get('failed','?')} failed"
+                            )
+
+                        # Show failing module details (best effort)
+                        details = modules.get('details', {}) if isinstance(modules, dict) else {}
+                        if isinstance(details, dict):
+                            failed_details = [
+                                (mid, d.get('detail'))
+                                for mid, d in details.items()
+                                if not d.get('ok', True)
+                            ]
+                            if failed_details:
+                                sample = failed_details[:5]
+                                table.add_row(
+                                    "Failures",
+                                    "[red]#{len(failed_details)}[/red]",
+                                    "; ".join([f"{mid}: {det}" for mid, det in sample])
+                                )
+
+                    console.print(Panel(table, title="KITSU STATUS"))
+
+                    elapsed_ms = (time.perf_counter() - start_ts) * 1000
+                    console.print(f"⏱️ Completed --status in {elapsed_ms:.0f}ms")
+                    await health.stop()
+                    return 0
+
+                except Exception as e:
+                    elapsed_ms = (time.perf_counter() - start_ts) * 1000
+                    logger.error(f"❌ Status failed: {e}", exc_info=True)
+                    Console().print(f"❌ Status failed after {elapsed_ms:.0f}ms: {e}")
+                    try:
+                        await health.stop()
+                    except Exception:
+                        pass
+                    return 1
+
 
             server, thread = _start_http_service(health, port=args["port"])
             logger.info("HTTP health server running on port %s", args["port"])
