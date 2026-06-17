@@ -1,3 +1,9 @@
+---
+title: Kitsu AI
+sdk: docker
+app_port: 7860
+---
+
 # Kitsu — Local Desktop AI Companion
 
 Kitsu is a local-first desktop AI companion with a Shimeji-style presence, a layered emotion system, and a self-learning fast-response brain. Built for production-grade reliability, she runs on any device from a weak CPU-only laptop to a high-end workstation, automatically adapting her capability profile.
