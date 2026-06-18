@@ -1,5 +1,4 @@
 psutil
-python
 rich
 numpy
 PyYAML

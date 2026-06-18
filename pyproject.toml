@@ -12,7 +12,8 @@ dependencies = [
     "PyYAML",
     "aiohttp",
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
+
 
 [build-system]
 requires = ["setuptools>=61.0"]
