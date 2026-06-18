@@ -3,7 +3,7 @@ name = "kitsu-desktop-ai"
 version = "0.1.0"
 description = "Local Shimeji-style desktop AI fox with emotion system"
 authors = [
-    {name = "Kitsu Team"}
+    {name = "Zino Team"}
 ]
 dependencies = [
     "psutil",
@@ -12,7 +12,12 @@ dependencies = [
     "PyYAML",
     "aiohttp",
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.11" 
+
+# Ensure sitecustomize.py is imported on interpreter startup
+# (Python auto-imports sitecustomize when it is importable on sys.path). 
+[tool.blackboxai.runtime]
+sitecustomize = "sitecustomize"
 
 [build-system]
 requires = ["setuptools>=61.0"]

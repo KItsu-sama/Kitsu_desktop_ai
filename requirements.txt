@@ -6,3 +6,4 @@ rich
 numpy
 PyYAML
 aiohttp
+# no extra deps required for StrEnum fallback (handled by sitecustomize.py)
