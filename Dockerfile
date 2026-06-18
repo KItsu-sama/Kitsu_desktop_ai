@@ -3,7 +3,7 @@
 # llama-cpp-python removed — HF Space runs as a lightweight gateway only
 # (--serve --safe). Inference is handled by an external endpoint via LLM_BASE_URL.
 
-FROM python:3.10-slim
+FROM python:3.11-slim
 
 # No C++ toolchain needed anymore — all deps are pure-Python wheels.
 # curl is kept for health-check probes in HF's container orchestrator.
