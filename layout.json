@@ -5,6 +5,13 @@
   "size": null,
   "children": [
     {
+      "name": ".dockerignore",
+      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\.dockerignore",
+      "type": "file",
+      "size": 204,
+      "children": []
+    },
+    {
       "name": ".github",
       "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\.github",
       "type": "directory",
@@ -123,7 +130,7 @@
           "name": "workspace.json",
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\.obsidian\\workspace.json",
           "type": "file",
-          "size": 5817,
+          "size": 5834,
           "children": []
         }
       ]
@@ -166,6 +173,41 @@
       "children": []
     },
     {
+      "name": "DEBUG_MODE_GUIDE.md",
+      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\DEBUG_MODE_GUIDE.md",
+      "type": "file",
+      "size": 10545,
+      "children": []
+    },
+    {
+      "name": "DEBUG_MODE_IMPLEMENTATION.md",
+      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\DEBUG_MODE_IMPLEMENTATION.md",
+      "type": "file",
+      "size": 9160,
+      "children": []
+    },
+    {
+      "name": "DEBUG_MODE_REFERENCE.md",
+      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\DEBUG_MODE_REFERENCE.md",
+      "type": "file",
+      "size": 5336,
+      "children": []
+    },
+    {
+      "name": "DEBUG_QUICK_START.md",
+      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\DEBUG_QUICK_START.md",
+      "type": "file",
+      "size": 4143,
+      "children": []
+    },
+    {
+      "name": "Dockerfile",
+      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\Dockerfile",
+      "type": "file",
+      "size": 1186,
+      "children": []
+    },
+    {
       "name": "Full layout.canvas",
       "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\Full layout.canvas",
       "type": "file",
@@ -197,7 +239,7 @@
       "name": "README.md",
       "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\README.md",
       "type": "file",
-      "size": 23763,
+      "size": 23821,
       "children": []
     },
     {
@@ -205,20 +247,6 @@
       "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\SYSTEM_ARCHITECTURE.md",
       "type": "file",
       "size": 53261,
-      "children": []
-    },
-    {
-      "name": "TODO.md",
-      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\TODO.md",
-      "type": "file",
-      "size": 427,
-      "children": []
-    },
-    {
-      "name": "TODO_runtime_state_and_legacy_merge.md",
-      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\TODO_runtime_state_and_legacy_merge.md",
-      "type": "file",
-      "size": 17,
       "children": []
     },
     {
@@ -316,7 +344,7 @@
               "name": "command_router.py",
               "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\application\\commands\\command_router.py",
               "type": "file",
-              "size": 70199,
+              "size": 82762,
               "children": []
             }
           ]
@@ -345,7 +373,7 @@
               "name": "event_bus.py",
               "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\application\\core\\event_bus.py",
               "type": "file",
-              "size": 20415,
+              "size": 13923,
               "children": []
             },
             {
@@ -368,14 +396,14 @@
           "name": "launcher.py",
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\application\\launcher.py",
           "type": "file",
-          "size": 10047,
+          "size": 10446,
           "children": []
         },
         {
           "name": "main.py",
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\application\\main.py",
           "type": "file",
-          "size": 8424,
+          "size": 11100,
           "children": []
         },
         {
@@ -389,6 +417,13 @@
               "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\application\\modules\\__init__.py",
               "type": "file",
               "size": 0,
+              "children": []
+            },
+            {
+              "name": "failure_categorizer.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\application\\modules\\failure_categorizer.py",
+              "type": "file",
+              "size": 3404,
               "children": []
             },
             {
@@ -409,21 +444,49 @@
               "name": "judge.py",
               "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\application\\modules\\judge.py",
               "type": "file",
-              "size": 3178,
+              "size": 4431,
               "children": []
             },
             {
               "name": "llm.py",
               "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\application\\modules\\llm.py",
               "type": "file",
-              "size": 3849,
+              "size": 8811,
               "children": []
             },
             {
               "name": "memory.py",
               "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\application\\modules\\memory.py",
               "type": "file",
-              "size": 2029,
+              "size": 2972,
+              "children": []
+            },
+            {
+              "name": "memory_hardening.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\application\\modules\\memory_hardening.py",
+              "type": "file",
+              "size": 4484,
+              "children": []
+            },
+            {
+              "name": "ollama_watchdog.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\application\\modules\\ollama_watchdog.py",
+              "type": "file",
+              "size": 6756,
+              "children": []
+            },
+            {
+              "name": "personality_integration.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\application\\modules\\personality_integration.py",
+              "type": "file",
+              "size": 6821,
+              "children": []
+            },
+            {
+              "name": "personality_real_time.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\application\\modules\\personality_real_time.py",
+              "type": "file",
+              "size": 3608,
               "children": []
             },
             {
@@ -444,7 +507,7 @@
               "name": "reflex.py",
               "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\application\\modules\\reflex.py",
               "type": "file",
-              "size": 10357,
+              "size": 13875,
               "children": []
             },
             {
@@ -465,14 +528,35 @@
               "name": "router.py",
               "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\application\\modules\\router.py",
               "type": "file",
-              "size": 9620,
+              "size": 4652,
               "children": []
             },
             {
               "name": "slm.py",
               "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\application\\modules\\slm.py",
               "type": "file",
-              "size": 6994,
+              "size": 9210,
+              "children": []
+            },
+            {
+              "name": "system_state_reflex.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\application\\modules\\system_state_reflex.py",
+              "type": "file",
+              "size": 4842,
+              "children": []
+            },
+            {
+              "name": "tts.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\application\\modules\\tts.py",
+              "type": "file",
+              "size": 2483,
+              "children": []
+            },
+            {
+              "name": "vtuber_control.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\application\\modules\\vtuber_control.py",
+              "type": "file",
+              "size": 2547,
               "children": []
             }
           ]
@@ -633,6 +717,13 @@
               "type": "directory",
               "size": null,
               "children": []
+            },
+            {
+              "name": "character_state.json",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\data\\memory\\character_state.json",
+              "type": "file",
+              "size": 362,
+              "children": []
             }
           ]
         },
@@ -654,14 +745,14 @@
           "name": "reflex_groups.yaml",
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\data\\reflex_groups.yaml",
           "type": "file",
-          "size": 6087,
+          "size": 6970,
           "children": []
         },
         {
           "name": "reflex_runtime.json",
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\data\\reflex_runtime.json",
           "type": "file",
-          "size": 9556,
+          "size": 10208,
           "children": []
         },
         {
@@ -723,7 +814,7 @@
               "name": "runtime_state.json",
               "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\data\\runtime\\runtime_state.json",
               "type": "file",
-              "size": 29451,
+              "size": 47129,
               "children": []
             }
           ]
@@ -1308,7 +1399,7 @@
                   "name": "provider.py",
                   "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\domain\\ai\\llm\\provider.py",
                   "type": "file",
-                  "size": 8929,
+                  "size": 10104,
                   "children": []
                 },
                 {
@@ -1386,6 +1477,21 @@
               ]
             },
             {
+              "name": "shared",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\domain\\ai\\shared",
+              "type": "directory",
+              "size": null,
+              "children": [
+                {
+                  "name": "gguf_provider.py",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\domain\\ai\\shared\\gguf_provider.py",
+                  "type": "file",
+                  "size": 4593,
+                  "children": []
+                }
+              ]
+            },
+            {
               "name": "slm",
               "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\domain\\ai\\slm",
               "type": "directory",
@@ -1423,7 +1529,7 @@
                   "name": "provider.py",
                   "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\domain\\ai\\slm\\provider.py",
                   "type": "file",
-                  "size": 9246,
+                  "size": 10537,
                   "children": []
                 },
                 {
@@ -1736,7 +1842,7 @@
               "name": "emotion_engine.py",
               "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\domain\\personality\\emotion_engine.py",
               "type": "file",
-              "size": 47140,
+              "size": 47808,
               "children": []
             },
             {
@@ -1921,7 +2027,7 @@
               "name": "llm_fallback_generator.py",
               "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\infrastructure\\llm\\llm_fallback_generator.py",
               "type": "file",
-              "size": 18952,
+              "size": 19293,
               "children": []
             }
           ]
@@ -1936,7 +2042,7 @@
               "name": "logger.py",
               "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\infrastructure\\logging\\logger.py",
               "type": "file",
-              "size": 5759,
+              "size": 5878,
               "children": []
             }
           ]
@@ -2324,15 +2430,347 @@
       "name": "layout.json",
       "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\layout.json",
       "type": "file",
-      "size": 763445,
+      "size": 767700,
       "children": []
     },
     {
       "name": "layout.txt",
       "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\layout.txt",
       "type": "file",
-      "size": 112826,
+      "size": 19080,
       "children": []
+    },
+    {
+      "name": "neuro_sama",
+      "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama",
+      "type": "directory",
+      "size": null,
+      "children": [
+        {
+          "name": "Neuro",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro",
+          "type": "directory",
+          "size": null,
+          "children": [
+            {
+              "name": ".env.example",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\.env.example",
+              "type": "file",
+              "size": 176,
+              "children": []
+            },
+            {
+              "name": ".github",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\.github",
+              "type": "directory",
+              "size": null,
+              "children": [
+                {
+                  "name": "FUNDING.yml",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\.github\\FUNDING.yml",
+                  "type": "file",
+                  "size": 889,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "name": ".gitignore",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\.gitignore",
+              "type": "file",
+              "size": 168,
+              "children": []
+            },
+            {
+              "name": "LICENSE",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\LICENSE",
+              "type": "file",
+              "size": 1062,
+              "children": []
+            },
+            {
+              "name": "Neuro.yaml",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\Neuro.yaml",
+              "type": "file",
+              "size": 3383,
+              "children": []
+            },
+            {
+              "name": "README.md",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\README.md",
+              "type": "file",
+              "size": 11061,
+              "children": []
+            },
+            {
+              "name": "blacklist.txt",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\blacklist.txt",
+              "type": "file",
+              "size": 8,
+              "children": []
+            },
+            {
+              "name": "constants.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\constants.py",
+              "type": "file",
+              "size": 5564,
+              "children": []
+            },
+            {
+              "name": "images",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\images",
+              "type": "directory",
+              "size": null,
+              "children": [
+                {
+                  "name": "stream.png",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\images\\stream.png",
+                  "type": "file",
+                  "size": 785947,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "name": "llmWrappers",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\llmWrappers",
+              "type": "directory",
+              "size": null,
+              "children": [
+                {
+                  "name": "abstractLLMWrapper.py",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\llmWrappers\\abstractLLMWrapper.py",
+                  "type": "file",
+                  "size": 6833,
+                  "children": []
+                },
+                {
+                  "name": "imageLLMWrapper.py",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\llmWrappers\\imageLLMWrapper.py",
+                  "type": "file",
+                  "size": 2115,
+                  "children": []
+                },
+                {
+                  "name": "llmState.py",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\llmWrappers\\llmState.py",
+                  "type": "file",
+                  "size": 252,
+                  "children": []
+                },
+                {
+                  "name": "textLLMWrapper.py",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\llmWrappers\\textLLMWrapper.py",
+                  "type": "file",
+                  "size": 967,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "name": "main.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\main.py",
+              "type": "file",
+              "size": 3939,
+              "children": []
+            },
+            {
+              "name": "memories",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\memories",
+              "type": "directory",
+              "size": null,
+              "children": [
+                {
+                  "name": "memoryinit.json",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\memories\\memoryinit.json",
+                  "type": "file",
+                  "size": 191,
+                  "children": []
+                },
+                {
+                  "name": "readme.md",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\memories\\readme.md",
+                  "type": "file",
+                  "size": 1745,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "name": "modules",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\modules",
+              "type": "directory",
+              "size": null,
+              "children": [
+                {
+                  "name": "audioPlayer.py",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\modules\\audioPlayer.py",
+                  "type": "file",
+                  "size": 4841,
+                  "children": []
+                },
+                {
+                  "name": "customPrompt.py",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\modules\\customPrompt.py",
+                  "type": "file",
+                  "size": 851,
+                  "children": []
+                },
+                {
+                  "name": "discordClient.py",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\modules\\discordClient.py",
+                  "type": "file",
+                  "size": 2004,
+                  "children": []
+                },
+                {
+                  "name": "injection.py",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\modules\\injection.py",
+                  "type": "file",
+                  "size": 534,
+                  "children": []
+                },
+                {
+                  "name": "memory.py",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\modules\\memory.py",
+                  "type": "file",
+                  "size": 7384,
+                  "children": []
+                },
+                {
+                  "name": "module.py",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\modules\\module.py",
+                  "type": "file",
+                  "size": 753,
+                  "children": []
+                },
+                {
+                  "name": "multimodal.py",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\modules\\multimodal.py",
+                  "type": "file",
+                  "size": 1270,
+                  "children": []
+                },
+                {
+                  "name": "twitchClient.py",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\modules\\twitchClient.py",
+                  "type": "file",
+                  "size": 5489,
+                  "children": []
+                },
+                {
+                  "name": "vtubeStudio.py",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\modules\\vtubeStudio.py",
+                  "type": "file",
+                  "size": 8976,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "name": "pipfreeze.txt",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\pipfreeze.txt",
+              "type": "file",
+              "size": 4778,
+              "children": []
+            },
+            {
+              "name": "prompter.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\prompter.py",
+              "type": "file",
+              "size": 2530,
+              "children": []
+            },
+            {
+              "name": "requirements.txt",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\requirements.txt",
+              "type": "file",
+              "size": 920,
+              "children": []
+            },
+            {
+              "name": "signals.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\signals.py",
+              "type": "file",
+              "size": 3023,
+              "children": []
+            },
+            {
+              "name": "socketioServer.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\socketioServer.py",
+              "type": "file",
+              "size": 9036,
+              "children": []
+            },
+            {
+              "name": "songs",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\songs",
+              "type": "directory",
+              "size": null,
+              "children": [
+                {
+                  "name": ".gitignore",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\songs\\.gitignore",
+                  "type": "file",
+                  "size": 74,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "name": "streamingSink.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\streamingSink.py",
+              "type": "file",
+              "size": 1653,
+              "children": []
+            },
+            {
+              "name": "stt.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\stt.py",
+              "type": "file",
+              "size": 2485,
+              "children": []
+            },
+            {
+              "name": "tts.py",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\tts.py",
+              "type": "file",
+              "size": 1811,
+              "children": []
+            },
+            {
+              "name": "utils",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\utils",
+              "type": "directory",
+              "size": null,
+              "children": [
+                {
+                  "name": "listAudioDevices.py",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\utils\\listAudioDevices.py",
+                  "type": "file",
+                  "size": 901,
+                  "children": []
+                }
+              ]
+            },
+            {
+              "name": "voices",
+              "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\voices",
+              "type": "directory",
+              "size": null,
+              "children": [
+                {
+                  "name": ".gitignore",
+                  "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\neuro_sama\\Neuro\\voices\\.gitignore",
+                  "type": "file",
+                  "size": 62,
+                  "children": []
+                }
+              ]
+            }
+          ]
+        }
+      ]
     },
     {
       "name": "plugins",
@@ -2424,21 +2862,21 @@
       "name": "pyproject.toml",
       "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\pyproject.toml",
       "type": "file",
-      "size": 406,
+      "size": 440,
       "children": []
     },
     {
       "name": "r.py",
       "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\r.py",
       "type": "file",
-      "size": 7977,
+      "size": 18042,
       "children": []
     },
     {
       "name": "requirements.txt",
       "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\requirements.txt",
       "type": "file",
-      "size": 27,
+      "size": 86,
       "children": []
     },
     {
@@ -2521,7 +2959,7 @@
               "name": "profiles.py",
               "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\config\\profiles.py",
               "type": "file",
-              "size": 7302,
+              "size": 7454,
               "children": []
             },
             {
@@ -2550,7 +2988,7 @@
               "name": "crash_manager.py",
               "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\core\\crash_manager.py",
               "type": "file",
-              "size": 4258,
+              "size": 4325,
               "children": []
             },
             {
@@ -2715,14 +3153,14 @@
               "name": "bootstrap.py",
               "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\launchers\\bootstrap.py",
               "type": "file",
-              "size": 20319,
+              "size": 20877,
               "children": []
             },
             {
               "name": "modern_launcher.py",
               "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\runtime\\launchers\\modern_launcher.py",
               "type": "file",
-              "size": 9091,
+              "size": 9380,
               "children": []
             }
           ]
@@ -2847,6 +3285,20 @@
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\scripts\\setup_wizard.py",
           "type": "file",
           "size": 23829,
+          "children": []
+        },
+        {
+          "name": "test_slm_provider.py",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\scripts\\test_slm_provider.py",
+          "type": "file",
+          "size": 1017,
+          "children": []
+        },
+        {
+          "name": "watch_debug_reasons.py",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\scripts\\watch_debug_reasons.py",
+          "type": "file",
+          "size": 690,
           "children": []
         }
       ]
@@ -2992,6 +3444,13 @@
               ]
             }
           ]
+        },
+        {
+          "name": "debug_timer.py",
+          "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\debug_timer.py",
+          "type": "file",
+          "size": 7319,
+          "children": []
         },
         {
           "name": "flags",
@@ -3179,7 +3638,7 @@
           "name": "logger.py",
           "path": "D:\\Du lieu o C\\kitsu_desktop_ai\\shared\\logger.py",
           "type": "file",
-          "size": 1132,
+          "size": 3181,
           "children": []
         },
         {

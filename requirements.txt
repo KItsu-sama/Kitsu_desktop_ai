@@ -1,6 +1,8 @@
+# requirements.txt
+# llama-cpp-python removed — not needed for HF Space (--serve --safe mode).
+# Inference is handled by an external Ollama endpoint or cloud API via LLM_BASE_URL.
 psutil
 rich
 numpy
 PyYAML
 aiohttp
-llama-cpp-python>=0.3.0

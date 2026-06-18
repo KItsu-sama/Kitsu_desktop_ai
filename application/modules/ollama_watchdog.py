@@ -32,8 +32,11 @@ import os
 import subprocess
 import time
 from dataclasses import dataclass
-from typing import Deque, Optional
 from collections import deque
+from typing import Deque, Optional
+
+import platform
+
 
 from .failure_categorizer import categorize_exception
 
@@ -50,6 +53,11 @@ class OllamaWatchdogConfig:
 
     # Process names for best-effort restart on Windows
     process_names: tuple[str, ...] = ("ollama.exe",)
+
+
+_SAFE_MODE = os.environ.get("KITSU_SAFE_MODE", "0") == "1"
+_SYSTEM = platform.system()  # "Windows" | "Linux" | "Darwin"
+
 
 
 class OllamaRestartStateMachine:
@@ -150,11 +158,17 @@ class OllamaRestartStateMachine:
                 self._restart_task = None
 
     async def _restart_ollama_best_effort(self) -> None:
-        """Best-effort restart for Windows.
+        """Cross-platform best-effort Ollama restart.
 
         If you have a better integration (service manager, docker, etc), replace this.
         """
+        # In safe mode (HF Space with KITSU_SAFE_MODE=1) we do not restart.
+        if _SAFE_MODE:
+            logger.debug("ollama watchdog safe mode: skipping restart")
+            return
+
         # Optional: allow external hook via env var
+
         hook_cmd = os.environ.get("OLLAMA_RESTART_HOOK_CMD")
         if hook_cmd:
             logger.info("Using OLLAMA_RESTART_HOOK_CMD")

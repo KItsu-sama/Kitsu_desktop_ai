@@ -14,10 +14,12 @@ dependencies = [
 ]
 requires-python = ">=3.10"
 
-
 [build-system]
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
-where = ["src"]
+# Code lives at the project root (application/, runtime/, etc.), not under src/.
+# where = ["src"] was wrong and caused pip install -e . to find nothing.
+where = ["."]
+exclude = ["tests*", "data*", "*.egg-info"]
