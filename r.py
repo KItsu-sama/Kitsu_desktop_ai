@@ -18,7 +18,8 @@ import logging
 import os
 import sys
 import threading
-from http.server import BaseHTTPRequestHandler, HTTPServer
+import time
+
 from pathlib import Path
 from socketserver import ThreadingMixIn
 
@@ -85,6 +86,110 @@ __version__ = "2.1.4"
 _SAFE_MODE = os.environ.get("KITSU_SAFE_MODE", "0") == "1"
 
 
+def _is_help_flag(value: str) -> bool:
+    return value in ("-h", "--help")
+
+
+def _option_help_text(option: str) -> str:
+    help_map = {
+        "--status": """
+--status
+  Show a health dashboard for the runtime.
+
+Examples:
+  python r.py --status
+  python r.py --status --json
+  python r.py --status --verbose --deep
+""",
+        "--serve": """
+--serve
+  Run the HTTP health server.
+
+Examples:
+  python r.py --serve
+  python r.py --serve --port 8080
+""",
+        "--json": """
+--json
+  Print machine-readable JSON output.
+  Typically used together with --status.
+
+Example:
+  python r.py --status --json
+""",
+        "--verbose": """
+--verbose
+  Print extra details in the status output.
+
+Example:
+  python r.py --status --verbose
+""",
+        "--deep": """
+--deep
+  Perform additional backend/storage checks.
+
+Example:
+  python r.py --status --deep
+""",
+        "--profile": """
+--profile PROFILE
+  Override the hardware profile setting.
+
+Example:
+  python r.py --profile high
+""",
+        "--safe": """
+--safe
+  Force the runtime into safe mode.
+
+Example:
+  python r.py --safe
+""",
+        "--debug": """
+--debug
+  Enable debug logging for troubleshooting.
+
+Example:
+  python r.py --debug
+""",
+        "--logo": """
+--logo
+  Print the startup logo and exit.
+
+Example:
+  python r.py --logo
+""",
+        "--port": """
+--port PORT
+  Set the HTTP server port when using --serve.
+
+Example:
+  python r.py --serve --port 7860
+""",
+    }
+    return help_map.get(option, "")
+
+
+def _maybe_show_option_help(parser: argparse.ArgumentParser, argv: list[str]) -> bool:
+    for i, token in enumerate(argv):
+        if not _is_help_flag(token) or i == 0:
+            continue
+
+        previous = argv[i - 1]
+        if previous in ("-h", "--help"):
+            continue
+
+        option_help = _option_help_text(previous)
+        if not option_help:
+            continue
+
+        print(f"usage: {parser.prog} {previous}")
+        print(option_help.strip())
+        return True
+
+    return False
+
+
 def parse_args() -> dict:
     parser = argparse.ArgumentParser(
         prog="kitsu",
@@ -121,8 +226,16 @@ Examples:
     parser.add_argument("--port", type=int, default=7860, help="Port for --serve")
     parser.add_argument("--version", action="version", version=f"Kitsu {__version__}")
 
+    argv = sys.argv[1:]
+    if _maybe_show_option_help(parser, argv):
+        raise SystemExit(0)
 
-    return vars(parser.parse_args())
+    return vars(parser.parse_args(argv))
+
+
+# Standard library HTTP server components are imported lazily to keep import-time light.
+# (Fix: resolve undefined-name errors from type-checkers.)
+from http.server import BaseHTTPRequestHandler, HTTPServer
 
 
 class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
@@ -186,9 +299,9 @@ class HealthHTTPRequestHandler(BaseHTTPRequestHandler):
     def _build_status(self) -> dict:
         """Build health status, patching known issues from raw HealthMonitor output."""
         try:
-            raw = self.health_monitor.get_status()
+            raw: dict[str, object] = self.health_monitor.get_status()
         except Exception as e:
-            raw = {"error": str(e)}
+            raw: dict[str, object] = {"error": str(e)}
 
         # Fix: timestamp must be Unix epoch, not monotonic uptime.
         raw["timestamp"] = time.time()
@@ -269,6 +382,18 @@ async def main() -> int:
 
     # Health server and status modes
     if args["serve"] or args["status"]:
+        # Delegate heavy gateway logic to application.health_gateway (keeps entrypoint small)
+        try:
+            from application.health_gateway import run_gateway
+
+            from application.health_gateway import run_gateway as _rg
+
+            return await _rg(args, version=__version__)
+        except Exception as e:
+            logger.error("❌ Health gateway failed: %s", e, exc_info=True)
+            return 1
+
+        # NOTE: legacy inlined gateway code removed in refactor
         try:
             from runtime.infrastructure.container import get_container
             from runtime.communication.bus import MessageBus
