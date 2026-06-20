@@ -83,7 +83,10 @@ LOGO = r"""
 __version__ = "2.1.4"
 
 
-_SAFE_MODE = os.environ.get("KITSU_SAFE_MODE", "0") == "1"
+def _is_safe_mode() -> bool:
+    return os.environ.get("KITSU_SAFE_MODE", "0") in {"1", "true", "True", "TRUE"} or os.environ.get(
+        "kitsu_SAFE_MODE", "0"
+    ) in {"1", "true", "True", "TRUE"}
 
 
 def _is_help_flag(value: str) -> bool:
@@ -311,7 +314,7 @@ class HealthHTTPRequestHandler(BaseHTTPRequestHandler):
         if not isinstance(ai, dict):
             ai = {}
         if ai.get("tier") in (None, "", "UNKNOWN"):
-            ai["tier"] = "SAFE" if _SAFE_MODE else "OFFLINE"
+            ai["tier"] = "SAFE" if _is_safe_mode() else "OFFLINE"
         raw["ai"] = ai
 
         # Fix: memory context — label host/hypervisor when reading host RAM.
@@ -328,7 +331,7 @@ class HealthHTTPRequestHandler(BaseHTTPRequestHandler):
         current_status = raw.get("status", "unknown")
         if (
             current_status == "degraded"
-            and _SAFE_MODE
+            and _is_safe_mode()
             and isinstance(modules, dict)
             and modules.get("total", 0) == 0
         ):

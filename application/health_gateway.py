@@ -32,7 +32,10 @@ logger = logging.getLogger(__name__)
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 
 
-_SAFE_MODE = os.environ.get("KITSU_SAFE_MODE", "0") == "1"
+def _is_safe_mode() -> bool:
+    return os.environ.get("KITSU_SAFE_MODE", "0") in {"1", "true", "True", "TRUE"} or os.environ.get(
+        "kitsu_SAFE_MODE", "0"
+    ) in {"1", "true", "True", "TRUE"}
 
 
 _INDEX_HTML = """<!DOCTYPE html>
@@ -159,16 +162,14 @@ class HealthHTTPRequestHandler(BaseHTTPRequestHandler):
             raw = {"error": str(e)}
 
         # Patch 1: timestamp must be Unix epoch
-        raw["timestamp"] = str(time.time())  # type: ignore[typeddict-item]
-
-
+        raw["timestamp"] = time.time()
 
         # Patch 2: tier fallback
         ai = raw.get("ai", {})
         if not isinstance(ai, dict):
             ai = {}
         if ai.get("tier") in (None, "", "UNKNOWN"):
-            ai["tier"] = "SAFE" if _SAFE_MODE else "OFFLINE"
+            ai["tier"] = "SAFE" if _is_safe_mode() else "OFFLINE"
         raw["ai"] = ai
 
         # Patch 3: memory context label
@@ -185,7 +186,7 @@ class HealthHTTPRequestHandler(BaseHTTPRequestHandler):
         current_status = raw.get("status", "unknown")
         if (
             current_status == "degraded"
-            and _SAFE_MODE
+            and _is_safe_mode()
             and isinstance(modules, dict)
             and modules.get("total", 0) == 0
         ):
@@ -328,7 +329,7 @@ async def run_gateway(args: dict, *, version: str) -> int:
             if args.get("json"):
                 console.print(json.dumps(status, ensure_ascii=False, indent=2))
                 elapsed_ms = (time.perf_counter() - start_ts) * 1000
-                console.print(f"⏱️  Completed --status in {elapsed_ms:.0f}ms")
+                console.print(f"Completed --status in {elapsed_ms:.0f}ms")
                 return 0
 
             from rich.table import Table
@@ -377,13 +378,13 @@ async def run_gateway(args: dict, *, version: str) -> int:
 
             console.print(Panel(table, title="KITSU STATUS"))
             elapsed_ms = (time.perf_counter() - start_ts) * 1000
-            console.print(f"⏱️  Completed --status in {elapsed_ms:.0f}ms")
+            console.print(f"Completed --status in {elapsed_ms:.0f}ms")
             return 0
 
         if args.get("serve"):
             server, thread = _start_http_service(health, version=version, port=int(args["port"]))
             logger.info("HTTP health server running on port %s", args["port"])
-            print(f"🚀 Kitsu HTTP health server listening on 0.0.0.0:{args['port']}")
+            print(f"Kitsu HTTP health server listening on 0.0.0.0:{args['port']}")
 
             try:
                 await _wait_indefinitely()
