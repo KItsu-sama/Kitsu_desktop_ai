@@ -6,4 +6,5 @@ rich
 numpy
 PyYAML
 aiohttp
+colorama
 # no extra deps required for StrEnum fallback (handled by sitecustomize.py)
