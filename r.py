@@ -69,7 +69,7 @@ LOGO = r"""
        ░░\░░¯001¯\_     \░░░░||░░░░/     _/¯011¯░░/░░
        ░|11\░░░░¯\0=¯ = _ \░░||░░/ _ = ¯=1/¯░░░░/01|░
        \░░0101\░░░░░░░░░░░'░░||░░'░░░░░░░░░░░/0100░░/
-        \░░\0010░░░_101\░░░░░||░░░░░/110_░░░1010/░░/
+        \░░\0010░░░_101\░░░░░||░░░░░░░/110_░░░1010/░░/
           \_░░░░░_/101/░░░/░░||░░\░░░\010\_░░░░░_/
              ¯\\_░░░░░░░░/|░░||░░|\░░░░░░░__//¯
                  ¯\\_░░░░\ ¯¯  ¯¯ /░░░░░//¯
@@ -79,7 +79,10 @@ LOGO = r"""
 =============================||=============================
 """
 
-__version__ = "2.1.3"
+__version__ = "2.1.4"
+
+
+_SAFE_MODE = os.environ.get("KITSU_SAFE_MODE", "0") == "1"
 
 
 def parse_args() -> dict:
@@ -126,29 +129,37 @@ class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
     daemon_threads = True
 
 
+
 class HealthHTTPRequestHandler(BaseHTTPRequestHandler):
     def __init__(self, health_monitor, *args, **kwargs):
         self.health_monitor = health_monitor
         super().__init__(*args, **kwargs)
+
+    def log_message(self, fmt, *args):
+        # Suppress default per-request stderr noise; use Python logging instead.
+        logging.getLogger("http.server").debug(fmt, *args)
 
     def _send_json(self, status_code: int, payload: dict) -> None:
         body = json.dumps(payload, indent=2).encode("utf-8")
         self.send_response(status_code)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
+        self.send_header("Access-Control-Allow-Origin", "*")
         self.end_headers()
         self.wfile.write(body)
 
     def do_GET(self) -> None:
-        if self.path in ("/health", "/status"):
-            status = self.health_monitor.get_status()
+        path = self.path.split("?")[0]
+        if path in ("/health", "/status"):
+            status = self._build_status()
             self._send_json(200, status)
             return
 
         self.send_error(404, "Not Found")
 
     def do_POST(self) -> None:
-        if self.path == "/chat":
+        path = self.path.split("?")[0]
+        if path == "/chat":
             length = int(self.headers.get("Content-Length", "0"))
             body = self.rfile.read(length).decode("utf-8", errors="replace")
             try:
@@ -161,10 +172,59 @@ class HealthHTTPRequestHandler(BaseHTTPRequestHandler):
                 self._send_json(400, {"error": "JSON body must include 'text'"})
                 return
 
-            self._send_json(501, {"error": "Chat endpoint not implemented in this lightweight service"})
+            self._send_json(
+                501,
+                {
+                    "error": "Chat endpoint not yet implemented in gateway mode",
+                    "hint": "Set LLM_BASE_URL env var to point to a local Ollama or cloud API",
+                },
+            )
             return
 
         self.send_error(404, "Not Found")
+
+    def _build_status(self) -> dict:
+        """Build health status, patching known issues from raw HealthMonitor output."""
+        try:
+            raw = self.health_monitor.get_status()
+        except Exception as e:
+            raw = {"error": str(e)}
+
+        # Fix: timestamp must be Unix epoch, not monotonic uptime.
+        raw["timestamp"] = time.time()
+
+        # Fix: tier fallback — SAFE when in safe mode, not UNKNOWN.
+        ai = raw.get("ai", {})
+        if not isinstance(ai, dict):
+            ai = {}
+        if ai.get("tier") in (None, "", "UNKNOWN"):
+            ai["tier"] = "SAFE" if _SAFE_MODE else "OFFLINE"
+        raw["ai"] = ai
+
+        # Fix: memory context — label host/hypervisor when reading host RAM.
+        sys_info = raw.get("system", {})
+        if isinstance(sys_info, dict):
+            mem = sys_info.get("memory", {})
+            if isinstance(mem, dict) and mem.get("total_gb", 0) > 30:
+                mem["note"] = "host_hypervisor_memory_not_container"
+            sys_info["memory"] = mem
+        raw["system"] = sys_info
+
+        # Fix: status override — in safe gateway mode with no modules, report gateway.
+        modules = raw.get("modules", {})
+        current_status = raw.get("status", "unknown")
+        if (
+            current_status == "degraded"
+            and _SAFE_MODE
+            and isinstance(modules, dict)
+            and modules.get("total", 0) == 0
+        ):
+            raw["status"] = "gateway"
+            raw["mode"] = "safe_gateway"
+
+        raw["version"] = __version__
+        return raw
+
 
 
 def _start_http_service(health: object, port: int) -> tuple[HTTPServer, threading.Thread]:

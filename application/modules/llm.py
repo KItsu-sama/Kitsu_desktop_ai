@@ -6,11 +6,16 @@ import logging
 import os
 from typing import Optional
 
+
 import aiohttp
 
 from ..core.context import RequestContext, can_respond
 from ..core.event_bus import bus
 from shared.utils.timing import within_budget
+
+
+# NOTE: within_budget is currently imported but not used in this module.
+
 
 from .judge import judge_response
 from .personality_integration import personality

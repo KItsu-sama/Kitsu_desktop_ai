@@ -70,7 +70,16 @@ class OllamaRestartStateMachine:
         self.cfg = cfg or OllamaWatchdogConfig()
         self.state = self.IDLE
 
+    def start(self) -> None:
+        """Begin monitoring state.
+
+        The watchdog can be created early during application import; call start()
+        once the runtime is ready (or treat first failure as implicit start).
+        """
+        self.state = self.MONITORING
+
         self._failure_times: Deque[float] = deque()
+
         self._restart_lock = asyncio.Lock()
         self._cooldown_until: float = 0.0
 
@@ -84,6 +93,10 @@ class OllamaRestartStateMachine:
         return self._now() < self._cooldown_until
 
     def record_failure(self, exc: BaseException) -> None:
+        # If this watchdog is being used, consider it actively monitoring.
+        if self.state == self.IDLE:
+            self.state = self.MONITORING
+
         now = self._now()
         self._failure_times.append(now)
 
