@@ -202,6 +202,16 @@ class HealthHTTPRequestHandler(BaseHTTPRequestHandler):
         raw["version"] = self._version
         return raw
 
+    def do_OPTIONS(self) -> None:
+        # HF Spaces and some clients may issue CORS preflight requests.
+        self.send_response(204)
+        self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type")
+        self.send_header("Access-Control-Max-Age", "86400")
+        self.send_header("X-Kitsu-Handler", self.handler_name)
+        self.end_headers()
+
     def do_GET(self) -> None:
         path = self._normalize_path(self.path)
 
@@ -218,6 +228,7 @@ class HealthHTTPRequestHandler(BaseHTTPRequestHandler):
 
     def do_POST(self) -> None:
         path = self._normalize_path(self.path)
+        logger.info("POST %s from %s", path, self.client_address)
 
         if path == "/chat":
             length = int(self.headers.get("Content-Length", "0"))
