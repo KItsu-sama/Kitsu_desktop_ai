@@ -129,6 +129,8 @@ class _LightweightHealthStub:
 
 
 class HealthHTTPRequestHandler(BaseHTTPRequestHandler):
+    handler_name = "application.health_gateway"
+
     def __init__(self, health_monitor: Any, version: str, *args: Any, **kwargs: Any):
         self.health_monitor = health_monitor
         self._version = version
@@ -137,12 +139,16 @@ class HealthHTTPRequestHandler(BaseHTTPRequestHandler):
     def log_message(self, fmt: str, *args: Any) -> None:
         logging.getLogger("http.server").debug(fmt, *args)
 
+    def _normalize_path(self, raw_path: str) -> str:
+        return raw_path.split("?")[0].rstrip("/") or "/"
+
     def _send_json(self, status_code: int, payload: dict) -> None:
         body = json.dumps(payload, indent=2, ensure_ascii=False).encode("utf-8")
         self.send_response(status_code)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("X-Kitsu-Handler", self.handler_name)
         self.end_headers()
         self.wfile.write(body)
 
@@ -197,7 +203,7 @@ class HealthHTTPRequestHandler(BaseHTTPRequestHandler):
         return raw
 
     def do_GET(self) -> None:
-        path = self.path.split("?")[0]
+        path = self._normalize_path(self.path)
 
         if path == "/":
             html = _INDEX_HTML.replace("{version}", self._version)
@@ -211,7 +217,8 @@ class HealthHTTPRequestHandler(BaseHTTPRequestHandler):
         self.send_error(404, "Not Found")
 
     def do_POST(self) -> None:
-        path = self.path.split("?")[0]
+        path = self._normalize_path(self.path)
+
         if path == "/chat":
             length = int(self.headers.get("Content-Length", "0"))
             body = self.rfile.read(length).decode("utf-8", errors="replace")
@@ -219,11 +226,11 @@ class HealthHTTPRequestHandler(BaseHTTPRequestHandler):
             try:
                 payload = json.loads(body) if body else {}
             except json.JSONDecodeError:
-                self._send_json(400, {"error": "Invalid JSON body"})
+                self._send_json(400, {"error": "Invalid JSON body", "debug": {"handler": self.handler_name, "route": path}})
                 return
 
             if not isinstance(payload, dict) or "text" not in payload:
-                self._send_json(400, {"error": "JSON body must include 'text'"})
+                self._send_json(400, {"error": "JSON body must include 'text'", "debug": {"handler": self.handler_name, "route": path}})
                 return
 
             self._send_json(
@@ -231,6 +238,10 @@ class HealthHTTPRequestHandler(BaseHTTPRequestHandler):
                 {
                     "error": "Chat endpoint not yet implemented in gateway mode",
                     "hint": "Set LLM_BASE_URL env var to point to a local Ollama or cloud API",
+                    "debug": {
+                        "handler": self.handler_name,
+                        "route": path,
+                    },
                 },
             )
             return

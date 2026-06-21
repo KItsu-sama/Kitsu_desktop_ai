@@ -6,7 +6,7 @@ Responsibilities:
   - sys.path anchor
   - CLI arg parsing
   - configure logging once
-  - delegate all runtime phases to application.launcher.ModernLauncher
+  - delegate all runtime phases to application.launcher.Launcher
 
 No first-run logic here; no handler setup here beyond calling configure_logging.
 """
@@ -247,6 +247,8 @@ class ThreadingHTTPServer(ThreadingMixIn, HTTPServer):
 
 
 class HealthHTTPRequestHandler(BaseHTTPRequestHandler):
+    handler_name = "r.py"
+
     def __init__(self, health_monitor, *args, **kwargs):
         self.health_monitor = health_monitor
         super().__init__(*args, **kwargs)
@@ -255,17 +257,21 @@ class HealthHTTPRequestHandler(BaseHTTPRequestHandler):
         # Suppress default per-request stderr noise; use Python logging instead.
         logging.getLogger("http.server").debug(fmt, *args)
 
+    def _normalize_path(self, raw_path: str) -> str:
+        return raw_path.split("?")[0].rstrip("/") or "/"
+
     def _send_json(self, status_code: int, payload: dict) -> None:
         body = json.dumps(payload, indent=2).encode("utf-8")
         self.send_response(status_code)
         self.send_header("Content-Type", "application/json; charset=utf-8")
         self.send_header("Content-Length", str(len(body)))
         self.send_header("Access-Control-Allow-Origin", "*")
+        self.send_header("X-Kitsu-Handler", self.handler_name)
         self.end_headers()
         self.wfile.write(body)
 
     def do_GET(self) -> None:
-        path = self.path.split("?")[0]
+        path = self._normalize_path(self.path)
         if path in ("/health", "/status"):
             status = self._build_status()
             self._send_json(200, status)
@@ -274,18 +280,19 @@ class HealthHTTPRequestHandler(BaseHTTPRequestHandler):
         self.send_error(404, "Not Found")
 
     def do_POST(self) -> None:
-        path = self.path.split("?")[0]
+        path = self._normalize_path(self.path)
         if path == "/chat":
+
             length = int(self.headers.get("Content-Length", "0"))
             body = self.rfile.read(length).decode("utf-8", errors="replace")
             try:
                 payload = json.loads(body) if body else {}
             except json.JSONDecodeError:
-                self._send_json(400, {"error": "Invalid JSON body"})
+                self._send_json(400, {"error": "Invalid JSON body", "debug": {"handler": self.handler_name, "route": path}})
                 return
 
             if not isinstance(payload, dict) or "text" not in payload:
-                self._send_json(400, {"error": "JSON body must include 'text'"})
+                self._send_json(400, {"error": "JSON body must include 'text'", "debug": {"handler": self.handler_name, "route": path}})
                 return
 
             self._send_json(
@@ -293,6 +300,10 @@ class HealthHTTPRequestHandler(BaseHTTPRequestHandler):
                 {
                     "error": "Chat endpoint not yet implemented in gateway mode",
                     "hint": "Set LLM_BASE_URL env var to point to a local Ollama or cloud API",
+                    "debug": {
+                        "handler": self.handler_name,
+                        "route": path,
+                    },
                 },
             )
             return
@@ -389,9 +400,7 @@ async def main() -> int:
         try:
             from application.health_gateway import run_gateway
 
-            from application.health_gateway import run_gateway as _rg
-
-            return await _rg(args, version=__version__)
+            return await run_gateway(args, version=__version__)
         except Exception as e:
             logger.error("❌ Health gateway failed: %s", e, exc_info=True)
             return 1
