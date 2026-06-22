@@ -8,6 +8,7 @@ Endpoints:
 - GET  /        : small homepage (useful for HF iframe embedding)
 - GET  /health  : JSON health
 - GET  /status  : JSON health (same as /health)
+- GET  /chat    : returns 501 in gateway mode (HF may probe via GET)
 - POST /chat    : returns 501 in gateway mode
 
 The JSON output is based on the legacy logic that used to live in `r.py`,
@@ -220,11 +221,29 @@ class HealthHTTPRequestHandler(BaseHTTPRequestHandler):
             self._send_html(200, html)
             return
 
+        # HF Space / some clients may probe chat via GET.
+        # Return the same "gateway not implemented" response instead of 404.
+        if path == "/chat":
+            self._send_json(
+                501,
+                {
+                    "error": "Chat endpoint not yet implemented in gateway mode",
+                    "hint": "Use POST /chat with JSON body: {\"text\": \"...\"}. Set LLM_BASE_URL env var for real inference.",
+                    "debug": {
+                        "handler": self.handler_name,
+                        "route": path,
+                        "method": "GET",
+                    },
+                },
+            )
+            return
+
         if path in ("/health", "/status"):
             self._send_json(200, self._build_status())
             return
 
         self.send_error(404, "Not Found")
+
 
     def do_POST(self) -> None:
         path = self._normalize_path(self.path)
