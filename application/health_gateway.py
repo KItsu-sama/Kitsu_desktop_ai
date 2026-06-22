@@ -8,8 +8,8 @@ Endpoints:
 - GET  /        : small homepage (useful for HF iframe embedding)
 - GET  /health  : JSON health
 - GET  /status  : JSON health (same as /health)
-- GET  /chat    : chat proxy (GET ?text=... for HF probes; needs LLM_BASE_URL)
-- POST /chat    : chat proxy (JSON {"text": "..."}; needs LLM_BASE_URL)
+- GET  /chat    : chat UI (no params) or JSON reply (?text=... / ?message=...)
+- POST /chat    : chat proxy (JSON or form body; needs LLM_BASE_URL)
 
 The JSON output is based on the legacy logic that used to live in `r.py`,
 with a few compatibility patches applied in `_build_status()`.
@@ -76,6 +76,90 @@ _INDEX_HTML = """<!DOCTYPE html>
   <p style="margin-top:1.5rem;font-size:0.75rem;color:#555;">
     Kitsu v{version} &nbsp;|&nbsp; HF Space gateway
   </p>
+</body>
+</html>
+""".strip()
+
+_CHAT_QUERY_KEYS = ("text", "message", "prompt", "input", "q", "msg", "data")
+
+_CHAT_HTML = """<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Kitsu AI — Chat</title>
+  <style>
+    body { font-family: monospace; background: #0d0d0d; color: #e0e0e0;
+           max-width: 720px; margin: 0 auto; padding: 1.5rem; min-height: 100vh; }
+    h2 { color: #ff9f43; margin-top: 0; }
+    #log { background: #111; border: 1px solid #333; border-radius: 8px;
+           min-height: 280px; padding: 1rem; overflow-y: auto; margin-bottom: 1rem; }
+    .user { color: #7fffb2; margin: 0.5rem 0; }
+    .bot  { color: #e0e0e0; margin: 0.5rem 0 1rem; white-space: pre-wrap; }
+    .err  { color: #ff6b6b; }
+    form { display: flex; gap: 0.5rem; }
+    input[type=text] { flex: 1; background: #1a1a2e; color: #e0e0e0; border: 1px solid #444;
+                       border-radius: 6px; padding: 0.6rem; font: inherit; }
+    button { background: #7fffb2; color: #0d0d0d; border: none; border-radius: 6px;
+             padding: 0.6rem 1rem; font: inherit; cursor: pointer; }
+    a { color: #7fffb2; }
+    .meta { color: #666; font-size: 0.75rem; margin-top: 1rem; }
+  </style>
+</head>
+<body>
+  <h2>🦊 Kitsu Chat</h2>
+  <p>Gateway mode — replies from <code>LLM_BASE_URL</code>.</p>
+  <div id="log"></div>
+  <form id="chat-form">
+    <input id="text" name="text" type="text" placeholder="Say something..." autocomplete="off" required/>
+    <button type="submit">Send</button>
+  </form>
+  <p class="meta"><a href="/">Home</a> · Kitsu v{version}</p>
+  <script>
+    const log = document.getElementById("log");
+    const form = document.getElementById("chat-form");
+    const input = document.getElementById("text");
+
+    function append(role, text, cls) {
+      const p = document.createElement("div");
+      p.className = cls || role;
+      p.textContent = (role === "user" ? "You: " : "Kitsu: ") + text;
+      log.appendChild(p);
+      log.scrollTop = log.scrollHeight;
+    }
+
+    async function sendChat(text) {
+      append("user", text, "user");
+      input.value = "";
+      input.disabled = true;
+      try {
+        let resp = await fetch("/chat", {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "Accept": "application/json" },
+          body: JSON.stringify({ text })
+        });
+        if (!resp.ok) {
+          resp = await fetch("/chat?text=" + encodeURIComponent(text), {
+            headers: { "Accept": "application/json" }
+          });
+        }
+        const data = await resp.json();
+        const reply = data.reply || data.response || data.text || data.error || JSON.stringify(data);
+        append("bot", reply, data.error ? "err bot" : "bot");
+      } catch (err) {
+        append("bot", String(err), "err bot");
+      } finally {
+        input.disabled = false;
+        input.focus();
+      }
+    }
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+      const text = input.value.trim();
+      if (text) sendChat(text);
+    });
+  </script>
 </body>
 </html>
 """.strip()
@@ -208,33 +292,66 @@ class HealthHTTPRequestHandler(BaseHTTPRequestHandler):
 
     def _extract_chat_text_from_query(self) -> str | None:
         query = parse_qs(urlparse(self.path).query)
-        for key in ("text", "message", "prompt"):
+        for key in _CHAT_QUERY_KEYS:
             values = query.get(key)
             if values and str(values[0]).strip():
                 return str(values[0]).strip()
+        for values in query.values():
+            if len(values) == 1 and str(values[0]).strip():
+                return str(values[0]).strip()
         return None
 
-    def _read_json_body(self, path: str) -> dict[str, Any] | None:
+    def _wants_json_response(self) -> bool:
+        accept = self.headers.get("Accept", "")
+        return "application/json" in accept and "text/html" not in accept
+
+    def _chat_info_payload(self) -> dict[str, Any]:
+        from application.gateway_chat import llm_configured
+
+        return {
+            "ok": True,
+            "endpoint": "/chat",
+            "methods": ["GET", "POST", "OPTIONS"],
+            "llm_configured": llm_configured(),
+            "usage": {
+                "get": "/chat?text=hello",
+                "post_json": {"text": "hello"},
+                "post_form": "text=hello",
+            },
+            "hint": "Open /chat in a browser for the chat UI, or pass ?text= / POST JSON.",
+        }
+
+    def _read_post_payload(self, path: str) -> dict[str, Any] | None:
         length = int(self.headers.get("Content-Length", "0"))
         body = self.rfile.read(length).decode("utf-8", errors="replace")
-        try:
-            payload = json.loads(body) if body else {}
-        except json.JSONDecodeError:
-            self._send_json(
-                400,
-                {"error": "Invalid JSON body", "debug": {"handler": self.handler_name, "route": path}},
-            )
-            return None
-        if not isinstance(payload, dict):
-            self._send_json(
-                400,
-                {"error": "JSON body must be an object", "debug": {"handler": self.handler_name, "route": path}},
-            )
-            return None
-        return payload
+        if not body:
+            return {}
+
+        content_type = self.headers.get("Content-Type", "").lower()
+        if "application/json" in content_type or body.lstrip().startswith(("{", "[")):
+            try:
+                payload = json.loads(body)
+            except json.JSONDecodeError:
+                self._send_json(
+                    400,
+                    {"error": "Invalid JSON body", "debug": {"handler": self.handler_name, "route": path}},
+                )
+                return None
+            if not isinstance(payload, dict):
+                self._send_json(
+                    400,
+                    {"error": "JSON body must be an object", "debug": {"handler": self.handler_name, "route": path}},
+                )
+                return None
+            return payload
+
+        if "application/x-www-form-urlencoded" in content_type or "=" in body:
+            return {k: v[0] for k, v in parse_qs(body, keep_blank_values=True).items()}
+
+        return {}
 
     def _extract_chat_text_from_payload(self, payload: dict[str, Any]) -> str | None:
-        for key in ("text", "message", "prompt"):
+        for key in _CHAT_QUERY_KEYS:
             value = payload.get(key)
             if isinstance(value, str) and value.strip():
                 return value.strip()
@@ -242,14 +359,11 @@ class HealthHTTPRequestHandler(BaseHTTPRequestHandler):
 
     def _handle_chat(self, text: str | None, *, method: str, path: str) -> None:
         if not text:
-            self._send_json(
-                400,
-                {
-                    "error": "Missing chat text",
-                    "hint": 'Use POST /chat with {"text": "..."} or GET /chat?text=...',
-                    "debug": {"handler": self.handler_name, "route": path, "method": method},
-                },
-            )
+            if method == "GET" and not self._wants_json_response():
+                html = _CHAT_HTML.replace("{version}", self._version)
+                self._send_html(200, html)
+                return
+            self._send_json(200, self._chat_info_payload())
             return
 
         status_code, payload = complete_chat(text)
@@ -295,18 +409,12 @@ class HealthHTTPRequestHandler(BaseHTTPRequestHandler):
         logger.info("POST %s from %s", path, self.client_address)
 
         if path == "/chat":
-            payload = self._read_json_body(path)
+            payload = self._read_post_payload(path)
             if payload is None:
                 return
-            text = self._extract_chat_text_from_payload(payload)
+            text = self._extract_chat_text_from_payload(payload) or self._extract_chat_text_from_query()
             if text is None:
-                self._send_json(
-                    400,
-                    {
-                        "error": "JSON body must include 'text', 'message', or 'prompt'",
-                        "debug": {"handler": self.handler_name, "route": path, "method": "POST"},
-                    },
-                )
+                self._handle_chat(None, method="POST", path=path)
                 return
             self._handle_chat(text, method="POST", path=path)
             return
