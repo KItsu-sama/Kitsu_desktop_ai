@@ -29,7 +29,79 @@ from socketserver import ThreadingMixIn
 from typing import Any, Tuple
 from urllib.parse import parse_qs, urlparse
 
-from application.gateway_chat import complete_chat
+from application.core.event_bus import bus
+from application.core.context import RequestContext
+
+
+def _ensure_pipeline_bus_started() -> None:
+    """Best-effort start for the internal event bus."""
+    try:
+        if not bus.is_running():
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                # Can't await from sync handler; fire-and-forget.
+                asyncio.create_task(bus.start())
+            else:
+                loop.run_until_complete(bus.start())
+    except RuntimeError:
+        # No event loop in this thread yet.
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(bus.start())
+        asyncio.set_event_loop(None)
+
+
+async def _chat_with_pipeline(text: str) -> tuple[int, dict[str, Any]]:
+    """Route /chat POST through the modern event-driven chat loop."""
+    _ensure_pipeline_bus_started()
+
+    loop = asyncio.get_running_loop()
+    fut: asyncio.Future[RequestContext] = loop.create_future()
+
+    rid_holder: dict[str, Any] = {}
+
+    async def _one_shot(ctx: Any) -> None:
+        try:
+            rid = getattr(ctx, "id", None)
+            if rid is None:
+                return
+            if rid_holder.get("rid") != rid:
+                return
+            if not fut.done():
+                fut.set_result(ctx)
+        except Exception:
+            if not fut.done():
+                fut.set_result(RequestContext(text=text, original_text=text))
+
+    await bus.subscribe("RESPONSE_READY", _one_shot, priority=-100)
+    try:
+        ctx = RequestContext(text=text, original_text=text)
+        rid_holder["rid"] = ctx.id
+
+        await bus.emit("RAW_INPUT", ctx)
+        result_ctx = await asyncio.wait_for(fut, timeout=30.0)
+
+        reply = getattr(result_ctx, "response", None) or ""
+        return 200, {
+            "input": text,
+            "text": reply,
+            "reply": reply,
+            "response": reply,
+            "model": getattr(result_ctx, "model", None),
+            "source": "pipeline",
+            "endpoint": "/chat",
+            "id": getattr(result_ctx, "id", None),
+        }
+    except asyncio.TimeoutError:
+        return 504, {"error": "Pipeline timed out waiting for RESPONSE_READY"}
+    except Exception as e:
+        return 500, {"error": "Pipeline chat failed", "detail": str(e)}
+    finally:
+        try:
+            await bus.unsubscribe("RESPONSE_READY", _one_shot)
+        except Exception:
+            pass
+
 
 logger = logging.getLogger(__name__)
 
@@ -366,7 +438,18 @@ class HealthHTTPRequestHandler(BaseHTTPRequestHandler):
             self._send_json(200, self._chat_info_payload())
             return
 
-        status_code, payload = complete_chat(text)
+        try:
+            loop = asyncio.get_event_loop()
+        except RuntimeError:
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+
+        if loop.is_running():
+            # We are already inside an event loop (unlikely for BaseHTTPRequestHandler)
+            # so just return an informative error.
+            status_code, payload = 500, {"error": "Server event loop already running; cannot await pipeline in sync handler"}
+        else:
+            status_code, payload = loop.run_until_complete(_chat_with_pipeline(text))
         if status_code >= 400:
             payload.setdefault(
                 "debug",
