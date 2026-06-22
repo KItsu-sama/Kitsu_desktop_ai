@@ -8,8 +8,8 @@ Endpoints:
 - GET  /        : small homepage (useful for HF iframe embedding)
 - GET  /health  : JSON health
 - GET  /status  : JSON health (same as /health)
-- GET  /chat    : returns 501 in gateway mode (HF may probe via GET)
-- POST /chat    : returns 501 in gateway mode
+- GET  /chat    : chat proxy (GET ?text=... for HF probes; needs LLM_BASE_URL)
+- POST /chat    : chat proxy (JSON {"text": "..."}; needs LLM_BASE_URL)
 
 The JSON output is based on the legacy logic that used to live in `r.py`,
 with a few compatibility patches applied in `_build_status()`.
@@ -27,6 +27,9 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 from pathlib import Path
 from socketserver import ThreadingMixIn
 from typing import Any, Tuple
+from urllib.parse import parse_qs, urlparse
+
+from application.gateway_chat import complete_chat
 
 logger = logging.getLogger(__name__)
 
@@ -203,6 +206,60 @@ class HealthHTTPRequestHandler(BaseHTTPRequestHandler):
         raw["version"] = self._version
         return raw
 
+    def _extract_chat_text_from_query(self) -> str | None:
+        query = parse_qs(urlparse(self.path).query)
+        for key in ("text", "message", "prompt"):
+            values = query.get(key)
+            if values and str(values[0]).strip():
+                return str(values[0]).strip()
+        return None
+
+    def _read_json_body(self, path: str) -> dict[str, Any] | None:
+        length = int(self.headers.get("Content-Length", "0"))
+        body = self.rfile.read(length).decode("utf-8", errors="replace")
+        try:
+            payload = json.loads(body) if body else {}
+        except json.JSONDecodeError:
+            self._send_json(
+                400,
+                {"error": "Invalid JSON body", "debug": {"handler": self.handler_name, "route": path}},
+            )
+            return None
+        if not isinstance(payload, dict):
+            self._send_json(
+                400,
+                {"error": "JSON body must be an object", "debug": {"handler": self.handler_name, "route": path}},
+            )
+            return None
+        return payload
+
+    def _extract_chat_text_from_payload(self, payload: dict[str, Any]) -> str | None:
+        for key in ("text", "message", "prompt"):
+            value = payload.get(key)
+            if isinstance(value, str) and value.strip():
+                return value.strip()
+        return None
+
+    def _handle_chat(self, text: str | None, *, method: str, path: str) -> None:
+        if not text:
+            self._send_json(
+                400,
+                {
+                    "error": "Missing chat text",
+                    "hint": 'Use POST /chat with {"text": "..."} or GET /chat?text=...',
+                    "debug": {"handler": self.handler_name, "route": path, "method": method},
+                },
+            )
+            return
+
+        status_code, payload = complete_chat(text)
+        if status_code >= 400:
+            payload.setdefault(
+                "debug",
+                {"handler": self.handler_name, "route": path, "method": method},
+            )
+        self._send_json(status_code, payload)
+
     def do_OPTIONS(self) -> None:
         # HF Spaces and some clients may issue CORS preflight requests.
         self.send_response(204)
@@ -221,21 +278,9 @@ class HealthHTTPRequestHandler(BaseHTTPRequestHandler):
             self._send_html(200, html)
             return
 
-        # HF Space / some clients may probe chat via GET.
-        # Return the same "gateway not implemented" response instead of 404.
+        # HF Space / some clients may probe chat via GET with ?text=...
         if path == "/chat":
-            self._send_json(
-                501,
-                {
-                    "error": "Chat endpoint not yet implemented in gateway mode",
-                    "hint": "Use POST /chat with JSON body: {\"text\": \"...\"}. Set LLM_BASE_URL env var for real inference.",
-                    "debug": {
-                        "handler": self.handler_name,
-                        "route": path,
-                        "method": "GET",
-                    },
-                },
-            )
+            self._handle_chat(self._extract_chat_text_from_query(), method="GET", path=path)
             return
 
         if path in ("/health", "/status"):
@@ -250,30 +295,20 @@ class HealthHTTPRequestHandler(BaseHTTPRequestHandler):
         logger.info("POST %s from %s", path, self.client_address)
 
         if path == "/chat":
-            length = int(self.headers.get("Content-Length", "0"))
-            body = self.rfile.read(length).decode("utf-8", errors="replace")
-
-            try:
-                payload = json.loads(body) if body else {}
-            except json.JSONDecodeError:
-                self._send_json(400, {"error": "Invalid JSON body", "debug": {"handler": self.handler_name, "route": path}})
+            payload = self._read_json_body(path)
+            if payload is None:
                 return
-
-            if not isinstance(payload, dict) or "text" not in payload:
-                self._send_json(400, {"error": "JSON body must include 'text'", "debug": {"handler": self.handler_name, "route": path}})
-                return
-
-            self._send_json(
-                501,
-                {
-                    "error": "Chat endpoint not yet implemented in gateway mode",
-                    "hint": "Set LLM_BASE_URL env var to point to a local Ollama or cloud API",
-                    "debug": {
-                        "handler": self.handler_name,
-                        "route": path,
+            text = self._extract_chat_text_from_payload(payload)
+            if text is None:
+                self._send_json(
+                    400,
+                    {
+                        "error": "JSON body must include 'text', 'message', or 'prompt'",
+                        "debug": {"handler": self.handler_name, "route": path, "method": "POST"},
                     },
-                },
-            )
+                )
+                return
+            self._handle_chat(text, method="POST", path=path)
             return
 
         self.send_error(404, "Not Found")
