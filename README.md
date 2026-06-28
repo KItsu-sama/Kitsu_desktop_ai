@@ -1,3 +1,9 @@
+---
+title: "Kitsu Desktop AI"
+sdk: "docker"
+app_file: "r.py"
+---
+
 # Kitsu Desktop AI
 
 Local-first desktop AI companion (Python backend + Tauri/Rust frontend).
