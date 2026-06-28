@@ -34,7 +34,7 @@ import asyncio
 import logging
 import sys
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Optional
 
 # Ensure application package root and project root are importable
 APP_ROOT = Path(__file__).parent
@@ -48,7 +48,7 @@ from .core.context import RequestContext
 
 # ── Optional splash ───────────────────────────────────────────────────────────
 try:
-    from .splash import Splash
+    from .splash import Splash  # deleted -> use application.terminal_ui
     _SPLASH_AVAILABLE = True
 except ImportError:
     _SPLASH_AVAILABLE = False
@@ -66,6 +66,91 @@ from .modules import memory  # RESPONSE_SENT (async, learning)
 
 logger = logging.getLogger("main")
 
+_PIPELINE_MODULES_LOADED = False
+_request_bridge: Optional["RequestBridge"] = None
+
+
+def ensure_pipeline_modules_loaded() -> None:
+    """Import pipeline modules so their bus subscriptions register."""
+    global _PIPELINE_MODULES_LOADED
+    if _PIPELINE_MODULES_LOADED:
+        return
+    # Import order = subscription order; keep stable.
+    from .modules import input_mux  # noqa: F401
+    from .modules import preprocess  # noqa: F401
+    from .modules import router  # noqa: F401
+    from .modules import reflex  # noqa: F401
+    from .modules import system_state_reflex  # noqa: F401
+    from .modules import slm  # noqa: F401
+    from .modules import llm  # noqa: F401
+    from .modules import memory  # noqa: F401
+    _PIPELINE_MODULES_LOADED = True
+
+
+class RequestBridge:
+    """Correlate RAW_INPUT requests to RESPONSE_READY via per-id Futures."""
+
+    def __init__(self) -> None:
+        self._pending: Dict[str, asyncio.Future] = {}
+        self._registered = False
+
+    async def ensure_registered(self) -> None:
+        if self._registered:
+            return
+        from .core.subscriptions import register
+
+        register("RESPONSE_READY", self._on_response_ready)
+        self._registered = True
+
+    async def _on_response_ready(self, ctx) -> None:
+        rid = getattr(ctx, "id", None)
+        if rid is None:
+            return
+        future = self._pending.get(rid)
+        if future and not future.done():
+            future.set_result(ctx)
+
+    async def submit(
+        self,
+        text: str,
+        *,
+        original_text: Optional[str] = None,
+        ctx: Optional[RequestContext] = None,
+    ) -> RequestContext:
+        ensure_pipeline_modules_loaded()
+        await self.ensure_registered()
+
+        if not bus.is_running():
+            await bus.start()
+
+        if ctx is None:
+            ctx = RequestContext(text=text, original_text=original_text or text)
+        loop = asyncio.get_running_loop()
+        future = loop.create_future()
+        self._pending[ctx.id] = future
+        try:
+            await bus.emit("RAW_INPUT", ctx)
+            return await asyncio.wait_for(future, timeout=30.0)
+        finally:
+            self._pending.pop(ctx.id, None)
+
+
+def get_request_bridge() -> RequestBridge:
+    global _request_bridge
+    if _request_bridge is None:
+        _request_bridge = RequestBridge()
+    return _request_bridge
+
+
+async def submit_request(
+    text: str,
+    *,
+    original_text: Optional[str] = None,
+    ctx: Optional[RequestContext] = None,
+) -> RequestContext:
+    """Submit chat text through the pipeline and wait for RESPONSE_READY."""
+    return await get_request_bridge().submit(text, original_text=original_text, ctx=ctx)
+
 
 class ChatApp:
     """Terminal chat front-end.
@@ -82,36 +167,11 @@ class ChatApp:
     """
 
     def __init__(self) -> None:
-        self._pending: Dict[str, asyncio.Future] = {}
+        self._bridge = get_request_bridge()
         self._loop: asyncio.AbstractEventLoop
         self._history: list[Dict] = []
         self._ctxs: Dict[str, RequestContext] = {}
         self._streaming_ids: set[str] = set()
-
-    # ── RESPONSE_READY subscriber ─────────────────────────────────────────
-
-    async def _on_response_ready(self, ctx) -> None:
-        """Handle final response (reflex/slm/llm final).
-
-        ctx is expected to be a RequestContext, but we defensively handle
-        unexpected dict payloads so the UI doesn't deadlock.
-        """
-        rid = getattr(ctx, "id", None)
-
-        if rid is None:
-            if isinstance(ctx, dict):
-                print(f"\n[DBG] RESPONSE_READY dict keys={list(ctx.keys())}")
-            return
-
-        future = self._pending.get(rid)
-        if future and not future.done():
-            future.set_result(ctx)
-        else:
-            txt = getattr(ctx, "text", "")
-            print(
-                f"\n[DBG] RESPONSE_READY could not resolve pending future for "
-                f"id={rid} (future_exists={future is not None}, text={txt!r})"
-            )
 
     async def _on_stream_chunk(self, payload) -> None:
         """Handle incremental stream chunks for an inflight request.
@@ -156,6 +216,8 @@ class ChatApp:
 
     def _display_history(self, ctx: RequestContext, score: float) -> None:
         """Display conversation history with confidence score."""
+        from .terminal_ui import terminal_print
+
         history_entry = {
             "user": ctx.text,
             "kitsu": ctx.response or "(no response)",
@@ -166,24 +228,27 @@ class ChatApp:
 
         self._history.append(history_entry)
 
-        print(f"\n📋 User: {ctx.text}")
-        print(f"   Kitsu: {ctx.response} [confidence: {score:.1f}]")
-        print()
+        terminal_print(f"\n📋 User: {ctx.text}")
+        terminal_print(f"   Kitsu: {ctx.response} [confidence: {score:.1f}]")
+        terminal_print()
 
     # ── Main loop ─────────────────────────────────────────────────────────
 
     async def run(self) -> None:
         self._loop = asyncio.get_running_loop()
 
+        ensure_pipeline_modules_loaded()
+
         if not bus.is_running():
             await bus.start()
+
+        await self._bridge.ensure_registered()
 
         if not _SPLASH_AVAILABLE:
             print("\n🦊 Kitsu AI — type a message, 'exit' to quit.\n")
 
         from .core.subscriptions import register
 
-        register("RESPONSE_READY", self._on_response_ready)
         register("RESPONSE_STREAM", self._on_stream_chunk)
 
         try:
@@ -254,19 +319,20 @@ class ChatApp:
                 return
 
         ctx = RequestContext(text=text, original_text=raw)
-
-        future = self._loop.create_future()
-        self._pending[ctx.id] = future
         self._ctxs[ctx.id] = ctx
 
-        print(f"\n[DBG] RAW_INPUT emitted id={ctx.id} text={ctx.text!r}")
-
-        await bus.emit("RAW_INPUT", ctx)
+        if logger.isEnabledFor(logging.DEBUG):
+            logger.debug("RAW_INPUT emitted id=%s text=%r", ctx.id, ctx.text)
 
         try:
-            result_ctx = await asyncio.wait_for(future, timeout=30.0)
+            result_ctx = await self._bridge.submit(text, original_text=raw, ctx=ctx)
         except asyncio.TimeoutError:
-            print(f"\n[DBG] TIMEOUT waiting for response for id={ctx.id} text={ctx.text!r}")
+            if logger.isEnabledFor(logging.DEBUG):
+                logger.debug(
+                    "TIMEOUT waiting for response for id=%s text=%r",
+                    ctx.id,
+                    ctx.text,
+                )
             result_ctx = ctx
 
         from .modules.judge import judge
@@ -276,18 +342,16 @@ class ChatApp:
             j = judge(result_ctx.response, result_ctx.text, result_ctx.vibe, result_ctx.mode)
             score = j.confidence(result_ctx.mode)
 
-        # Extra debug attribution (who produced the response)
-        owner = getattr(result_ctx, "response_owner", "")
-        trace = getattr(result_ctx, "trace", [])
-        trace_tail = trace[-6:] if trace else []
-        print(f"   [DBG] owner={owner!r} trace_tail={trace_tail!r}")
+        if logger.isEnabledFor(logging.DEBUG):
+            owner = getattr(result_ctx, "response_owner", "")
+            trace = getattr(result_ctx, "trace", [])
+            trace_tail = trace[-6:] if trace else []
+            logger.debug("owner=%r trace_tail=%r", owner, trace_tail)
 
         self._display_history(result_ctx, score)
 
         await bus.emit("RESPONSE_SENT", {"ctx": result_ctx, "judge_score": score})
 
-
-        self._pending.pop(ctx.id, None)
         self._ctxs.pop(ctx.id, None)
 
 
@@ -299,6 +363,9 @@ async def _main() -> None:
 
 if __name__ == "__main__":
     try:
+        from .runtime_error_hooks import install_runtime_error_hooks
+
+        install_runtime_error_hooks()
         asyncio.run(_main())
     except KeyboardInterrupt:
         print("\n👋 Goodbye!")

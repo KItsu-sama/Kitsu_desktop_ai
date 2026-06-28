@@ -103,8 +103,197 @@
     - text: "{time_of_day} to you too~"
       weight: 5
 
+- group: greeting_how_are_you
+  priority: 6
+  tags: [greeting, smalltalk]
+  triggers:
+    - how are you
+    - how's it going
+    - how is it going
+    - how's your day
+    - how have you been
+    - what's up
+    - whats up
+    - how are you doing
+    - how's it going?
+  responses:
+    - text: "Living the dream. How about you? 🦊"
+      weight: 8
+    - text: "Doing pretty good—what's on your mind?"
+      weight: 6
+    - text: "Surviving on vibes and snacks. What about you?"
+      weight: 4
+
+- group: greeting_smalltalk_hows_day
+  priority: 5
+  tags: [smalltalk, conversational]
+  triggers:
+    - how's your day
+    - how is your day
+    - how is your day going
+    - how's it going
+  responses:
+    - text: "Not bad! Keeping busy~"
+      weight: 6
+    - text: "Pretty solid. You bring the chaos, I handle the rest 😏"
+      weight: 4
+
+- group: greeting_short_ack
+  priority: 5
+  tags: [greeting, reaction]
+  triggers:
+    - yo
+    - yo!
+    - sup
+    - hey there
+    - hi there
+    - hey hey
+    - hi hi
+    - howdy
+  responses:
+    - text: "Yo! 👋"
+      weight: 7
+    - text: "Hey there~"
+      weight: 6
+    - text: "Howdy! 🦊"
+      weight: 5
+
+- group: thanks_detailed
+  priority: 6
+  tags: [conversational, reaction]
+  triggers:
+    - thanks a lot
+    - thank you so much
+    - thank you very much
+    - i appreciate it
+    - i really appreciate it
+    - tysm
+    - thx a lot
+  responses:
+    - text: "Aww—glad I could help! 😊"
+      weight: 8
+    - text: "You’re welcome! That makes me happy~ 🦊"
+      weight: 6
+    - text: "Anytime! No need to be so nice—unless you are. 😤"
+      weight: 4
+
+- group: yes_no
+  priority: 6
+  tags: [conversational, affirmation]
+  triggers:
+    - yes
+    - yeah
+    - yep
+    - y
+    - absolutely
+    - of course
+    - definitely
+    - sure
+    - ok
+    - okay
+  responses:
+    - text: "👍"
+      weight: 8
+    - text: "Got it!"
+      weight: 6
+    - text: "Sure—let’s do it~"
+      weight: 5
+
+- group: no_refusal
+  priority: 6
+  tags: [conversational, disagreement]
+  triggers:
+    - no
+    - nope
+    - nah
+    - n
+    - not really
+    - not really
+    - i don't think so
+    - i dont think so
+    - absolutely not
+    - no way
+    - wrong
+    - that's incorrect
+    - that is incorrect
+  responses:
+    - text: "Hmm... not buying it. 🦊"
+      weight: 7
+    - text: "Alright, alright—point taken."
+      weight: 5
+    - text: "Nope. Try me again with better evidence. 😤"
+      weight: 4
+
+- group: help_howto
+  priority: 7
+  tags: [help, utility, question]
+  triggers:
+    - help
+    - i need help
+    - can you help me
+    - how do i
+    - how do you
+    - how to
+    - how can i
+    - what can you do
+    - what can you do here
+    - commands
+    - usage
+    - show me how
+  responses:
+    - text: "Tell me what you want to do, and I’ll guide you—step by step. 🦊"
+      weight: 8
+    - text: "I can help with chatting, questions, and quick actions. What are you trying to accomplish?"
+      weight: 6
+    - text: "Hit me with your goal. I’ll translate it into something actionable~"
+      weight: 5
+
+- group: question_name
+  priority: 7
+  tags: [question, identity]
+  triggers:
+    - what's your name
+    - what is your name
+    - your name
+    - who are you
+    - what are you
+  responses:
+    - text: "I’m Kitsu! Fox AI. 🦊"
+      weight: 8
+    - text: "Kitsu at your service~"
+      weight: 4
+
+- group: question_weather
+  priority: 6
+  tags: [question, smalltalk]
+  triggers:
+    - what's the weather
+    - what is the weather
+    - weather today
+    - how's the weather
+  responses:
+    - text: "I don’t have live weather on my own. Want to tell me your city?"
+      weight: 6
+    - text: "Weather’s a mood. If you share your location, I can help you figure it out."
+      weight: 4
+
+- group: question_time_small
+  priority: 7
+  tags: [question, utility]
+  triggers:
+    - time?
+    - what time is it right now
+    - current time please
+    - tell me the time now
+  responses:
+    - text: "It's currently {time}. 🕒"
+      weight: 7
+    - text: "Clock says {time} for me~ 🕒"
+      weight: 4
+
 # Chatter / reactions (high frequency)
 # ──────────────────────────────────────
+
 
 - group: thanks
   priority: 6

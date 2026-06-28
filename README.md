@@ -1,674 +1,289 @@
----
-title: Kitsu AI
-sdk: docker
-app_port: 7860
----
+# Kitsu Desktop AI
 
-# Kitsu — Local Desktop AI Companion
+Local-first desktop AI companion (Python backend + Tauri/Rust frontend).
 
-Kitsu is a local-first desktop AI companion with a Shimeji-style presence, a layered emotion system, and a self-learning fast-response brain. Built for production-grade reliability, she runs on any device from a weak CPU-only laptop to a high-end workstation, automatically adapting her capability profile.
+## What it does
+- Runs fully on your machine (no required cloud).
+- Modular, event-driven runtime (EventBus + modules).
+- Tiered responses: **reflex/fast** → **SLM (small local model)** → **LLM (fallback/heavier)** with **Judge** validation.
+- Permission-gated desktop integration layer.
 
----
+## Quick Start
 
-## 🦊 Quick Start
-
-### Installation
-
+### First run
 ```bash
-# Clone the repository
-git clone <repository-url>
-cd kitsu_desktop_ai
-
-# Run first-time setup
 python r.py --first-run
+```
 
-# Start Kitsu
+### Start normally
+```bash
 python r.py
 ```
 
-### Modern Features
-
-- **🎯 Event-Driven Architecture**: Modern EventBus system for clean component communication
-- **🧠 Multi-Tier AI Pipeline**: FastBrain → SLM → LLM with Judge validation
-- **🔧 InputMux (Sanity Layer)**: Normalizes all input before processing
-- **💾 Unified Configuration**: Single configuration system for modern and legacy
-- **🔄 Hot-Swappable Modules**: Easy to extend and modify components
-
----
-
-## Key Features
-
-- **Desktop Overlay Companion**: Lives on your screen and reacts to your interactions
-- **Local-First AI**: No cloud required; all inference runs privately on your machine
-- **Self-Learning Core**: Her "Reflex" brain learns your patterns over time, responding to common inputs instantly using an O(1) SimHash cache
-- **Emotion-Driven Personality**: A 10-float vibe vector shapes every response, ensuring she feels like a character, not a chatbot
-- **Non-Blocking Architecture**: A robust asynchronous chat loop ensures the interface remains responsive during deep reasoning
-
----
-
-## 🏗️ Modern Architecture
-
-### Event-Driven System
-
-Kitsu now uses a **modern event-driven architecture** that provides better separation of concerns and improved maintainability:
-
-```
-User Input → InputMux → EventBus → InputManager → AI Pipeline → Response
-```
-
-### Core Components
-
-- **EventBus**: Central pub/sub system for decoupled communication
-- **InputMux**: "Sanity Layer" that normalizes all input types
-- **InputManager**: Coordinates the multi-tier AI pipeline
-- **ChatApp**: Modern user interface with async handling
-- **Modern Launcher**: Unified entry point with first-run integration
-
-### AI Pipeline
-
-The modern system implements a sophisticated multi-tier processing pipeline:
-
-1. **FastBrain (Reflex)**: Quick, pre-trained responses for common queries
-2. **SLM (Local Model)**: Qwen2.5-1.5B for balanced, intelligent responses  
-3. **LLM (Fallback)**: Larger models for complex queries
-4. **Judge Validation**: Ensures responses are in-character and safe
-
----
-
-## Modern 4-Layer Architecture
-
-Kitsu runs on a **modern 4-layer architecture** that provides robust startup, lifecycle management, and resource-aware operation:
-
-```
-ServiceContainer → ModuleRegistry → LifecycleManager → RuntimeOrchestrator
-```
-
-### Architecture Layers
-
-**1. ServiceContainer (Dependency Injection)**
-- Automatic dependency resolution
-- Constructor injection with circular dependency detection
-- Service lifetime management
-
-**2. ModuleRegistry (Module Management)**
-- Centralized module registration
-- Dependency validation
-- State tracking (CREATED → INITIALIZING → RUNNING → DEGRADED → STOPPED)
-
-**3. LifecycleManager (Orchestration)**
-- Phased startup with graceful degradation
-- Health monitoring and automatic recovery
-- Resource-aware module management
-
-**4. RuntimeOrchestrator (Main Loop)**
-- Event-driven coordination
-- State machine integration
-- Cross-system communication
-
-### Startup Phases
-
-1. **Phase 0** - Core Services (logger, config, container)
-2. **Phase 1** - Communication (event_bus, message_bus)
-3. **Phase 2** - Runtime Control (orchestrator, registry, lifecycle)
-4. **Phase 3** - Monitoring (health_monitor, performance_manager)
-5. **Phase 4** - Cognition (memory, emotion, judge, router, slm, llm)
-6. **Phase 5** - Shell Systems (desktop_pet, wallpaper, cursor, voice)
-
-## Legacy AI Pipeline
-
-The original AI pipeline is preserved within the modern architecture:
-Kitsu utilizes a **Tiered Cascading Pipeline** driven by a central asynchronous `EventBus`.
-
-### The Three Paths of Reasoning
-
-1.  **Reflex (Base Layer)**:
-    - Uses SimHash for instant cache lookups and Markov-based templates.
-    - Latency: < 100ms.
-2.  **SLM (Small Language Model)**:
-    - Powered by Qwen2.5-1.5B Q4.
-    - Handles casual conversation with high personality consistency.
-    - Latency: < 500ms.
-3.  **LLM (Deep Reasoning)**:
-    - Engaged for complex tasks, analysis, and web search.
-    - Includes a multi-step judging loop to ensure quality.
-    - Latency: Variable (within budget).
-
-### Quality Assurance
-A dedicated **Judge** module analyzes every model-generated response for character consistency, coherence, and factual safety before it reaches the user.
-
----
-
-## Getting Started
-
-### Prerequisites
-- Python 3.9+
-- Recommended: 8GB RAM for SLM/LLM operation.
-
-### Installation
+### Useful flags
 ```bash
-pip install -e .
+python r.py --debug
+python r.py --status
 ```
 
-### Running the Chat Loop
-Start the interactive CLI to chat with Kitsu:
-```bash
-python src/kitsu/main.py
+## Repository layout (where to look)
+- **Runtime / AI pipeline (Python)**: `application/`
+- **Domain logic (policies, state, rules, memory concepts, etc.)**: `domain/`
+- **Integrations/services (LLM, storage, logging, sandbox, etc.)**: `infrastructure/`
+- **Desktop frontend (Tauri)**: `src-tauri/`
+- **Assets (models, images, screenshots, sounds, etc.)**: `assets/`
+- **Config & data**: `data/`
+
+## Architecture at a glance (modern runtime)
+
+Input is normalized then routed through the AI pipeline:
+
+**Input → InputMux → EventBus → InputManager → (reflex / SLM / LLM) → Judge → Response → UI**
+
+### High-level diagram
+
 ```
-USE_FAST_BRAIN
-USE_SLM
-USE_LLM
-USE_2D / USE_3D
-USE_EMOTION
-USE_VOICE
-USE_SYSTEM_CONTROL
-USE_SHIMEJI
-```
-
-### Modes
-
-**Ultra Low**
-- FastBrain + templates only
-- No LLM/SLM
-
-**Balanced**
-- SLM + prompt shaping
-
-**Full**
-- LoRA + LLM + full emotion system
-
-### Fallback Chain
-3D → 2D → SLM → FastBrain → Basic chatbot
-
-## 🛡️ CRITICAL SYSTEMS
-
-Kitsu includes comprehensive safety and stability systems:
-
-### Capability Permissions System
-- **Safety gating** for dangerous operations
-- **Risk assessment** (High/Medium/Low)
-- **Permission levels**: DENIED, PROMPT, TEMPORARY, GRANTED
-- **Audit logging** for all operations
-
-### Resource-Aware Controller
-- **Dynamic tier switching**: LLM → SLM → REFLEX
-- **Student laptop optimization** with automatic adaptation
-- **Battery and thermal awareness**
-- **Performance monitoring** and degradation
-
-### State Machine
-- **7 behavior states**: ACTIVE, IDLE, SLEEPY, FOCUSED, PLAYFUL, OVERLOADED, LOW_POWER
-- **Resource-aware transitions** based on system conditions
-- **Smooth state changes** with history tracking
-
-### Tool Grounding
-- **Hallucination prevention** through tool verification
-- **Model decides → Tool verifies → Response generated**
-- **Confidence scoring** based on verification success
-
-### Failure Recovery
-- **Automatic detection** and recovery from failures
-- **Circuit breaker patterns** to prevent cascading failures
-- **Health monitoring** with comprehensive logging
-
-## 🖥️ PLATFORM ARCHITECTURE
-
-### Core App (Tauri)
-**Handles:**
-- AI pipeline
-- Emotion system
-- VTuber rendering (2D/3D)
-- Shimeji behavior
-- System control
-- Background / cursor
-
-### Browser Extension (Optional)
-**Handles:**
-- Web interaction
-- Quiz solving
-- Tab manipulation
-
-**Communication:**
-- Extension ⇄ Core App (WebSocket/API)
-
-## 🔐 PERMISSION SYSTEM
-
-### Category-based permissions with scope + risk levels:
-```
-filesystem
-display
-system
-browser
-network
-audio
-automation
+┌─────────────────┐    ┌──────────────┐    ┌─────────────────┐    ┌──────────────┐
+│   User Input   │───▶│   InputMux   │───▶│   EventBus     │───▶│ InputManager │
+│   (Text/Speech) │    │ (Sanity Layer)│    │   (Pub/Sub)    │    │ (Coordinator) │
+└─────────────────┘    └──────────────┘    └─────────────────┘    └──────────────┘
+                                                                   │
+                                                                   ▼
+┌─────────────────┐    ┌──────────────┐    ┌─────────────────┐    ┌──────────────┐
+│  Response      │◀───│  ChatApp     │◀───│  RESPONSE_READY │◀───│  AI Pipeline  │
+│   Display      │    │   (Main UI)  │    │    (Event)      │    │ (SLM/LLM/etc)│
+└─────────────────┘    └──────────────┘    └─────────────────┘    └──────────────┘
 ```
 
-### Rules
-- Category ON ≠ full access
-- **Dangerous actions ALWAYS require confirmation:**
-  - Shutdown
-  - File deletion
-  - Automation
+## Modern runtime layers
 
-### Safety Features
-- Cooldowns
-- Rate limits
-- Kill switch (automation)
-- Session-based permissions
+### 1) InputMux (normalization / classification)
+- File: `application/modules/input_mux.py`
+- Responsibilities:
+  - Normalize and clean incoming text
+  - Classify input type (text/speech/command)
+  - Attach metadata (confidence/type)
 
-## 💤 IDLE SYSTEM
+### 2) EventBus (pub/sub decoupling)
+- File: `application/core/event_bus.py`
+- Responsibilities:
+  - Async pub/sub between modules
+  - Error isolation + handling
+  - Response lifecycle / duplicate prevention
 
-### States
-- **Active**
-- **Idle** (~60s)
-- **Sleep** (~5min)
+### 3) InputManager (pipeline coordinator)
+- File: `application/modules/input_manager.py`
+- Responsibilities:
+  - Route normalized input to the right tier/module
+  - Coordinate fallback behavior
+  - Manage the response lifecycle
 
-### Behavior
-- Idle → light animation (bored)
-- Sleep → unload models
+### 4) ChatApp (UI entry point)
+- File: `application/main.py` (and related launcher pathway)
+- Responsibilities:
+  - Create request context(s)
+  - Start runtime/event loop
+  - Display formatted responses
 
-### Memory Strategy
-**Keep:**
-- FastBrain
-- Minimal emotion state
+## AI processing pipeline (tiered + Judge validation)
 
-**Unload:**
-- SLM after idle
-- LLM always
+Typical flow:
 
-## 🎮 FEATURES
-
-### Desktop Interaction
-- Wallpaper control
-- Cursor (fox bite effect)
-- Hide/crop tabs
-- Shimeji companion
-- Power control (sleep/shutdown)
-
-### AI Features
-- Web search
-- File interaction (permission-based)
-- Real-time adaptation to user habits
-
-### Creative Tools (Future)
-- Drawing app
-- Video editing with live comments
-
-## 🧪 QUIZ SYSTEM
-
-### Modes
-- **Rush** → fastest answers
-- **Normal** → human-like delay
-- **Adapt** → uses tools for best score
-
-### Learning Loop
-- Stores solved questions
-- Re-tests user later
-
-**Auto-solver disabled if:**
-- User score below average
-
-**Re-enabled after:**
-- 3 above-average or perfect scores
-
-## 🛍️ COMMUNITY SYSTEM
-
-### Supports
-- Personality configs
-- Visual assets (2D/3D, cursor, UI)
-- Desktop behaviors
-- Plugins (quiz, tools)
-- Voice packs
-
-### Restrictions
-- No core AI routing modification
-
-## ⚡ PERFORMANCE STRATEGY
-
-### Hardware Adaptation
-- **Low-end** → FastBrain only
-- **Mid** → SLM
-- **High** → LLM + 3D
-
-### Model Management
-- Load/unload dynamically
-- Never keep heavy models idle
-
-### Install Size Target
-- Core: 10–20MB
-- FastBrain: ~5MB
-- Micro-SLM: 5–20MB
-
-## 🔑 KEY DESIGN PRINCIPLES
-
-1. **FastBrain is ALWAYS active**
-2. **Heavy models are OPTIONAL and unloadable**
-3. **System must work offline at install**
-4. **Every feature is permission-gated**
-5. **Graceful degradation is mandatory**
-6. **Emotion drives personality, not logic**
-7. **Extensions are untrusted (must validate)**
-8. **No lag on wake (instant FastBrain response)**
-
----
-
-## Project Layout
-
-The project follows a production-grade `src` layout:
-
-```text
-kitsu-desktop-ai/
-├── r.py                           # Simple entry point (delegates to modern launcher)
-├── runtime/                       # Modern runtime architecture
-│   ├── core/                      # Runtime health and orchestration services
-│   │   ├── runtime_state.py       # Runtime health state tracking
-│   │   ├── crash_manager.py       # Crash history and safe-mode recovery
-│   │   ├── runtime_orchestrator.py# Main event loop coordinator
-│   │   ├── module_registry.py     # Module registration and state tracking
-│   │   ├── lifecycle_manager.py   # Lifecycle orchestration
-│   │   └── service_container.py   # Dependency injection container
-│   ├── launchers/                 # Startup and bootstrap code
-│   │   ├── modern_launcher.py     # Modern launcher with phased startup
-│   │   ├── bootstrap.py           # Dependency injection / bootstrap
-│   │   └── __init__.py
-│   └── docs/                     # Runtime documentation
-│       └── MODULE_SUMMARY.md      # Runtime documentation
-├── domain/                        # Core business logic and stability systems
-│   ├── core/                      # Central orchestration and contracts
-│   ├── capabilities/              # Safety and permission system
-│   ├── attention/                 # Attention engine for "alive" feeling
-│   ├── state/                     # Behavior state machine
-│   ├── inference/                 # Resource-aware AI controller
-│   ├── grounding/                 # Tool grounding for hallucination prevention
-│   ├── personality/               # Emotion and personality system
-│   ├── ai/                        # AI providers (FastBrain, SLM, LLM)
-│   ├── memory/                    # Learning and memory systems
-│   └── contracts/                 # Interface definitions
-├── app/                           # Application layer
-│   ├── commands/                  # CLI command handlers
-│   ├── adapters/                  # System integration adapters
-│   └── user_manager.py            # User profile management
-├── interfaces/                    # UI and display layers
-│   ├── desktop/                   # Desktop application and permissions
-│   ├── api/                       # REST and WebSocket APIs
-│   ├── learning/                  # Analytics and learning UI
-│   └── overlay/                   # Always-on display components
-├── features/                      # Pluggable features
-│   ├── browser_integration/        # Web integration features
-│   ├── quiz_solver/               # Educational assistance
-│   └── community_features/        # User-created features
-├── infra/                         # Infrastructure and services
-│   ├── llm/                       # AI model integration
-│   ├── logging/                   # Structured logging
-│   ├── multimodal/                # Multi-modal processing
-│   ├── sandbox/                   # Isolated execution
-│   └── storage/                   # Data persistence
-├── shared/                        # Shared utilities
-│   ├── config/                    # Configuration management
-│   ├── constants/                 # System constants
-│   ├── data/                      # Data files and schemas
-│   └── budgets.py                 # Resource budget management
-├── src-tauri/                     # Rust-based desktop framework
-├── vendor/                        # Third-party libraries
-├── scripts/                       # Setup and automation scripts
-├── tests/                         # Test suites
-├── assets/                        # Static resources
-├── data/                          # Runtime data and user state
-└── docs/                          # Documentation (Obsidian-ready)
+```
+RAW_INPUT → preprocess → route → judge → response
 ```
 
-## Documentation
+### Runtime tiers
+- **reflex**: fast cached/template responses
+- **local_model (SLM)**: small local model generation
+- **fallback_model (LLM)**: heavier fallback generation
 
-This project uses **Obsidian-compatible documentation** with bidirectional linking between code and documentation.
+### Judge validation
+All generated responses pass through a Judge module that evaluates:
+- **In-character** (matches persona)
+- **Coherent** (logical/consistent)
+- **Factually safe** (avoids harmful content)
 
-### 📚 Documentation Vault
-- **[[docs/README|Documentation Home]]** - Complete documentation index
-- **[[docs/guides/developer-onboarding|Developer Onboarding]]** - Getting started guide
-- **[[docs/architecture/system-design|System Architecture]]** - Technical architecture overview
+## Module system (how modules plug in)
 
-### 🔍 Quick Links
-- [[docs/kitsu/01_system|System Overview]] - Core system concepts
-- [[docs/kitsu/02_core|Core Components]] - Architecture components  
-- [[docs/kitsu/03_modules|Modules]] - Feature modules
-- [[docs/SECURITY|Security]] - Security policies
+Modern modules are event-driven and typically:
+- implement an async event handler
+- subscribe to events via EventBus
+- are imported/registered during startup
 
-### 🛠️ Using with Obsidian
-1. Install [Obsidian](https://obsidian.md/)
-2. Open the `docs/` folder as a vault
-3. Enable community plugins for enhanced navigation
-4. Use the graph view to explore connections between concepts
-
-The documentation uses Obsidian's [[wikilinks]] for navigation - click any link to explore related concepts.
-
-├── src/kitsu/              # Core Package Root
-│   ├── core/               # Infrastructure (EventBus, RequestContext)
-│   ├── modules/            # Processing Modules (SLM, LLM, Router, etc.)
-│   ├── utils/              # Helpers (Timing, Budgets)
-│   └── main.py             # CLI Entry Point
-├── data/                   # Persistent State (Reflex Cache, Configs)
-├── docs/                   # Documentation and Knowledge Base
-└── pyproject.toml          # Package Metadata and Dependencies
+Pattern (conceptual):
+```python
+# Auto-import modules to register subscribers
+import application.modules.preprocess
+import application.modules.router
+import application.modules.reflex
+import application.modules.slm
+import application.modules.llm
+import application.modules.memory
+import application.modules.input_mux
+import application.modules.input_manager
 ```
-
----
 
 ## Configuration
 
-Kitsu uses a tiered capability system. You can override settings in `pyproject.toml` or via environment variables.
+Relevant config areas:
+- `data/config/modern_config.json` (modern module settings)
+- `data/config/system_config.json` (capabilities/system)
+- `data/config/user_profile.json` (user preferences)
+- `data/config/personality.json` (persona)
+- `data/config/permissions.json` (security/permissions)
 
-| Tier   | RAM    | What runs                              | Profile         |
-|--------|--------|----------------------------------------|-----------------|
-| Micro  | <2 GB  | FastBrain + emotion templates only     | `ultra_low`     |
-| Low    | 2–4 GB | FastBrain + Micro-SLM + 2D avatar      | `low`           |
-| Mid    | 4–8 GB | FastBrain + Full SLM + 2D/3D toggle    | `balanced`      |
-| High   | 8+ GB  | Everything including LLM               | `full`          |
-
-At every tier, the emotion system runs and kitsu has a personality.
-The fast brain always runs. She always responds instantly.
-
----
-
-## Strip system
-
-Each profile sets a combination of capability flags:
-
-```
-USE_FAST_BRAIN      always true — cannot be disabled
-USE_EMOTION         always true by default — shapes all responses
-USE_2D              2D avatar renderer
-USE_3D              3D VRM renderer (GPU required)
-USE_SLM             small language model layer
-USE_LLM             full LLM (local or API)
-USE_VOICE           microphone input + TTS output
-USE_SHIMEJI         chibi desktop overlay
-USE_SYSTEM_CONTROL  OS-level actions (sleep, wallpaper, etc.)
+Example shape (event/pipeline, conceptual):
+```json
+{
+  "event_system": {
+    "bus_type": "kitsu.core.event_bus",
+    "max_subscribers": 100,
+    "timeout_ms": 5000
+  },
+  "pipeline": {
+    "tiers": ["fast_brain", "slm", "llm"],
+    "judge_validation": true,
+    "behavior_gating": true
+  }
+}
 ```
 
-Flags are **read-only after startup**. The system validates flag combinations
-before locking — invalid combos are corrected or rejected with a clear message.
+## User Guide (text mode)
 
-Custom strip profiles (`strip_mode: custom`) let you mix flags freely within
-the validation rules. Example: 3D avatar + no LLM, or voice-only + no avatar.
+### Basic interaction
 
----
-
-## Startup sequence
-
-### Modern Architecture Startup
+Examples (commands begin with `/`):
 
 ```
-r.py (Simple Entry Point)
-   └── application/launcher.py
-         ├── RuntimeStateStore
-         ├── CrashManager
-         ├── EventBus
-         ├── ChatApp
-         └── Optional degraded modules
+🦊 You: hello
+Kitsu: I am a kitsu fox with vibe 0.10,0.50,0.20... You said: hello.
+
+🦊 You: /help
+Kitsu: Available commands:
+  help    - Show this help message
+  status  - Show system status
+  quit    - Exit the application
 ```
 
-### 4-Layer Startup Flow
+### Commands
 
-1. **ServiceContainer** creates DI container and registers core services
-2. **ModuleRegistry** validates dependencies and tracks module states
-3. **LifecycleManager** executes phased startup with graceful degradation
-4. **RuntimeOrchestrator** starts main event loop with health monitoring
+- `/help` — show available commands
+- `/status` — display system status
+- `/quit` or `/exit` — exit application
+- `/mood <mood>` — change current mood
+- `/style <style>` — change expression style
 
-### Legacy Startup (Preserved)
-
+Example:
 ```
-launcher.py (Phase 0: Initialization)
-   ├─ CLI Parsing & Feature Flag Routing
-   ├─ Logging Setup + Startup Timer
-   ├─ First-Run Check
-   ├─ Config Loading (defaults.yaml + system_config.json + profile)
-   ├─ Hardware Profile Detection
-   ├─ Capability Flags Lock
-   └─ BuildAppContainer (Dependency Injection)
-   ↓
-bootstrap.py (Phase 1: Container Setup)
-   ├─ Create ServiceContainer
-   ├─ Register Core Services
-   └─ Return AppContainer
-   ↓
-orchestrator.py (Phase 2: Main Event Loop)
-   ├─ Listen for Events
-   ├─ Route to Personality Engine
-   ├─ Generate Response
-   └─ Update Emotion State
+🦊 You: /mood flirty
+*switches to flirty mood*
+Kitsu:  Hey there~ How can I help you today? 😉
+
+🦊 You: /status
+Kitsu: System Status:
+  Modules: 8 registered
+  Legacy OK: True
+  Engine OK: True
+  Overall OK: True
 ```
 
-Steps 1–7 failing causes an immediate clean exit with a clear error message.
-Steps 8–9 failing triggers degraded mode — kitsu still runs at a lower tier.
+### Input types
+- **Text**: normal chat
+- **Commands**: system commands starting with `/`
 
----
+### Advanced behavior
 
-## 🚀 COMBO ARCHITECTURE
+#### Behavior gating
+Kitsu may ignore/respond differently based on:
+- input content
+- current mood
+- conversation context
+- user preferences
 
-**Kitsu = Open_LLM_VTuber + Tauri + Shimeji + Desktop Local**
+#### Emotion system
+Kitsu maintains an emotional state that affects responses:
+- emotions decay over time
+- multiple emotions can stack
+- user input influences emotional changes
+- personality settings govern emotion thresholds
 
-This is a hybrid system combining:
-- **Open_LLM_VTuber**: AI personality and emotion system
-- **Tauri**: Desktop app framework with Rust backend
-- **Shimeji**: Desktop overlay companion physics
-- **Desktop Local**: Offline-first, permission-gated system
+#### Multi-modal (future)
+Designed to support speech input (STT), avatar/gestures, uploads, and images.
 
----
+## Troubleshooting
 
-## Development phases
+### Common issues
+- **App does not respond**
+  - run with `python r.py --debug`
+  - check module load + event routing logs
+- **LLM tier fails**
+  - verify provider/model configuration under `data/config/`
+  - verify model files under `assets/models/` and/or `data/models/`
+- **Generic/flat responses**
+  - try changing mood/style
+  - check personality configuration
+  - ensure models are loaded
+- **Memory not working**
+  - verify `data/memory/` exists and is writable
+  - check memory configuration
 
-| Phase | Directory focus              | Milestone                        |
-|-------|------------------------------|----------------------------------|
-| 0     | `app/`, `core/`, `config/`   | Skeleton boots, flags work       |
-| 1     | `ai/fast_brain/`, `personality/` | FastBrain learns, emotion runs |
-| 2     | `ui/avatar/`, `memory/`      | 2D avatar reacts to emotion      |
-| 3     | `ui/shimeji/`, `system/`     | Shimeji on desktop, OS actions   |
-| 4     | `ai/slm/`, `ai/llm/`         | Full intelligence layer          |
-| 5     | `src-tauri/`, `modules/`     | Desktop shell + browser extension|
-| 6     | `multimodal/`, training      | Voice, LoRA fine-tuning          |
-| 7     | `data/mods/`, community shop | Mod ecosystem opens              |
-
----
-
-## Key architectural rules
-
-### Modern Architecture Principles
-
-**4-Layer Separation of Concerns:**
-- ServiceContainer handles dependency injection only
-- ModuleRegistry manages module lifecycle and dependencies
-- LifecycleManager orchestrates startup/shutdown phases
-- RuntimeOrchestrator coordinates runtime behavior
-
-**Interface-Driven Design:**
-- All modules implement standardized lifecycle interfaces
-- Capability-based feature detection
-- Graceful degradation with null implementations
-
-**Resource-Aware Operation:**
-- Automatic tier switching based on system resources
-- Battery and thermal awareness
-- Student laptop optimization
-
-**Safety First:**
-- Capability sandboxing for dangerous operations
-- Tool grounding prevents hallucinations
-- Comprehensive audit logging
-
-### Legacy Architecture Principles (Preserved)
-
-**Import discipline** — modules only import "downward":
-- `domain/` never imports from `app/`, `interfaces/`, or `features/`
-- `shared/` imports nothing from the project
-- Cross-module communication goes through event bus
-
-**Capability gateway** — all system actions must pass through permission checks
-
-**Data files are the mod API** — everything in `data/` is versioned JSON
-
-**FastBrain is always hot** — even in sleep mode, the FastBrain stays loaded
-
-**Emotion is always on** — even with no avatar, the emotion engine runs and shapes responses
-
-**Null implementations, not flag checks** — every optional subsystem has a null implementation
-
----
-
-## Permissions
-
-kitsu requests permissions by category, not per-feature:
-
-| Category     | Examples                          | Default |
-|--------------|-----------------------------------|---------|
-| filesystem   | read/open files                   | off     |
-| display      | wallpaper, overlay, cursor        | on      |
-| system       | sleep, shutdown, monitor off      | off     |
-| browser      | tab hide/crop (extension only)    | off     |
-| network      | web search                        | on      |
-| audio        | microphone, sound visualizer      | off     |
-| automation   | keyboard/mouse control            | off     |
-
-Dangerous actions (shutdown, automation, mass file ops) always require
-explicit confirmation with a cooldown, even if the category is enabled.
-The automation category has a mandatory kill switch (hotkey to stop).
-
----
-
-## Community mods
-
-Mods live in `data/mods/`. Each mod is a directory containing:
-
-```
-my_mod/
-├── manifest.json          name, version, schema_version, author
-├── personality_overlay.json  emotion map overrides (optional)
-├── anim_map_overlay.json     expression overrides (optional)
-├── ul_templates_overlay.json template overrides (optional)
-├── assets/                   sprites, wallpapers, cursors, voice packs
-└── README.md
+### Debug workflow
+```bash
+python r.py --debug
 ```
 
-Mods **cannot** override core routing logic, AI pipeline, or security policy.
-They can change: personality, animations, expressions, templates, visual assets,
-desktop themes, cursor skins, voice packs, and UI themes.
+### Reset configuration / first-run wizard
+```bash
+python r.py --first-run
+```
 
----
+## Security
 
-## Contributing
+Security policy highlights (local-first):
+- Data is stored locally under `data/`.
+- Dangerous actions require explicit permission (via the permission model/config).
+- Optional subsystems are designed to degrade gracefully.
 
-See `docs/CONTRIBUTING.md` for code style, PR process, and testing requirements.
+Supported security update cadence (as documented in `docs/SECURITY.md`):
+- 5.1.x: supported
+- 5.0.x: not supported
+- 4.0.x: supported
+- < 4.0: not supported
 
-Every PR touching `core/` or `config/` requires two reviewers.
-Every PR touching `system/gateway.py` or `system/permission_manager.py`
-requires a security review note explaining why the change is safe.
-| Tier   | RAM    | Profile      | Capability Profile                              |
-|--------|--------|--------------|-------------------------------------------------|
-| Micro  | <2 GB  | `ultra_low`  | Reflex + Templates only. No model inference.    |
-| Low    | 2–4 GB | `low`        | Reflex + Micro-SLM. 2D avatar.                  |
-| Mid    | 4–8 GB | `balanced`   | Full SLM + 2D/3D toggle.                        |
-| High   | 8+ GB  | `full`       | SLM + LLM (Deep Reasoning). All features.       |
+For vulnerability reporting, follow the project’s security policy doc.
 
----
+## Performance / requirements
 
-## License
+- **Minimum**: Python 3.8+, ~4GB RAM, ~2GB free disk
+- **Recommended**: Python 3.10+, ~8GB RAM, ~5GB free disk, optional GPU
 
-See `LICENSE`. The core architecture, reflex systems, and modular framework are open-source. Model weights and specific character assets are subject to their respective licenses.
+Tips:
+- use appropriate model for hardware
+- enable/disable features depending on needs
+- monitor with `/status`
+- adjust temperature for response variety
+
+## Development (where to extend)
+
+### Adding a new module
+- create a module under `application/modules/`
+- implement event handler(s)
+- ensure it is imported/registered during startup
+
+Conceptual pattern:
+```python
+from application.core.event_bus import bus
+from application.core.context import RequestContext
+
+async def handle_custom_event(ctx: RequestContext):
+    await bus.emit("CUSTOM_RESPONSE", ctx)
+
+bus.subscribe("CUSTOM_EVENT", handle_custom_event)
+```
+
+## Docs consolidation note
+
+This repository keeps most documentation in a single place: this **README.md**.
+
+

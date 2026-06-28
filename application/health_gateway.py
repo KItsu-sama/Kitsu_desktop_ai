@@ -29,58 +29,15 @@ from socketserver import ThreadingMixIn
 from typing import Any, Tuple
 from urllib.parse import parse_qs, urlparse
 
-from application.core.event_bus import bus
 from application.core.context import RequestContext
 
 
-def _ensure_pipeline_bus_started() -> None:
-    """Best-effort start for the internal event bus."""
-    try:
-        if not bus.is_running():
-            loop = asyncio.get_event_loop()
-            if loop.is_running():
-                # Can't await from sync handler; fire-and-forget.
-                asyncio.create_task(bus.start())
-            else:
-                loop.run_until_complete(bus.start())
-    except RuntimeError:
-        # No event loop in this thread yet.
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        loop.run_until_complete(bus.start())
-        asyncio.set_event_loop(None)
-
-
 async def _chat_with_pipeline(text: str) -> tuple[int, dict[str, Any]]:
-    """Route /chat POST through the modern event-driven chat loop."""
-    _ensure_pipeline_bus_started()
+    """Route /chat through the event-driven chat loop."""
+    from application.main import submit_request
 
-    loop = asyncio.get_running_loop()
-    fut: asyncio.Future[RequestContext] = loop.create_future()
-
-    rid_holder: dict[str, Any] = {}
-
-    async def _one_shot(ctx: Any) -> None:
-        try:
-            rid = getattr(ctx, "id", None)
-            if rid is None:
-                return
-            if rid_holder.get("rid") != rid:
-                return
-            if not fut.done():
-                fut.set_result(ctx)
-        except Exception:
-            if not fut.done():
-                fut.set_result(RequestContext(text=text, original_text=text))
-
-    await bus.subscribe("RESPONSE_READY", _one_shot, priority=-100)
     try:
-        ctx = RequestContext(text=text, original_text=text)
-        rid_holder["rid"] = ctx.id
-
-        await bus.emit("RAW_INPUT", ctx)
-        result_ctx = await asyncio.wait_for(fut, timeout=30.0)
-
+        result_ctx = await submit_request(text)
         reply = getattr(result_ctx, "response", None) or ""
         return 200, {
             "input": text,
@@ -96,16 +53,16 @@ async def _chat_with_pipeline(text: str) -> tuple[int, dict[str, Any]]:
         return 504, {"error": "Pipeline timed out waiting for RESPONSE_READY"}
     except Exception as e:
         return 500, {"error": "Pipeline chat failed", "detail": str(e)}
-    finally:
-        try:
-            await bus.unsubscribe("RESPONSE_READY", _one_shot)
-        except Exception:
-            pass
 
 
 logger = logging.getLogger(__name__)
 
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
+
+# Avoid ever echoing potentially secret-bearing values back to clients.
+# This gateway only needs coarse diagnostics.
+from application.security.secret_redaction import redact_secrets  # noqa: E402
+
 
 
 def _is_safe_mode() -> bool:
@@ -395,7 +352,13 @@ class HealthHTTPRequestHandler(BaseHTTPRequestHandler):
 
     def _read_post_payload(self, path: str) -> dict[str, Any] | None:
         length = int(self.headers.get("Content-Length", "0"))
+        # Hard limit to prevent memory abuse on HF Spaces / gateway mode.
+        # (Keep generous for small chat payloads)
+        if length > 64_000:
+            self._send_json(413, {"error": "Payload too large", "max_bytes": 64000})
+            return None
         body = self.rfile.read(length).decode("utf-8", errors="replace")
+
         if not body:
             return {}
 
@@ -418,6 +381,7 @@ class HealthHTTPRequestHandler(BaseHTTPRequestHandler):
             return payload
 
         if "application/x-www-form-urlencoded" in content_type or "=" in body:
+            # parse_qs handles '+' and percent-decoding.
             return {k: v[0] for k, v in parse_qs(body, keep_blank_values=True).items()}
 
         return {}
@@ -431,6 +395,7 @@ class HealthHTTPRequestHandler(BaseHTTPRequestHandler):
 
     def _handle_chat(self, text: str | None, *, method: str, path: str) -> None:
         if not text:
+
             if method == "GET" and not self._wants_json_response():
                 html = _CHAT_HTML.replace("{version}", self._version)
                 self._send_html(200, html)
@@ -438,24 +403,26 @@ class HealthHTTPRequestHandler(BaseHTTPRequestHandler):
             self._send_json(200, self._chat_info_payload())
             return
 
-        try:
-            loop = asyncio.get_event_loop()
-        except RuntimeError:
-            loop = asyncio.new_event_loop()
-            asyncio.set_event_loop(loop)
+        from application.gateway_worker import get_worker
 
-        if loop.is_running():
-            # We are already inside an event loop (unlikely for BaseHTTPRequestHandler)
-            # so just return an informative error.
-            status_code, payload = 500, {"error": "Server event loop already running; cannot await pipeline in sync handler"}
-        else:
-            status_code, payload = loop.run_until_complete(_chat_with_pipeline(text))
+        try:
+            status_code, payload = get_worker().submit(_chat_with_pipeline(text))
+        except TimeoutError:
+            status_code, payload = 504, {"error": "Pipeline timed out"}
+        except Exception as e:
+            status_code, payload = 500, {"error": str(e)}
+
+        # Ensure response payload never contains secret-like fields.
+        # (Defensive; current pipeline should not include them, but gateway is safer.)
+        payload = redact_secrets(payload)
+
         if status_code >= 400:
             payload.setdefault(
                 "debug",
                 {"handler": self.handler_name, "route": path, "method": method},
             )
         self._send_json(status_code, payload)
+
 
     def do_OPTIONS(self) -> None:
         # HF Spaces and some clients may issue CORS preflight requests.
@@ -589,66 +556,71 @@ async def run_gateway(args: dict, *, version: str) -> int:
 
                 status["deep"] = deep
 
-            # Output
-            from rich.console import Console
+            # Output (route all terminal UI through application.terminal_ui)
+            from application.terminal_ui import (
+                terminal_print_json,
+                terminal_print,
+                terminal_print_table,
+            )
 
-            console = Console()
             if args.get("json"):
-                console.print(json.dumps(status, ensure_ascii=False, indent=2))
+                terminal_print_json(status, ensure_ascii=False, indent=2)
                 elapsed_ms = (time.perf_counter() - start_ts) * 1000
-                console.print(f"Completed --status in {elapsed_ms:.0f}ms")
+                terminal_print(f"Completed --status in {elapsed_ms:.0f}ms")
                 return 0
-
-            from rich.table import Table
-            from rich.panel import Panel
-
-            table = Table(title="Kitsu System Health")
-            table.add_column("Component")
-            table.add_column("Status")
-            table.add_column("Detail")
 
             global_status = status.get("status", "UNKNOWN")
             status_color = {
-                "healthy": "[green]OK[/green]",
-                "gateway": "[cyan]GATEWAY[/cyan]",
-                "degraded": "[yellow]DEGRADED[/yellow]",
-            }.get(global_status, "[red]CRITICAL[/red]")
-            table.add_row("Overall", status_color, str(global_status).upper())
+                "healthy": "OK",
+                "gateway": "GATEWAY",
+                "degraded": "DEGRADED",
+            }.get(global_status, "CRITICAL")
 
             tier = status.get("ai", {}).get("tier", "UNKNOWN")
-            tier_color = "[green]OK[/green]" if tier not in ("UNKNOWN", "OFFLINE") else "[yellow]UNKNOWN[/yellow]"
-            table.add_row("AI Tier", tier_color, str(tier))
-
             cpu = status.get("system", {}).get("cpu_percent")
-            table.add_row("CPU", "[yellow]ACTIVE[/yellow]", f"{cpu:.0f}%" if isinstance(cpu, (int, float)) else "N/A")
+
+            rows: list[tuple[str, str, str]] = [
+                ("Overall", str(status_color), str(global_status).upper()),
+                ("AI Tier", str(tier), str(tier)),
+                ("CPU", "ACTIVE" if isinstance(cpu, (int, float)) else "N/A", f"{cpu:.0f}%" if isinstance(cpu, (int, float)) else "N/A"),
+            ]
 
             if args.get("verbose"):
                 sys_info = status.get("system", {})
                 mem = sys_info.get("memory", {}) if isinstance(sys_info.get("memory"), dict) else {}
-                table.add_row(
-                    "Memory",
-                    "[cyan]RAM[/cyan]",
-                    f"{mem.get('used_gb','?')}/{mem.get('total_gb','?')}GB ({mem.get('percent','?'):.0f}%){' (' + mem.get('note','') + ')' if mem.get('note') else ''}" if mem else "N/A",
-                )
+                if mem:
+                    note = mem.get("note", "")
+                    detail = f"{mem.get('used_gb','?')}/{mem.get('total_gb','?')}GB ({mem.get('percent','?'):.0f}%)" + (
+                        f" ({note})" if note else ""
+                    )
+                else:
+                    detail = "N/A"
+                rows.append(("Memory", "RAM", detail))
 
                 modules = status.get("modules", {})
                 if isinstance(modules, dict):
-                    table.add_row(
-                        "Modules",
-                        "[magenta]MODULES[/magenta]",
-                        f"{modules.get('running','?')}/{modules.get('total','?')} running, {modules.get('failed','?')} failed",
+                    rows.append(
+                        (
+                            "Modules",
+                            "MODULES",
+                            f"{modules.get('running','?')}/{modules.get('total','?')} running, {modules.get('failed','?')} failed",
+                        )
                     )
 
                 mode = status.get("mode", "")
                 if mode:
-                    table.add_row("Mode", "[blue]MODE[/blue]", str(mode))
+                    rows.append(("Mode", "MODE", str(mode)))
 
-            console.print(Panel(table, title="KITSU STATUS"))
+            terminal_print_table("KITSU STATUS", rows)
             elapsed_ms = (time.perf_counter() - start_ts) * 1000
-            console.print(f"Completed --status in {elapsed_ms:.0f}ms")
+            terminal_print(f"Completed --status in {elapsed_ms:.0f}ms")
             return 0
 
+
         if args.get("serve"):
+            from application.gateway_worker import get_worker
+
+            get_worker().start()
             server, thread = _start_http_service(health, version=version, port=int(args["port"]))
             logger.info("HTTP health server running on port %s", args["port"])
             print(f"Kitsu HTTP health server listening on 0.0.0.0:{args['port']}")

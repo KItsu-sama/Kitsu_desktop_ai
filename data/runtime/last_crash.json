@@ -1,7 +1,0 @@
-{
-  "timestamp": "2026-05-10T10:44:43.505701Z",
-  "error": "No module named 'runtime.events'",
-  "recovered": false,
-  "startup_time_ms": 1,
-  "crash_count": 6
-}

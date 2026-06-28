@@ -70,7 +70,7 @@ LOGO = r"""
        ░░\░░¯001¯\_     \░░░░||░░░░/     _/¯011¯░░/░░
        ░|11\░░░░¯\0=¯ = _ \░░||░░/ _ = ¯=1/¯░░░░/01|░
        \░░0101\░░░░░░░░░░░'░░||░░'░░░░░░░░░░░/0100░░/
-        \░░\0010░░░_101\░░░░░||░░░░░░░/110_░░░1010/░░/
+        \░░\0010░░░_101\░░░░░||░░░░░/110_░░░1010/░░/
           \_░░░░░_/101/░░░/░░||░░\░░░\010\_░░░░░_/
              ¯\\_░░░░░░░░/|░░||░░|\░░░░░░░__//¯
                  ¯\\_░░░░\ ¯¯  ¯¯ /░░░░░//¯
@@ -213,6 +213,19 @@ Examples:
     parser.add_argument("--logo", action="store_true", help="Display Kitsu logo and exit")
     parser.add_argument("--safe", action="store_true", help="Force safe-mode profile")
     parser.add_argument("--profile", type=str, help="Override hardware profile")
+
+    # First-run re-setup controls
+    parser.add_argument(
+        "--first-run",
+        action="store_true",
+        help="Force running the first-run setup wizard even if setup was completed.",
+    )
+    parser.add_argument(
+        "--reset",
+        action="store_true",
+        help="Reset first-run state and delete old config/runtime/profile/memory/manifest before running --first-run.",
+    )
+
     parser.add_argument("--status", action="store_true", help="Show health dashboard")
     parser.add_argument(
         "--json",
@@ -394,9 +407,32 @@ async def main() -> int:
         os.environ.setdefault("kitsu_SAFE_MODE", "1")
         logger.info("Safe mode CLI request enabled")
 
+    # First-run orchestration (wizard + optional reset)
+    if args.get("reset"):
+        try:
+            from application.first_run import reset_setup
+            reset_ok = reset_setup()
+            logger.info("--reset: reset_setup=%s", reset_ok)
+        except Exception as e:
+            logger.error("--reset failed: %s", e, exc_info=True)
+            return 1
+
+    if args.get("first_run"):
+        try:
+            from application.first_run import run_first_run
+            # Run wizard non-interactively is not requested; keep interactive.
+            init_ok = await run_first_run(interactive=True)
+            if not init_ok:
+                logger.error("First-run setup failed")
+                return 1
+        except Exception as e:
+            logger.error("First-run setup crashed: %s", e, exc_info=True)
+            return 1
+
     # Health server and status modes
     if args["serve"] or args["status"]:
-        # Delegate heavy gateway logic to application.health_gateway (keeps entrypoint small)
+        # IMPORTANT: gateway-only startup must never run the interactive first-run wizard,
+        # because it may print or persist secret-bearing values derived from environment.
         try:
             from application.health_gateway import run_gateway
 
@@ -404,6 +440,7 @@ async def main() -> int:
         except Exception as e:
             logger.error("❌ Health gateway failed: %s", e, exc_info=True)
             return 1
+
 
         # NOTE: legacy inlined gateway code removed in refactor
         try:

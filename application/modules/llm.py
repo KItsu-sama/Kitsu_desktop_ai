@@ -1,10 +1,11 @@
 ﻿# application/modules/llm.py
 
 import asyncio
+import enum
 import json
 import logging
 import os
-from typing import Optional
+from typing import Any, Optional
 
 
 import aiohttp
@@ -35,18 +36,129 @@ _SAFE_MODE = os.environ.get("KITSU_SAFE_MODE", "0") == "1"
 #   Empty string → no inference available (gateway-only mode)
 _LLM_BASE_URL = os.environ.get("LLM_BASE_URL", "http://localhost:11434").rstrip("/")
 _LLM_MODEL = os.environ.get("LLM_MODEL", "tinyllama:1.1b")
+_HF_FALLBACK_URL = os.environ.get("HF_FALLBACK_URL", "").strip().rstrip("/")
 
-# Derive the generate endpoint. If the base URL looks like an OpenAI-compat
-# server, use the chat/completions path; otherwise use Ollama's /api/generate.
-_OPENAI_COMPAT = any(
-    kw in _LLM_BASE_URL.lower()
-    for kw in ("openai", "groq", "openrouter", "anthropic", "together")
-)
-_GENERATE_URL = (
-    f"{_LLM_BASE_URL}/chat/completions"
-    if _OPENAI_COMPAT
-    else f"{_LLM_BASE_URL}/api/generate"
-)
+
+class LLMProvider(enum.Enum):
+    OLLAMA = "ollama"
+    OPENAI_COMPAT = "openai_compat"
+    HF_INFERENCE = "hf_inference"
+
+
+def _detect_provider() -> LLMProvider:
+    explicit = os.environ.get("LLM_PROVIDER", "").lower()
+    if explicit in ("groq", "openai", "openrouter", "openai_compat"):
+        return LLMProvider.OPENAI_COMPAT
+    if explicit in ("hf", "huggingface", "hf_inference"):
+        return LLMProvider.HF_INFERENCE
+    if explicit == "ollama":
+        return LLMProvider.OLLAMA
+
+    url = _LLM_BASE_URL.lower()
+    if "huggingface.co" in url or "hf.co" in url:
+        return LLMProvider.HF_INFERENCE
+    if any(kw in url for kw in ("openai", "groq", "openrouter", "anthropic", "together")):
+        return LLMProvider.OPENAI_COMPAT
+    return LLMProvider.OLLAMA
+
+
+def _build_generate_url(base_url: str, provider: LLMProvider) -> str:
+    if not base_url:
+        return ""
+    if provider == LLMProvider.OPENAI_COMPAT:
+        return f"{base_url}/chat/completions"
+    if provider == LLMProvider.HF_INFERENCE:
+        if base_url.endswith("/models") or "/models/" in base_url:
+            return base_url if base_url.endswith(_LLM_MODEL) else f"{base_url.rstrip('/')}/{_LLM_MODEL}"
+        return f"{base_url.rstrip('/')}/models/{_LLM_MODEL}"
+    return f"{base_url}/api/generate"
+
+
+_PROVIDER = _detect_provider()
+_GENERATE_URL = _build_generate_url(_LLM_BASE_URL, _PROVIDER)
+
+
+def _request_headers(provider: LLMProvider, *, base_url: str | None = None) -> dict[str, str]:
+    if provider == LLMProvider.HF_INFERENCE:
+        token = (
+            os.environ.get("HF_TOKEN", "").strip()
+            or os.environ.get("HUGGINGFACEHUB_API_TOKEN", "").strip()
+            or os.environ.get("LLM_API_KEY", "").strip()
+        )
+        return {"Authorization": f"Bearer {token}"} if token else {}
+    if provider == LLMProvider.OPENAI_COMPAT:
+        api_key = os.environ.get("LLM_API_KEY", "").strip()
+        return {"Authorization": f"Bearer {api_key}"} if api_key else {}
+    return {}
+
+
+def _build_request_body(
+    prompt: str,
+    vibe: list[float],
+    provider: LLMProvider,
+    *,
+    stream: bool = True,
+) -> dict:
+    temperature = 0.7 + (vibe[0] * 0.3)
+    if provider == LLMProvider.OPENAI_COMPAT:
+        return {
+            "model": _LLM_MODEL,
+            "messages": [{"role": "user", "content": prompt}],
+            "stream": stream,
+            "temperature": temperature,
+            "top_p": 0.9,
+        }
+    if provider == LLMProvider.HF_INFERENCE:
+        body: dict = {
+            "inputs": prompt,
+            "parameters": {"temperature": temperature, "top_p": 0.9, "return_full_text": False},
+        }
+        if stream:
+            body["stream"] = True
+        return body
+    return {
+        "model": _LLM_MODEL,
+        "prompt": prompt,
+        "stream": stream,
+        "options": {
+            "temperature": temperature,
+            "top_p": 0.9,
+            "top_k": 40,
+        },
+    }
+
+
+def _extract_hf_text(payload: Any) -> str:
+    if isinstance(payload, list) and payload:
+        item = payload[0]
+        if isinstance(item, dict):
+            text = item.get("generated_text") or item.get("translation_text")
+            if isinstance(text, str):
+                return text.strip()
+    if isinstance(payload, dict):
+        text = payload.get("generated_text")
+        if isinstance(text, str):
+            return text.strip()
+    return ""
+
+
+def _parse_stream_chunk(chunk_data: dict, provider: LLMProvider) -> tuple[str, bool]:
+    if provider == LLMProvider.OPENAI_COMPAT:
+        chunk = (
+            chunk_data.get("choices", [{}])[0]
+            .get("delta", {})
+            .get("content", "")
+        )
+        done = chunk_data.get("choices", [{}])[0].get("finish_reason") is not None
+        return chunk or "", done
+    if provider == LLMProvider.HF_INFERENCE:
+        token = chunk_data.get("token", {}) if isinstance(chunk_data.get("token"), dict) else {}
+        chunk = token.get("text") or chunk_data.get("generated_text") or ""
+        done = bool(chunk_data.get("done"))
+        return str(chunk), done
+    chunk = chunk_data.get("response", "")
+    done = chunk_data.get("done", False)
+    return chunk or "", bool(done)
 
 
 def _llm_available() -> bool:
@@ -134,6 +246,47 @@ async def _fallback_response(ctx: RequestContext) -> str:
     return text
 
 
+async def llm_generate_hf(
+    prompt: str,
+    ctx: RequestContext,
+    *,
+    base_url: str | None = None,
+) -> str | None:
+    """Non-streaming HuggingFace Inference API call."""
+    url_base = (base_url or _HF_FALLBACK_URL or _LLM_BASE_URL).strip().rstrip("/")
+    if not url_base:
+        return None
+
+    generate_url = _build_generate_url(url_base, LLMProvider.HF_INFERENCE)
+    headers = _request_headers(LLMProvider.HF_INFERENCE)
+    request_body = _build_request_body(prompt, getattr(ctx, "vibe", [0.0, 0.0, 0.0]), LLMProvider.HF_INFERENCE, stream=False)
+
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.post(
+                generate_url,
+                json=request_body,
+                headers=headers,
+                timeout=aiohttp.ClientTimeout(total=45.0),
+            ) as resp:
+                if resp.status != 200:
+                    logger.warning(
+                        "HF inference request failed status=%d url=%s",
+                        resp.status,
+                        generate_url,
+                    )
+                    return None
+                payload = await resp.json(content_type=None)
+                text = _extract_hf_text(payload)
+                if text:
+                    await _emit_stream_text(text, ctx)
+                    return text
+                return None
+    except Exception as exc:
+        logger.warning("HF inference failed for id=%s: %s", ctx.id, exc)
+        return None
+
+
 async def llm_generate_streaming(
     prompt: str, vibe: list[float], ctx: RequestContext
 ) -> str | None:
@@ -149,34 +302,16 @@ async def llm_generate_streaming(
         return None
 
     watchdog = _get_watchdog()
+    provider = _PROVIDER
+    generate_url = _GENERATE_URL
 
     try:
         async with aiohttp.ClientSession() as session:
-            if _OPENAI_COMPAT:
-                api_key = os.environ.get("LLM_API_KEY", "")
-                headers = {"Authorization": f"Bearer {api_key}"} if api_key else {}
-                request_body = {
-                    "model": _LLM_MODEL,
-                    "messages": [{"role": "user", "content": prompt}],
-                    "stream": True,
-                    "temperature": 0.7 + (vibe[0] * 0.3),
-                    "top_p": 0.9,
-                }
-            else:
-                headers = {}
-                request_body = {
-                    "model": _LLM_MODEL,
-                    "prompt": prompt,
-                    "stream": True,
-                    "options": {
-                        "temperature": 0.7 + (vibe[0] * 0.3),
-                        "top_p": 0.9,
-                        "top_k": 40,
-                    },
-                }
+            headers = _request_headers(provider)
+            request_body = _build_request_body(prompt, vibe, provider, stream=True)
 
             async with session.post(
-                _GENERATE_URL,
+                generate_url,
                 json=request_body,
                 headers=headers,
                 timeout=aiohttp.ClientTimeout(total=45.0),
@@ -185,7 +320,7 @@ async def llm_generate_streaming(
                     logger.warning(
                         "LLM streaming request failed with status %d url=%s",
                         resp.status,
-                        _GENERATE_URL,
+                        generate_url,
                     )
                     debug_escalate(
                         f"LLM streaming HTTP status {resp.status}", "LLM"
@@ -201,6 +336,14 @@ async def llm_generate_streaming(
 
                 buffer = ""
                 full_response: list[str] = []
+
+                if provider == LLMProvider.HF_INFERENCE:
+                    payload = await resp.json(content_type=None)
+                    text = _extract_hf_text(payload)
+                    if text:
+                        await _emit_stream_text(text, ctx)
+                        return text
+                    return None
 
                 async for chunk_bytes in resp.content.iter_chunked(4096):
                     if not chunk_bytes:
@@ -222,19 +365,7 @@ async def llm_generate_streaming(
                         except json.JSONDecodeError:
                             continue
 
-                        if _OPENAI_COMPAT:
-                            chunk = (
-                                chunk_data.get("choices", [{}])[0]
-                                .get("delta", {})
-                                .get("content", "")
-                            )
-                            done = (
-                                chunk_data.get("choices", [{}])[0].get("finish_reason")
-                                is not None
-                            )
-                        else:
-                            chunk = chunk_data.get("response", "")
-                            done = chunk_data.get("done", False)
+                        chunk, done = _parse_stream_chunk(chunk_data, provider)
 
                         if chunk:
                             full_response.append(chunk)
@@ -307,6 +438,13 @@ async def on_llm_path(ctx: RequestContext):
     ctx.vibe = vibe
 
     response_text = await llm_generate_streaming(prompt, vibe, ctx)
+
+    if response_text is None and _PROVIDER == LLMProvider.OPENAI_COMPAT:
+        hf_url = _HF_FALLBACK_URL
+        if hf_url:
+            logger.info("Primary OpenAI-compat LLM failed; trying HF fallback url=%s", hf_url)
+            response_text = await llm_generate_hf(prompt, ctx, base_url=hf_url)
+
     if response_text is None:
         logger.warning(
             "LLM streaming produced no response (unavailable or failed); using fallback"

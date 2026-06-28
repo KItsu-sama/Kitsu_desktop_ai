@@ -107,6 +107,43 @@
     "total_weight": 16
   },
   {
+    "group": "followup_what_is",
+    "priority": 8,
+    "tags": [
+      "followup",
+      "question",
+      "explanation"
+    ],
+    "tool": null,
+    "fingerprints": [
+      5341314156077638132,
+      6041139849697783464,
+      5049520447798444326,
+      144115930610647040,
+      6041139849697783464,
+      5341314156077638132
+    ],
+    "trigger_texts": [
+      "what is",
+      "who is",
+      "tell me about",
+      "what's",
+      "who was",
+      "what are"
+    ],
+    "responses": [
+      {
+        "text": "That's asking for an explanation. Let me think...",
+        "weight": 6
+      },
+      {
+        "text": "Sounds like you want more details. Here's what I know...",
+        "weight": 4
+      }
+    ],
+    "total_weight": 10
+  },
+  {
     "group": "greeting_hello",
     "priority": 7,
     "tags": [

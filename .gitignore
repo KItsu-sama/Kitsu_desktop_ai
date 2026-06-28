@@ -82,13 +82,36 @@ Thumbs.db
 # Runtime / generated
 data/config.json
 data/.first_run_complete
+# first-run markers / wizards
+data/.first_run_*/
+data/*first_run*/
+
+# user profile state
+data/profiles/
+shared/profiles/
+
+# generated runtime state
+runtime/
+data/runtime/
+data/reflex_runtime.json
+data/reflex_cache.json
+
+# canvas/layout runtime artifacts
+*.canvas
+runtime*.canvas
+layout.canvas
+
 data/training/
 data/models/
 logs/
+
+
 
 # Secrets
 *.env
 
 # tests/__pycache__/
 tests/*.pyc
+# ignore runtime dumps created during tests (if any)
 tests/
+
