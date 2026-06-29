@@ -20,6 +20,17 @@ import sys
 import threading
 import time
 
+# Safe on both local and Hugging Face Spaces.
+# - Local: load .env for developer convenience.
+# - Spaces: no .env is uploaded; load_dotenv() is a no-op.
+try:
+    from dotenv import load_dotenv  # type: ignore
+
+    load_dotenv()
+except Exception:
+    pass
+
+
 from pathlib import Path
 from socketserver import ThreadingMixIn
 
